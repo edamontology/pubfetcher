@@ -1,0 +1,534 @@
+#
+#  Copyright © 2016, 2018 Erik Jaaniso
+#
+#  This file is part of PubFetcher.
+#
+#  PubFetcher is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  PubFetcher is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with PubFetcher.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# regex: site
+
+# '^https?://(www\.)?' is automatically put in front of regex
+# except when regex already begins with '^'
+
+'academic\.oup\.com': oup
+'citeseerx\.ist\.psu\.edu': citeseerx
+'onlinelibrary\.wiley\.com/.+/(abstract|summary)': wiley
+'onlinelibrary\.wiley\.com/.+/full': wiley_full
+'sciencedirect\.com': sciencedirect
+'[a-zA-Z0-9.-]*biomedcentral\.com': biomedcentral
+'link\.springer\.com/+(article|chapter|protocol|referencework|book)/': springer
+'link\.springer\.com/+referenceworkentry/': springer_ref
+'[a-zA-Z0-9.-]*cshlp\.org/.+[^f][^u][^l][^l]$': highwire
+'[a-zA-Z0-9.-]*cshlp\.org/.+full$': highwire_full
+'nature\.com': nature
+'journals\.plos\.org': plos
+'biorxiv\.org': highwire2
+'pubs\.acs\.org/+doi/+abs/+10': acs
+'pubs\.acs\.org/+doi/+(full/+)?10': acs_full
+'arxiv\.org': arxiv
+'mcponline\.org/.+[^f][^u][^l][^l]$': highwire
+'mcponline\.org/.+full$': highwire_full
+'pnas\.org/.+[^f][^u][^l][^l]$': highwire
+'pnas\.org/.+full$': highwire_full
+'ieeexplore\.ieee\.org[^/]*/+document': ieee
+'ieeexplore\.ieee\.org[^/]*/+xpls': ieee_full
+'online\.liebertpub\.com/+doi/+abs/+10': liebertpub
+'online\.liebertpub\.com/+doi/+(full/+)?10': liebertpub_full
+'pubs\.rsc\.org.*/(ArticleLanding|articlelanding)/': rsc
+'pubs\.rsc\.org.*/(ArticleHTML|articlehtml)/': rsc_full
+'scripts\.iucr\.org': iucr
+'worldscientific\.com': worldscientific
+'f1000research\.com/+articles': f1000research_articles
+'f1000research\.com/+posters': f1000research_posters
+'peerj\.com/+articles': peerj
+'peerj\.com/+preprints': peerj_preprints
+'orbit\.dtu\.dk': dtu
+'tandfonline\.com/+doi/+abs/+10': tandfonline
+'tandfonline\.com/+doi/+full/+10': tandfonline_full
+'[a-zA-Z0-9.-]*asm\.org/.+[^f][^u][^l][^l]$': highwire
+'[a-zA-Z0-9.-]*asm\.org/.+full$': highwire_full
+'dl\.acm\.org': acm
+'degruyter\.com': degruyter
+'hindawi\.com': hindawi
+'biecoll\.ub\.uni-bielefeld\.de': biecoll
+'jbc\.org/.+[^f][^u][^l][^l]$': highwire
+'jbc\.org/.+full$': highwire_full
+'karger\.com/+Article/+Abstract': karger
+'karger\.com/+Article/+FullText': karger_full
+'eurekaselect\.com': eurekaselect
+'journal\.embnet\.org.*[^0-9]/+[0-9]+/*$': embnet
+'journal\.embnet\.org.*/+[0-9]+/+[0-9]+/*$': embnet_full
+'amjbot\.org/.+[^f][^u][^l][^l]$': highwire
+'amjbot\.org/.+full$': highwire_full
+'[a-zA-Z0-9.-]*sciencemag\.org/.+[^f][^u][^l][^l]$': sciencemag
+'[a-zA-Z0-9.-]*sciencemag\.org/.+full$': sciencemag_full
+'bioinformation\.net': bioinformation
+'journals\.aps\.org': aps
+'projecteuclid\.org': projecteuclid
+'precedings\.nature\.com': precedings_nature
+'ebooks\.iospress\.nl': iospress
+'researchgate\.net': researchgate
+'frontiersin\.org': frontiersin
+'digital-library\.theiet\.org': theiet
+'[a-zA-Z0-9.-]*bmj\.com': bmj
+'nrcresearchpress\.com': nrcresearchpress
+'inderscience\.com': inderscience
+'genetics\.org': highwire2
+'plantphysiol\.org': highwire2
+'plantcell\.org': highwire2
+'bloodjournal\.org': highwire2
+'bloodadvances\.org': highwire2
+'biochemj\.org': highwire2
+'biochemsoctrans\.org': highwire2
+'[a-zA-Z0-9.-]*aacrjournals\.org': highwire2
+
+---
+
+#site:
+#  pmid:
+#  pmcid:
+#  doi:
+#  title:
+#  subtitle:
+#  keywords:
+#  keywords_split:
+#  abstract:
+#  fulltext:
+#  fulltext_src:
+#  fulltext_dst:
+#  fulltext_a:
+#  pdf_src:
+#  pdf_dst:
+#  pdf_a:
+#  javascript:
+
+# Selector reference:
+# https://jsoup.org/cookbook/extracting-data/selector-syntax
+# https://jsoup.org/apidocs/org/jsoup/select/Selector.html
+
+# check that selectors don't select text multiple times (for example, if p
+# inside p, then both outer p and duplicate inner p could be selected)
+
+oup:
+  doi: .ww-citation-primary > a
+  title: h1
+  keywords: .kwd-group > .kwd-part
+  abstract: section.abstract > p
+  fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content))
+  pdf_a: .article-pdfLink
+
+citeseerx:
+  title: '#viewHeader > h2'
+  #keywords: '#keywords a' # keywords mined from abstract
+  abstract: '#abstract > p'
+  pdf_a: '#downloads a:not(:matchesOwn(^DBLP$))'
+
+wiley:
+  doi: '#doi, #header-section-doi + span'
+  title: h1.articleTitle, h1.article-header__title
+  keywords: .keywordLists li, .article-info__keywords-item
+  abstract: '#abstract > div > :not(h2)'
+  fulltext_src: /abstract
+  fulltext_dst: /full
+  fulltext_a: .viewFullTextLink
+  pdf_src: /abstract
+  pdf_dst: /pdf
+  pdf_a: .standardPdfLink, .article-support__item--pdf > a
+
+wiley_full:
+  doi: '#doi, #header-section-doi + span'
+  title: h1.articleTitle, h1.article-header__title
+  keywords: .keywordList li, .article-info__keywords-item
+  abstract: '#abstract > div > :not(h2)'
+  fulltext: '#main-content > section[id]:not([id~=ack]):not([id=abstract]):not([id=pdf-section]) > *, #main-content > section.article-section__notes > *'
+  pdf_src: /full
+  pdf_dst: /pdf
+  pdf_a: .standardPdfLink, .article-support__item--pdf > a
+
+sciencedirect:
+  doi: article .DoiLink > .doi
+  title: article h1 > .title-text
+  keywords: article .Keywords > div > .keyword
+  abstract: article .Abstracts > div:not(.graphical) > div
+  fulltext: article .Body > div:not(.Appendices) > *
+  pdf_a: .PdfDropDownMenu a:matchesOwn(^Article$)
+
+biomedcentral:
+  doi: .ArticleDoi
+  title: .ArticleTitle
+  abstract: .Abstract > div > div, .Abstract > div > p
+  fulltext: .FullTextWrapper > section[id^=Sec] > *, .FullTextWrapper > section:not([id]) > *
+  pdf_a: '#articlePdf'
+
+springer:
+  doi: '#doi-url'
+  title: 'h1.ArticleTitle, h1.ChapterTitle, #book-title > h1, h1.unified-header__title'
+  subtitle: '#book-title > .page-title__subtitle'
+  keywords: .Keyword
+  abstract: 'section.Abstract > p, #book-description > *'
+  fulltext: '#body > section > *'
+  pdf_a: .test-pdf-link .gtm-pdf-link
+
+springer_ref:
+  doi: .FulltextWrapper .ChapterDOI
+  title: .FulltextWrapper .ChapterTitle
+  abstract: '#body > section > h2:matchesOwn(^Definition$) ~ * > *'
+  fulltext: '#body > section > h2:not(:matchesOwn(^Definition$)) ~ * > *'
+
+highwire:
+  doi: .slug-doi
+  title: '#content-block h1'
+  keywords: .kwd-group > .kwd
+  abstract: '#content-block .abstract > p, #content-block .executive-summary > p'
+  fulltext_src: (\.abstract)?/*$
+  fulltext_dst: \.full
+  fulltext_a: '[rel=view-full-text]'
+  pdf_src: (\.abstract)?/*$
+  pdf_dst: \.full.pdf
+
+highwire_full:
+  doi: .slug-doi
+  title: '#content-block h1'
+  keywords: .kwd-group > .kwd
+  abstract: '#content-block .abstract > p, #content-block .executive-summary > p'
+  fulltext: '#content-block > .article > p, #content-block > .article [id^=sec] > :not([id^=sec]):not(.section-nav):not(div[id~=^F[0-9]]):not(div[id~=^T[0-9]]), #content-block > .article [id^=sec] > div[id~=^F[0-9]] > :not(.fig-inline), #content-block > .article [id^=sec] > div[id~=^T[0-9]] > :not(.table-inline), #content-block > .article > div[id~=^F[0-9]] > :not(.fig-inline), #content-block > .article > div[id~=T[0-9]] > :not(.table-inline)'
+  pdf_src: /*$
+  pdf_dst: \.pdf
+
+nature:
+  doi: 'li:has(abbr[title=Digital Object Identifier]), dd:has(abbr[title=Digital Object Identifier]), #article #content > .article > #cite > .doi'
+  title: 'article header h1, #article #content > .article > h2.article-title'
+  keywords: .subject-tag-link, .reading-companion a[href^=/subjects]
+  abstract: 'article .article-body > section > #abstract-section > div > *, #article #content > .article > #Summary + p'
+  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section) > *, article .article-body > div'
+  pdf_a: a[data-article-pdf]
+
+plos:
+  doi: '#artDoi'
+  title: '#artTitle'
+  keywords: '#subjectList .taxo-term'
+  abstract: '#artText > .abstract > *'
+  fulltext: '#artText > [id^=section] > *'
+  pdf_a: '#downloadPdf'
+
+highwire2:
+  doi: .highwire-cite-metadata-doi
+  title: '#page-title'
+  subtitle: .highwire-cite-subtitle
+  abstract: .abstract > :not(h2), .executive-summary > :not(h2)
+  fulltext: .fulltext-view > p:matchText, .fulltext-view > p > :not(.disp-formula):not(.inline-formula), .fulltext-view > div.glossary, .fulltext-view [id^=sec] > h2, .fulltext-view [id^=sec] > h3, .fulltext-view [id^=sec] > h4, .fulltext-view [id^=sec] > h5, .fulltext-view [id^=sec] > p:matchText, .fulltext-view [id^=sec] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view li[id^=list-item] > p:matchText, .fulltext-view [id^=list-item] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view [id^=sec] > div[id~=^F[0-9]] > :not(.highwire-figure), .fulltext-view [id^=sec] > div[id~=^T[0-9]] > :not(.table-inline), .fulltext-view > div[id~=^F[0-9]] > :not(.highwire-figure), .fulltext-view > div[id~=^T[0-9]] > :not(.table-inline)
+  pdf_src: (\.full)?(\?sso-checked=true)?/*$
+  pdf_dst: \.full-text.pdf
+  javascript: 'true'
+
+acs:
+  doi: '#doi'
+  title: .articleTitle
+  keywords: '#abstractBox > .keywords > a'
+  abstract: '#abstractBox > :not(.keywords)'
+  fulltext_src: /+doi/+abs/+10
+  fulltext_dst: /doi/full/10
+  pdf_src: /+doi/+abs/+10
+  pdf_dst: /doi/pdf/10
+
+acs_full:
+  doi: '#doi'
+  title: .articleTitle
+  keywords: '#abstractBox > .keywords > a'
+  abstract: '#abstractBox > :not(.keywords)'
+  fulltext: '.hlFld-Fulltext > .NLM_sec > :not(.anchors), .hlFld-Fulltext > .NLM_back > #notes-1 > :not(.anchors)'
+  pdf_src: /+doi/+(full/+)?10
+  pdf_dst: /doi/pdf/10
+
+arxiv:
+  doi: .metatable .doi
+  title: h1.title:matchText, h1.title > :not(.descriptor)
+  abstract: .abstract:matchText, .abstract > :not(.descriptor)
+  pdf_src: /abs/
+  pdf_dst: /pdf/
+
+ieee:
+  pmid: div[ng-if=::vm.details.pubMedId] > a
+  doi: div[ng-if=::vm.details.doi] > a
+  title: h1.document-title
+  keywords: .stats-keywords-container :containsOwn(Author Keywords) + div a
+  abstract: .abstract-text
+  fulltext: '#article > .section > *'
+  fulltext_a: '#full-text-section a[ng-if=::ft.article.fullTextAccess]'
+  pdf_src: /+document/+([0-9]+).*
+  pdf_dst: /stamp/stamp.jsp\?tp=&arnumber=$1
+  javascript: 'true'
+
+ieee_full:
+  doi: '#dt_doi'
+  title: '#at-glance .text h1'
+  keywords: '#keywords :containsOwn(Authors Keywords) ~ a'
+  abstract: '#at-glance .text p'
+  fulltext: '#article > .section > :not(div), #article > .section > div > :not(.toc)'
+  pdf_a: .pdf > a
+  javascript: 'true'
+
+liebertpub:
+  doi: h2.artTitle + p a[href^=https://doi.org]
+  title: h2.artTitle
+  abstract: .abstractSection > *
+  fulltext_a: .html a[href^=/doi]
+  pdf_a: .pdfprint a[href^=/doi]
+
+liebertpub_full:
+  doi: h2.artTitle + p a[href^=https://doi.org]
+  title: h2.artTitle
+  abstract: .abstractSection > *
+  fulltext: .NLM_sec:not(.NLM_sec-type_ack) > :not(div), .NLM_sec:not(.NLM_sec-type_ack) div > :not(div):not(.floatright), .section + .first, .section + .first ~ p
+  fulltext_a: .html a[href^=/doi]
+  pdf_a: .pdfprint a[href^=/doi]
+
+rsc:
+  doi: .list__item-label:containsOwn(DOI:) + .list__item-data
+  title: .article__title > h2
+  abstract: h3:matchesOwn(^Abstract$) + div > *
+  fulltext_src: /(ArticleLanding|articlelanding)/
+  fulltext_dst: /ArticleHTML/
+  pdf_src: /(ArticleLanding|articlelanding)/
+  pdf_dst: /ArticlePDF/
+
+rsc_full:
+  doi: .article_info > a:matchesOwn(^10\.)
+  title: h1
+  abstract: .abstract
+  fulltext: .abstract ~ :not(span[id]):not(ol[type=1]):not(table), .abstract ~ table.box_border
+  pdf_src: /(ArticleHTML|articlehtml)/
+  pdf_dst: /ArticlePDF/
+
+iucr:
+  doi: .ica_doi
+  title: .ica_title
+  keywords: .kwdg > a
+  abstract: .ica_abstract
+
+worldscientific:
+  doi: .articleMeta a[href^=https://doi.org]
+  title: '#articleContent h1'
+  keywords_split: .abstractKeywords
+  abstract: .abstractSection > *
+  pdf_a: .showPDF > a
+
+f1000research_articles:
+  doi: .article-information > .info-separation:first-child + .info-separation > a[href^=http://dx.doi.org]
+  #title: '#anchor-title'
+  abstract: .abstract-text
+  fulltext: '#article-context > .generated-article-body > *, #article-context > .generated-article-footer > :has(h2:containsOwn(Supplementary materials))'
+  pdf_src: /*$
+  pdf_dst: /pdf
+
+f1000research_posters:
+  title: .asset-title > h2
+  keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
+  abstract: .abstract__content
+  javascript: 'true'
+
+peerj:
+  pmid: '#article-identifier-pmid'
+  doi: .article-identifiers > dt:containsOwn(DOI) + dd
+  title: h1.article-title
+  keywords: .kwd
+  abstract: .abstract > *
+  fulltext: main section > :not(section)
+  pdf_a: .article-download-pdf
+
+peerj_preprints:
+  pmid: '#article-identifier-pmid'
+  doi: .article-identifiers > dt:containsOwn(DOI) + dd
+  title: h1.article-title
+  keywords: .kwd
+  abstract: .abstract > *
+  pdf_a: .article-download-pdf
+
+dtu:
+  doi: .digital_object_identifiers a[href^=http://dx.doi.org]
+  title: .publication_view_title h2.title
+  keywords_split: .keywords > li
+  abstract: .abstract > *
+
+tandfonline:
+  doi: .dx-doi
+  title: h1 > .NLM_article-title
+  keywords: .abstractKeywords a
+  abstract: .abstractSection > *
+  fulltext_a: .tab-nav .show-full
+  pdf_a: .tab-nav .show-pdf
+
+tandfonline_full:
+  doi: .dx-doi
+  title: h1 > .NLM_article-title
+  keywords: .abstractKeywords a
+  abstract: .abstractSection > *
+  fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.hidden):matchText, .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.hidden) > :not(.ref-lnk):not(.hidden)
+  pdf_a: .tab-nav .show-pdf
+
+acm:
+  doi: tbody > tr:last-child > td > span:containsOwn(doi) > a[href^=https://doi.org]
+  title: '#divmain h1'
+  keywords: '#authortags a'
+  abstract: '#abstract'
+  pdf_a: '#divmain a[name=FullTextPDF]'
+  javascript: 'true'
+
+degruyter:
+  doi: .article-doi
+  title: h1.entryTitle
+  keywords: .articleBody_keywords > a
+  abstract: .articleBody_abstract > p
+
+hindawi:
+  doi: .middle_content pre a[href^=http://dx.doi.org]
+  title: .middle_content h2
+  abstract: .middle_content h4:matchesOwn(^Abstract$) + p
+  fulltext: .middle_content .end-abs ~ *
+  pdf_a: '#article_list .full_text_pdf'
+
+biecoll:
+  doi: b:matchesOwn(^DOI) > a[href^=http://dx.doi.org]
+  title: h1 ~ .p95
+  abstract: b:matchesOwn(^Abstract) + div
+  pdf_a: .rahmendownload > a
+
+karger:
+  doi: .articleDetails a[href^=https://doi.org]
+  title: .articleTable h1
+  keywords: .keywords .kbadge
+  abstract: .tab-content h2:matchesOwn(^Abstract$) + p
+  fulltext_a: .nav-tabs a:contains(FullText)
+  pdf_a: .nav-tabs a:contains(PDF)
+
+karger_full:
+  doi: .articleDetails a[href^=https://doi.org]
+  title: .articleTable h1
+  keywords: .keywords .kbadge
+  abstract: .tab-content h2:matchesOwn(^Abstract$) + p
+  fulltext: '#fulltext > :not(:last-child)'
+  pdf_a: .nav-tabs a:contains(PDF)
+
+eurekaselect:
+  doi: '#content .doi'
+  title: '#content h1'
+  keywords_split: '#content p:matches(^Keywords:)'
+  abstract: '#content h4:matches(^Abstract:) ~ *'
+
+embnet:
+  doi: '#content > a[href^=http://dx.doi.org]'
+  title: '#articleTitle'
+  keywords_split: '#articleSubject > div'
+  abstract: '#articleAbstract > div > *'
+  fulltext_a: '#articleFullText > a:containsOwn(HTML)'
+  pdf_a: '#articleFullText > a:containsOwn(PDF)'
+
+embnet_full:
+  title: '#content .story > :first-child, #content .title-3'
+  abstract: '#content .abstract-box > p ~ p'
+  fulltext: '#content .abstract-box ~ :not(ol):not(.references)'
+
+sciencemag:
+  title: article.primary header h1
+  abstract: article.primary .article > [id^=abstract] > p
+  fulltext_src: /*$
+  fulltext_dst: \.full
+  pdf_src: /*$
+  pdf_dst: \.full\.pdf
+  javascript: 'true'
+
+sciencemag_full:
+  title: article.primary header h1
+  abstract: article.primary .article > [id^=abstract] > p
+  fulltext: article.primary .article > p, article.primary .article [id^=sec] > :not([id^=sec]):not(figure[id^=F]), article.primary .article [id^=sec] > figure[id^=F] > figcaption, article.primary .article > [id^=notes] > *, article.primary .article > figure[id^=F] > figcaption, article.primary .article > div[id^=T]
+  pdf_src: /*$
+  pdf_dst: \.pdf
+  javascript: 'true'
+
+bioinformation:
+  title: tr > td:matches(^Title$) ~ td:last-of-type
+  keywords_split: tr > td:matches(^Keywords$) ~ td:last-of-type
+  abstract: tr > td:matches(^Abstract$) ~ td:last-of-type
+  pdf_src: htm$
+  pdf_dst: pdf
+
+aps:
+  doi: '#article-content > .abstract > div > p > .doi-field'
+  title: '#title h3'
+  abstract: '#article-content > .abstract > div > p'
+
+projecteuclid:
+  title: .publication-content > h3
+  keywords: .publication-content .keywords > a
+  abstract: '#abstract > .abstract-text'
+  pdf_a: .publication-content .download-buttons > a
+
+precedings_nature:
+  doi: '#inside > .doi-head'
+  title: '#inside .docinfowrap > h2'
+  keywords: '#inside > .document-details > dd.tags li'
+  abstract: '#inside > .document-details > dd.abstract > *'
+  pdf_a: '#inside .docinfowrap > .doclinks > a.pdf'
+
+iospress:
+  doi: '#contentcolumn .metadata > .doi'
+  title: '#contentcolumn .metadata > .title'
+  abstract: '#contentcolumn .metadata > .abstract > p'
+
+researchgate:
+  doi: .publication-header .publication-meta-secondary:matchText, .publication-header .publication-meta-secondary > :first-child
+  title: .publication-header > .publication-title
+  abstract: .publication-abstract > :not(:first-child)
+  pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text
+
+frontiersin:
+  doi: .abstract-container > .article-header-container > .header-bar-three > a
+  title: .JournalAbstract > h1
+  abstract: .JournalAbstract > p
+  fulltext: .JournalFullText > :not(.References)
+  pdf_a: .side-article-download a.download-files-pdf
+
+theiet:
+  doi: '#content .doicontainer > .doi > a'
+  title: '#content .headlinelarge > h2'
+  keywords: '#tabbedpages .keywords > a'
+  abstract: '#tabbedpages .description'
+
+bmj:
+  title: '#article-top .highwire-cite-title'
+  abstract: '#article-top .article > .abstract > :not(h2)'
+  javascript: 'true'
+
+nrcresearchpress:
+  doi: '#content .citationLine > a'
+  title: '#content h1.article-title'
+  keywords: '#content .keywordsLabel ~ a'
+  abstract: '#content .abstractInFull'
+
+inderscience:
+  title: '#main table td > p:first-child > b > font > a'
+  abstract: '#main table td > font'
+
+---
+
+'1126': true
+'1101': true
+'1136': true
+'1534': true
+'1104': true
+'1105': true
+'1182': true
+'1042': true
+'1158': true

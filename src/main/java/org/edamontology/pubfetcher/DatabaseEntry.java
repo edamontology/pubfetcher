@@ -38,13 +38,28 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 
 	protected boolean canFetch(FetcherArgs fetcherArgs) {
 		long currentTime = System.currentTimeMillis();
-		if (fetchTime == 0
-			|| (isEmpty() && currentTime > fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000)
-			|| (!isFinal(fetcherArgs) && !isEmpty() && currentTime > fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000)
-			|| (fetchException && currentTime > fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000)
-			|| ((isEmpty() || !isFinal(fetcherArgs) || fetchException) && (retryCounter < fetcherArgs.getRetryLimit() || fetcherArgs.getRetryLimit() < 0))) {
+		String finalness = (isEmpty() ? "empty" : (!isFinal(fetcherArgs) ? "non-final" : "final"));
+		boolean canFetch = false;
+		if (fetchTime == 0) {
+			System.out.println("    can fetch " + finalness + " entry: first fetch");
+			canFetch = true;
+		} else if (isEmpty() && currentTime > fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000) {
+			System.out.println("    can fetch " + finalness + " entry: more than " + fetcherArgs.getEmptyCooldown() + " min since " + getFetchTimeHuman());
+			canFetch = true;
+		} else if (!isFinal(fetcherArgs) && !isEmpty() && currentTime > fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000) {
+			System.out.println("    can fetch " + finalness + " entry: more than " + fetcherArgs.getNonFinalCooldown() + " min since " + getFetchTimeHuman());
+			canFetch = true;
+		} else if (fetchException && currentTime > fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000) {
+			System.out.println("    can fetch " + finalness + " entry with fetching exception: more than " + fetcherArgs.getFetchExceptionCooldown() + " min since " + getFetchTimeHuman());
+			canFetch = true;
+		} else if ((isEmpty() || !isFinal(fetcherArgs) || fetchException) && (retryCounter < fetcherArgs.getRetryLimit() || fetcherArgs.getRetryLimit() < 0)) {
+			System.out.println("    can fetch " + finalness + " entry: retry count " + retryCounter + " has not reached limit " + fetcherArgs.getRetryLimit());
+			canFetch = true;
+		}
+		if (canFetch) {
 			return true;
 		} else {
+			System.out.println("    can not fetch " + finalness + " entry " + (fetchException ? "with fetching exception " : "") + "from " + fetchTime + " with retry count " + retryCounter);
 			return false;
 		}
 	}

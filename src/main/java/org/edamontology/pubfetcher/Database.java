@@ -458,9 +458,9 @@ public class Database implements Closeable {
 			return null;
 		}
 	}
-	private void checkGetPublicationMismatch(String given, String got) {
-		if (!given.isEmpty() && !got.isEmpty() && !given.equals(got)) {
-			System.err.println("ID given (" + given + ") for getting publication is not equal to ID got (" + got +")");
+	private void checkGetPublicationMismatch(String given, String present, String query) {
+		if (!given.isEmpty() && !present.isEmpty() && !given.equals(present)) {
+			System.err.println("Mismatch between ID given (" + given +") and ID present (" + present + ") in publication got using ID " + query);
 		}
 	}
 	public Publication getPublication(PublicationIds publicationIds) {
@@ -475,24 +475,24 @@ public class Database implements Closeable {
 		if (!publicationIds.getPmid().isEmpty()) {
 			Publication publication = getPublication(publicationIds.getPmid(), false);
 			if (publication != null) {
-				checkGetPublicationMismatch(publicationIds.getPmcid(), publication.getPmcid().getContent());
-				checkGetPublicationMismatch(publicationIds.getDoi(), publication.getDoi().getContent());
+				checkGetPublicationMismatch(publicationIds.getPmcid(), publication.getPmcid().getContent(), publicationIds.getPmid());
+				checkGetPublicationMismatch(publicationIds.getDoi(), publication.getDoi().getContent(), publicationIds.getPmid());
 				return publication;
 			}
 		}
 		if (!publicationIds.getPmcid().isEmpty()) {
 			Publication publication = getPublication(publicationIds.getPmcid(), false);
 			if (publication != null) {
-				checkGetPublicationMismatch(publicationIds.getPmid(), publication.getPmid().getContent());
-				checkGetPublicationMismatch(publicationIds.getDoi(), publication.getDoi().getContent());
+				checkGetPublicationMismatch(publicationIds.getPmid(), publication.getPmid().getContent(), publicationIds.getPmcid());
+				checkGetPublicationMismatch(publicationIds.getDoi(), publication.getDoi().getContent(), publicationIds.getPmcid());
 				return publication;
 			}
 		}
 		if (!publicationIds.getDoi().isEmpty()) {
 			Publication publication = getPublication(publicationIds.getDoi(), false);
 			if (publication != null) {
-				checkGetPublicationMismatch(publicationIds.getPmid(), publication.getPmid().getContent());
-				checkGetPublicationMismatch(publicationIds.getPmcid(), publication.getPmcid().getContent());
+				checkGetPublicationMismatch(publicationIds.getPmid(), publication.getPmid().getContent(), publicationIds.getDoi());
+				checkGetPublicationMismatch(publicationIds.getPmcid(), publication.getPmcid().getContent(), publicationIds.getDoi());
 				return publication;
 			}
 		}

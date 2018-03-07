@@ -40,12 +40,11 @@
 'arxiv\.org': arxiv
 'mcponline\.org/.+[^f][^u][^l][^l]$': highwire
 'mcponline\.org/.+full$': highwire_full
-'pnas\.org/.+[^f][^u][^l][^l]$': highwire
-'pnas\.org/.+full$': highwire_full
+'pnas\.org': highwire2
 'ieeexplore\.ieee\.org[^/]*/+document': ieee
 'ieeexplore\.ieee\.org[^/]*/+xpls': ieee_full
-'online\.liebertpub\.com/+doi/+abs/+10': liebertpub
-'online\.liebertpub\.com/+doi/+(full/+)?10': liebertpub_full
+'(online\.)?liebertpub\.com/+doi/+abs/+10': liebertpub
+'(online\.)?liebertpub\.com/+doi/+(full/+)?10': liebertpub_full
 'pubs\.rsc\.org.*/(ArticleLanding|articlelanding)/': rsc
 'pubs\.rsc\.org.*/(ArticleHTML|articlehtml)/': rsc_full
 'scripts\.iucr\.org': iucr
@@ -70,8 +69,6 @@
 'eurekaselect\.com': eurekaselect
 'journal\.embnet\.org.*[^0-9]/+[0-9]+/*$': embnet
 'journal\.embnet\.org.*/+[0-9]+/+[0-9]+/*$': embnet_full
-'amjbot\.org/.+[^f][^u][^l][^l]$': highwire
-'amjbot\.org/.+full$': highwire_full
 '[a-zA-Z0-9.-]*sciencemag\.org/.+[^f][^u][^l][^l]$': sciencemag
 '[a-zA-Z0-9.-]*sciencemag\.org/.+full$': sciencemag_full
 'bioinformation\.net': bioinformation
@@ -168,8 +165,9 @@ sciencedirect:
 biomedcentral:
   doi: .ArticleDoi
   title: .ArticleTitle
+  keywords: .FullTextWrapper > section.KeywordGroup .Keyword
   abstract: .Abstract > div > div, .Abstract > div > p
-  fulltext: .FullTextWrapper > section[id^=Sec] > *, .FullTextWrapper > section:not([id]) > *
+  fulltext: .FullTextWrapper > section[id^=Sec] > *, .FullTextWrapper > section:not([id]):not(.KeywordGroup) > *, .FullTextWrapper > p.Para
   pdf_a: '#articlePdf'
 
 springer:
@@ -281,36 +279,34 @@ ieee_full:
   javascript: 'true'
 
 liebertpub:
-  doi: h2.artTitle + p a[href^=https://doi.org]
-  title: h2.artTitle
+  doi: .epub-section__doi__text
+  title: h1.citation__title
   abstract: .abstractSection > *
-  fulltext_a: .html a[href^=/doi]
-  pdf_a: .pdfprint a[href^=/doi]
+  fulltext_a: .coolBar--download a:matches(Full Text$)
+  pdf_a: .coolBar--download a:matches(PDF$)
 
 liebertpub_full:
-  doi: h2.artTitle + p a[href^=https://doi.org]
-  title: h2.artTitle
+  doi: .epub-section__doi__text
+  title: h1.citation__title
   abstract: .abstractSection > *
-  fulltext: .NLM_sec:not(.NLM_sec-type_ack) > :not(div), .NLM_sec:not(.NLM_sec-type_ack) div > :not(div):not(.floatright), .section + .first, .section + .first ~ p
-  fulltext_a: .html a[href^=/doi]
-  pdf_a: .pdfprint a[href^=/doi]
+  fulltext: .hlFld-Fulltext > *
+  fulltext_a: .coolBar--download a:matches(Full Text$)
+  pdf_a: .coolBar--download a:matches(PDF$)
 
 rsc:
   doi: .list__item-label:containsOwn(DOI:) + .list__item-data
   title: .article__title > h2
   abstract: h3:matchesOwn(^Abstract$) + div > *
-  fulltext_src: /(ArticleLanding|articlelanding)/
-  fulltext_dst: /ArticleHTML/
-  pdf_src: /(ArticleLanding|articlelanding)/
-  pdf_dst: /ArticlePDF/
+  fulltext_a: '#DownloadOption a:contains(HTML)'
+  pdf_a: '#DownloadOption a:contains(PDF)'
+  javascript: 'true' # for fulltext_a, pdf_a
 
 rsc_full:
   doi: .article_info > a:matchesOwn(^10\.)
   title: h1
   abstract: .abstract
   fulltext: .abstract ~ :not(span[id]):not(ol[type=1]):not(table), .abstract ~ table.box_border
-  pdf_src: /(ArticleHTML|articlehtml)/
-  pdf_dst: /ArticlePDF/
+  pdf_a: '.left_head a:contains(PDF)'
 
 iucr:
   doi: .ica_doi

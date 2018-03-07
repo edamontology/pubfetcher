@@ -174,7 +174,7 @@ public final class HtmlMeta {
 		for (Element meta : metaFulltext) {
 			String link = meta.attr("abs:content").trim();
 			if (!link.isEmpty()) {
-				links.add(link, type, doc.location(), publication, fetcherArgs);
+				links.add(link, type, doc.location(), publication, fetcherArgs, false);
 			}
 		}
 	}

@@ -173,8 +173,16 @@ public final class FetcherUtil {
 			return 0;
 		}
 	}
+	private static int equalString(String test, String actual, String label) {
+		if (!test.equals(actual)) {
+			System.err.println(label + " must be " + test + ", actually is " + actual);
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 
-	private static int testXml(String[] test, Publication publication) {
+	private static int testPmc(String[] test, Publication publication) {
 		int mismatch = 0;
 		mismatch += equal(test[1], publication.getPmid().getContent().length(), "PMID length");
 		mismatch += equal(test[2], publication.getPmcid().getContent().length(), "PMCID length");
@@ -183,17 +191,25 @@ public final class FetcherUtil {
 		mismatch += equal(test[5], publication.getKeywords().getList().size(), "keywords size");
 		mismatch += equal(test[6], publication.getAbstract().getContent().length(), "abstract length");
 		mismatch += equal(test[7], publication.getFulltext().getContent().length(), "fulltext length");
+		mismatch += equal(test[8], publication.getCorrespAuthor().length(), "corresponding author length");
 		return mismatch;
 	}
 
 	@SuppressWarnings("unused")
-	private static int testHtml(String[] test, Publication publication) {
-		int mismatch = testXml(test, publication);
-		mismatch += equal(test[8], publication.getVisitedSites().size(), "visited sites size");
+	private static int testPmcXml(String[] test, Publication publication) {
+		int mismatch = testPmc(test, publication);
+		mismatch += equal(test[9], publication.getJournalTitle().length(), "journal title length");
 		return mismatch;
 	}
 
-	private static int testPubmed(String[] test, Publication publication) {
+	@SuppressWarnings("unused")
+	private static int testPmcHtml(String[] test, Publication publication) {
+		int mismatch = testPmc(test, publication);
+		mismatch += equal(test[9], publication.getVisitedSites().size(), "visited sites size");
+		return mismatch;
+	}
+
+	private static int testPubmedHtml(String[] test, Publication publication) {
 		int mismatch = 0;
 		mismatch += equal(test[1], publication.getPmid().getContent().length(), "PMID length");
 		mismatch += equal(test[2], publication.getPmcid().getContent().length(), "PMCID length");
@@ -205,12 +221,19 @@ public final class FetcherUtil {
 		return mismatch;
 	}
 
+	private static int testPubmedXml(String[] test, Publication publication) {
+		int mismatch = testPubmedHtml(test, publication);
+		mismatch += equal(test[8], publication.getJournalTitle().length(), "journal title length");
+		mismatch += equalString(test[9], publication.getPubDateHuman(), "publication date");
+		return mismatch;
+	}
+
 	private static int testEuropepmc(String[] test, Publication publication, FetcherPublicationState state) {
-		int mismatch = testPubmed(test, publication);
-		mismatch += equal(test[8], publication.isOA() ? 1 : 0, "Open Access");
-		mismatch += equal(test[9], state.europepmcHasFulltextHTML ? 1 : 0, "has HTML");
-		mismatch += equal(test[10], state.europepmcHasPDF ? 1 : 0, "has PDF");
-		mismatch += equal(test[11], state.europepmcHasMinedTerms ? 1 : 0, "has mined");
+		int mismatch = testPubmedXml(test, publication);
+		mismatch += equal(test[10], publication.isOA() ? 1 : 0, "Open Access");
+		mismatch += equal(test[11], state.europepmcHasFulltextHTML ? 1 : 0, "has HTML");
+		mismatch += equal(test[12], state.europepmcHasPDF ? 1 : 0, "has PDF");
+		mismatch += equal(test[13], state.europepmcHasMinedTerms ? 1 : 0, "has mined");
 		return mismatch;
 	}
 
@@ -220,6 +243,7 @@ public final class FetcherUtil {
 		mismatch += equal(test[1], publication.isOA() ? 1 : 0, "Open Access");
 		mismatch += equal(test[2], publication.getVisitedSites().size(), "visited sites size");
 		mismatch += equal(test[3], publication.getTitle().getContent().length(), "title length");
+		mismatch += equal(test[4], publication.getJournalTitle().length(), "journal title length");
 		return mismatch;
 	}
 
@@ -276,7 +300,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testEuropepmcXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("europepmc-xml.csv", "test", 8), "fetchEuropepmcXml", "testXml", fetcher, parts);
+		test(getTest("europepmc-xml.csv", "test", 10), "fetchEuropepmcXml", "testPmcXml", fetcher, parts);
 	}
 
 	private static Publication fetchEuropepmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -296,7 +320,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testEuropepmcHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("europepmc-html.csv", "test", 9), "fetchEuropepmcHtml", "testHtml", fetcher, parts);
+		test(getTest("europepmc-html.csv", "test", 10), "fetchEuropepmcHtml", "testPmcHtml", fetcher, parts);
 	}
 
 	private static Publication fetchPmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -312,7 +336,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testPmcXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pmc-xml.csv", "test", 8), "fetchPmcXml", "testXml", fetcher, parts);
+		test(getTest("pmc-xml.csv", "test", 10), "fetchPmcXml", "testPmcXml", fetcher, parts);
 	}
 
 	private static Publication fetchPmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -330,7 +354,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testPmcHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pmc-html.csv", "test", 9), "fetchPmcHtml", "testHtml", fetcher, parts);
+		test(getTest("pmc-html.csv", "test", 10), "fetchPmcHtml", "testPmcHtml", fetcher, parts);
 	}
 
 	private static Publication fetchPubmedXml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -346,7 +370,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testPubmedXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pubmed-xml.csv", "test", 8), "fetchPubmedXml", "testPubmed", fetcher, parts);
+		test(getTest("pubmed-xml.csv", "test", 10), "fetchPubmedXml", "testPubmedXml", fetcher, parts);
 	}
 
 	private static Publication fetchPubmedHtml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -362,7 +386,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testPubmedHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pubmed-html.csv", "test", 8), "fetchPubmedHtml", "testPubmed", fetcher, parts);
+		test(getTest("pubmed-html.csv", "test", 8), "fetchPubmedHtml", "testPubmedHtml", fetcher, parts);
 	}
 
 	private static void printEuropepmc(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -375,7 +399,7 @@ public final class FetcherUtil {
 
 	private static void testEuropepmc(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
 		int mismatch = 0;
-		List<String[]> tests = getTest("europepmc.csv", "test", 12);
+		List<String[]> tests = getTest("europepmc.csv", "test", 14);
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
@@ -425,7 +449,7 @@ public final class FetcherUtil {
 	}
 
 	private static void testOaDoi(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("oadoi.csv", "test", 4), "fetchOaDoi", "testOaDoi", fetcher, parts);
+		test(getTest("oadoi.csv", "test", 5), "fetchOaDoi", "testOaDoi", fetcher, parts);
 	}
 
 	private static Publication fetchSite(String url, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -1582,6 +1606,8 @@ public final class FetcherUtil {
 		}
 		System.out.println(", after " + publications.size());
 	}
+
+	// TODO journalTitle, pubDate, citationsCount, citationsTimestamp, correspAuthor
 
 	private static void visited(List<Publication> publications, String regex) {
 		System.out.print("Filter publications with visited site matching " + regex + ": before " + publications.size());

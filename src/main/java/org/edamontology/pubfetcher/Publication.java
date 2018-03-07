@@ -19,6 +19,11 @@
 
 package org.edamontology.pubfetcher;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +56,15 @@ public class Publication extends DatabaseEntry<Publication> {
 	private PublicationPartString fulltext;
 
 	private boolean oa = false;
+
+	private String journalTitle = "";
+
+	private long pubDate = -1;
+
+	private int citationsCount = -1;
+	private long citationsTimestamp = -1;
+
+	private String correspAuthor = "";
 
 	private Set<Link> visitedSites = new LinkedHashSet<>();
 
@@ -305,6 +319,68 @@ public class Publication extends DatabaseEntry<Publication> {
 		this.oa = oa;
 	}
 
+	public String getJournalTitle() {
+		return journalTitle;
+	}
+	void setJournalTitle(String journalTitle) {
+		if (this.journalTitle.isEmpty()) {
+			this.journalTitle = journalTitle.trim();
+		}
+	}
+
+	public long getPubDate() {
+		return pubDate;
+	}
+	public String getPubDateHuman() {
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(pubDate), ZoneOffset.UTC).toLocalDate().toString();
+	}
+	void setPubDate(String pubDate) {
+		if (this.pubDate < 0) {
+			try {
+				this.pubDate = LocalDate.parse(pubDate).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+			} catch (DateTimeParseException e) {
+				System.err.println("Could not set publication date from " + e.getParsedString() + " (error index " + e.getErrorIndex() + "): " + e.getMessage());
+			} catch (ArithmeticException e) {
+				System.err.println("Overflow in setting publication date");
+			}
+		}
+	}
+
+	public int getCitationsCount() {
+		return citationsCount;
+	}
+	void setCitationsCount(String citationsCount) {
+		if (this.citationsCount < 0) {
+			try {
+				int citationsCountParsed = Integer.parseInt(citationsCount);
+				if (citationsCountParsed >= 0) {
+					this.citationsCount = citationsCountParsed;
+					this.citationsTimestamp = System.currentTimeMillis();
+				} else {
+					System.err.println("Citations count is negative: " + citationsCountParsed);
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("Illegal citations count: " + citationsCount);
+			}
+		}
+	}
+
+	public long getCitationsTimestamp() {
+		return citationsTimestamp;
+	}
+	public String getCitationsTimestampHuman() {
+		return Instant.ofEpochMilli(citationsTimestamp).toString();
+	}
+
+	public String getCorrespAuthor() {
+		return correspAuthor;
+	}
+	void setCorrespAuthor(String correspAuthor) {
+		if (this.correspAuthor.isEmpty()) {
+			this.correspAuthor = correspAuthor;
+		}
+	}
+
 	public Set<Link> getVisitedSites() {
 		return visitedSites;
 	}
@@ -396,6 +472,10 @@ public class Publication extends DatabaseEntry<Publication> {
 		sb.append(fulltext.toStringHtml()).append("\n\n");
 		sb.append("<dl>\n");
 		sb.append("<dt>OPEN ACCESS</dt><dd>").append(oa).append("</dd>\n");
+		sb.append("<dt>JOURNAL TITLE</dt><dd>").append(journalTitle).append("</dd>\n");
+		sb.append("<dt>PUBLICATION DATE</dt><dd>").append(pubDate).append(" ").append(getPubDateHuman()).append("</dd>\n");
+		sb.append("<dt>CITATIONS</dt><dd>").append(citationsCount).append(" (").append(citationsTimestamp).append(" ").append(getCitationsTimestampHuman()).append(")</dd>\n");
+		sb.append("<dt>CORRESPONDING AUTHOR</dt><dd>").append(correspAuthor).append("</dd>\n");
 		sb.append("<dt>VISITED LINKS</dt><dd><ul>\n");
 		for (Link link : visitedSites) {
 			sb.append("<li>").append(link.toStringHtml()).append("</li>\n");
@@ -418,7 +498,11 @@ public class Publication extends DatabaseEntry<Publication> {
 		sb.append(goTerms).append("\n\n");
 		sb.append(theAbstract).append("\n\n");
 		sb.append(fulltext).append("\n\n");
-		sb.append("OPEN ACCESS: ").append(oa).append("\n\n");
+		sb.append("OPEN ACCESS: ").append(oa).append("\n");
+		sb.append("JOURNAL TITLE: ").append(journalTitle).append("\n");
+		sb.append("PUBLICATION DATE: ").append(pubDate).append(" ").append(getPubDateHuman()).append("\n");
+		sb.append("CITATIONS: ").append(citationsCount).append(" (").append(citationsTimestamp).append(" ").append(getCitationsTimestampHuman()).append(")\n");
+		sb.append("CORRESPONDING AUTHOR: ").append(correspAuthor).append("\n\n");
 		sb.append("VISITED SITES:");
 		for (Link link : visitedSites) {
 			sb.append("\n").append(link);

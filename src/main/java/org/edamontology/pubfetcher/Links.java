@@ -91,7 +91,7 @@ public class Links {
 		}
 	}
 
-	void add(String url, PublicationPartType type, String from, Publication publication, FetcherArgs fetcherArgs) {
+	void add(String url, PublicationPartType type, String from, Publication publication, FetcherArgs fetcherArgs, boolean pmcPdf) {
 		Link link = null;
 		try {
 			link = new Link(url, type, from);
@@ -108,19 +108,19 @@ public class Links {
 			if (publication != null) {
 				extract(EUROPEPMC, EUROPEPMC_PMID, urlString, publication, type, from, fetcherArgs);
 			}
-			if (!type.isPdf()) return;
+			if (!type.isPdf() || !pmcPdf) return;
 		}
 		if (link.getUrl().getHost().equalsIgnoreCase("ncbi.nlm.nih.gov") || link.getUrl().getHost().equalsIgnoreCase("www.ncbi.nlm.nih.gov")) {
 			if (publication != null) {
 				extract(PMC, PMC_PMID, urlString, publication, type, from, fetcherArgs);
 			}
-			if (!type.isPdf()) return;
+			if (!type.isPdf() || !pmcPdf) return;
 		}
 		if (link.getUrl().getHost().equalsIgnoreCase("pubmedcentralcanada.ca")) {
 			if (publication != null) {
 				extract(PMCCANADA, PMCCANADA_PMID, urlString, publication, type, from, fetcherArgs);
 			}
-			if (!type.isPdf()) return;
+			if (!type.isPdf() || !pmcPdf) return;
 		}
 
 		if (triedLinks.contains(link)) {

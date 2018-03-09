@@ -94,6 +94,7 @@ public class Fetcher {
 	private static final String PHONE_ALLOWED_END = "[\\p{N})]";
 	private static final Pattern PHONE1 = Pattern.compile("(?i)tel[:.e]*[\\p{Z}\\p{Cc}]*(phone[:.]*)?[\\p{Z}\\p{Cc}]*(" + PHONE_ALLOWED + "+" + PHONE_ALLOWED_END + ")");
 	private static final Pattern PHONE2 = Pattern.compile("(?i)phone[:.]*[\\p{Z}\\p{Cc}]*(" + PHONE_ALLOWED + "+" + PHONE_ALLOWED_END + ")");
+	private static final Pattern EMAIL = Pattern.compile("(?i)e-?mail[:.]*[\\p{Z}\\p{Cc}]*([a-zA-Z0-9+._-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,})");
 
 	private static final Pattern ELSEVIER_REDIRECT = Pattern.compile("^https?://linkinghub\\.elsevier\\.com/retrieve/pii/(.+)$");
 	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
@@ -760,7 +761,18 @@ public class Fetcher {
 		}
 		phones.addAll(phonesLocal);
 
+		addEmail(corresp.text(), emails);
 		addPhone(corresp.text(), phones, phonesLocal);
+	}
+
+	private void addEmail(String text, List<String> emails) {
+		Matcher emailMatcher = EMAIL.matcher(text);
+		while (emailMatcher.find()) {
+			String email = emailMatcher.group(1).trim();
+			if (!email.isEmpty() && !emails.contains(email) && !emails.contains(new StringBuilder(email).reverse().toString())) {
+				emails.add(email);
+			}
+		}
 	}
 
 	private void addPhone(String text, List<String> phones, List<String> phonesExclude) {
@@ -791,7 +803,7 @@ public class Fetcher {
 		if (xml) {
 			Elements contribCorrespAll = doc.select("contrib[corresp=yes], contrib:has(xref[ref-type=corresp])");
 			if (contribCorrespAll.isEmpty()) {
-				contribCorrespAll = doc.select("contrib:has(xref[rid~=(?i)fn[0-9]+])");
+				contribCorrespAll = doc.select("contrib:has(xref[ref-type=author-notes]):has(xref[rid~=(?i)fn[0-9]+]), contrib:has(xref[ref-type=author-notes]):has(xref[rid~=(?i)^N[0-9a-fx.]+$])");
 			}
 			for (Element contribCorresp : contribCorrespAll) {
 				Element nameTag = contribCorresp.selectFirst("name");
@@ -819,7 +831,7 @@ public class Fetcher {
 
 			Elements notesCorrespAll = doc.select("author-notes > corresp");
 			if (notesCorrespAll.isEmpty()) {
-				notesCorrespAll = doc.select("author-notes > fn[id~=(?i)fn[0-9]+]");
+				notesCorrespAll = doc.select("author-notes > fn[id~=(?i)fn[0-9]+], author-notes > fn[id~=(?i)^N[0-9a-fx.]+$]");
 			}
 			for (Element notesCorresp : notesCorrespAll) {
 				addEmailPhoneUriXml(notesCorresp, emails, phones, uris);
@@ -841,6 +853,7 @@ public class Fetcher {
 										emails.add(email);
 									}
 								}
+								addEmail(contribEmail.text(), emails);
 								addPhone(contribEmail.text(), phones, null);
 							}
 						} catch (SelectorParseException e) {
@@ -856,7 +869,7 @@ public class Fetcher {
 
 			Elements notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)cor[0-9]+], .fm-authors-info div[id~=(?i)caf[0-9]+], .fm-authors-info div[id~=(?i)^c[0-9]+], .fm-authors-info div[id~=(?i)^cr[0-9]+], .fm-authors-info div[id~=(?i)^cor$]");
 			if (notesCorrespAll.isEmpty()) {
-				notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)fn[0-9]+]");
+				notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)fn[0-9]+], .fm-authors-info div[id~=(?i)^N[0-9a-fx.]+$]");
 			}
 			for (Element notesCorresp : notesCorrespAll) {
 				for (Element emailTag : notesCorresp.select(".oemail")) {
@@ -866,6 +879,7 @@ public class Fetcher {
 					}
 				}
 				String notesCorrespText = notesCorresp.text();
+				addEmail(notesCorrespText, emails);
 				addPhone(notesCorrespText, phones, phonesCopy);
 				String sup = "";
 				Element supTag = notesCorresp.selectFirst("sup");

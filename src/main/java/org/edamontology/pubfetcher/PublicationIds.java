@@ -144,13 +144,13 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		if (tab) sb.append("</td><td>");
 		String pmcidLink = FetcherCommon.getPmcidLink(pmcid);
 		if (pmcidLink != null) {
-			if (sb.length() > 1 && !tab) sb.append(", ");
+			if (sb.length() > 0 && !tab) sb.append(", ");
 			sb.append("<a href=\"").append(pmcidLink).append("\">").append(pmcid).append("</a>");
 		}
 		if (tab) sb.append("</td><td>");
 		String doiLink = FetcherCommon.getDoiLink(doi);
 		if (doiLink != null) {
-			if (sb.length() > 1 && !tab) sb.append(", ");
+			if (sb.length() > 0 && !tab) sb.append(", ");
 			sb.append("<a href=\"").append(doiLink).append("\">").append(doi).append("</a>");
 		}
 		if (tab) sb.append("</td></tr>");
@@ -164,12 +164,12 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		}
 		if (tab) sb.append("\t");
 		if (pmcid != null && !pmcid.isEmpty()) {
-			if (sb.length() > 1 && !tab) sb.append(", ");
+			if (sb.length() > 0 && !tab) sb.append(", ");
 			sb.append(pmcid);
 		}
 		if (tab) sb.append("\t");
 		if (doi != null && !doi.isEmpty()) {
-			if (sb.length() > 1 && !tab) sb.append(", ");
+			if (sb.length() > 0 && !tab) sb.append(", ");
 			sb.append(doi);
 		}
 		return sb.toString();

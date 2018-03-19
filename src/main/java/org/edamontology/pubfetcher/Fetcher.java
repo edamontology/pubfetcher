@@ -172,7 +172,7 @@ public class Fetcher {
 					webClient.getOptions().setThrowExceptionOnFailingStatusCode(true);
 					webClient.getOptions().setThrowExceptionOnScriptError(false);
 					webClient.getOptions().setActiveXNative(false);
-					webClient.getOptions().setTimeout(fetcherArgs.getConnectionTimeout());
+					webClient.getOptions().setTimeout(fetcherArgs.getTimeout());
 					webClient.getOptions().setDownloadImages(false);
 
 					webClient.setAjaxController(new NicelyResynchronizingAjaxController());
@@ -191,7 +191,7 @@ public class Fetcher {
 					if (page.isHtmlPage()) {
 						HtmlPage htmlPage = (HtmlPage) page;
 
-						webClient.waitForBackgroundJavaScript(fetcherArgs.getConnectionTimeout());
+						webClient.waitForBackgroundJavaScript(fetcherArgs.getTimeout());
 
 						doc = Jsoup.parse(htmlPage.asXml(), finalUrl);
 					} else {
@@ -204,7 +204,7 @@ public class Fetcher {
 				Response res = Jsoup.connect(url)
 					.userAgent(fetcherArgs.getUserAgent())
 					.referrer(u.getProtocol() + "://" + u.getAuthority())
-					.timeout(fetcherArgs.getConnectionTimeout())
+					.timeout(fetcherArgs.getTimeout())
 					// .validateTLSCertificates(false) // TODO deprecated
 					.followRedirects(true)
 					.ignoreHttpErrors(false)

@@ -110,6 +110,13 @@ public class Publication extends DatabaseEntry<Publication> {
 			isAbstractFinal(fetcherArgs) && isFulltextFinal(fetcherArgs);
 	}
 
+	@Override
+	public boolean isUsable(FetcherArgs fetcherArgs) {
+		return isTitleUsable(fetcherArgs) || isKeywordsUsable(fetcherArgs) ||
+			isMeshTermsUsable(fetcherArgs) || isEfoTermsUsable(fetcherArgs) || isGoTermsUsable(fetcherArgs) ||
+			isAbstractUsable(fetcherArgs) || isFulltextUsable(fetcherArgs);
+	}
+
 	public int getIdCount() {
 		int idCount = 0;
 		if (!pmid.isEmpty()) ++idCount;
@@ -197,8 +204,11 @@ public class Publication extends DatabaseEntry<Publication> {
 	boolean setPmid(String pmid, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
 		return setId(pmid, type, url, fetcherArgs, this::isPmidFinal, FetcherCommon::isPmid, this.pmid);
 	}
+	public boolean isPmidUsable() {
+		return !pmid.isEmpty();
+	}
 	public boolean isPmidFinal() {
-		return pmid.getType().isFinal() && !pmid.isEmpty();
+		return pmid.getType().isFinal() && isPmidUsable();
 	}
 
 	public PublicationPartString getPmcid() {
@@ -207,8 +217,11 @@ public class Publication extends DatabaseEntry<Publication> {
 	boolean setPmcid(String pmcid, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
 		return setId(pmcid, type, url, fetcherArgs, this::isPmcidFinal, FetcherCommon::isPmcid, this.pmcid);
 	}
+	public boolean isPmcidUsable() {
+		return !pmcid.isEmpty();
+	}
 	public boolean isPmcidFinal() {
-		return pmcid.getType().isFinal() && !pmcid.isEmpty();
+		return pmcid.getType().isFinal() && isPmcidUsable();
 	}
 
 	public PublicationPartString getDoi() {
@@ -218,8 +231,11 @@ public class Publication extends DatabaseEntry<Publication> {
 		doi = FetcherCommon.normalizeDoi(doi);
 		return setId(doi, type, url, fetcherArgs, this::isDoiFinal, FetcherCommon::isDoi, this.doi);
 	}
+	public boolean isDoiUsable() {
+		return !doi.isEmpty();
+	}
 	public boolean isDoiFinal() {
-		return doi.getType().isFinal() && !doi.isEmpty();
+		return doi.getType().isFinal() && isDoiUsable();
 	}
 
 	public boolean isIdFinal() {
@@ -232,8 +248,11 @@ public class Publication extends DatabaseEntry<Publication> {
 	void setTitle(String title, PublicationPartType type, String url, FetcherArgs fetcherArgs, boolean clean) {
 		set(title, type, url, fetcherArgs, this::isTitleFinal, this.title, true, clean);
 	}
+	public boolean isTitleUsable(FetcherArgs fetcherArgs) {
+		return title.getContent().length() >= fetcherArgs.getTitleMinLength();
+	}
 	public boolean isTitleFinal(FetcherArgs fetcherArgs) {
-		return title.getType().isFinal() && title.getContent().length() >= fetcherArgs.getTitleMinLength();
+		return title.getType().isFinal() && isTitleUsable(fetcherArgs);
 	}
 
 	public PublicationPartList<String> getKeywords() {
@@ -249,8 +268,11 @@ public class Publication extends DatabaseEntry<Publication> {
 			.collect(Collectors.toList());
 		setList(keywordsFull, type, url, fetcherArgs, this::isKeywordsFinal, this.keywords);
 	}
+	public boolean isKeywordsUsable(FetcherArgs fetcherArgs) {
+		return keywords.getList().size() >= fetcherArgs.getKeywordsMinSize();
+	}
 	public boolean isKeywordsFinal(FetcherArgs fetcherArgs) {
-		return keywords.getType().isFinal() && keywords.getList().size() >= fetcherArgs.getKeywordsMinSize();
+		return keywords.getType().isFinal() && isKeywordsUsable(fetcherArgs);
 	}
 
 	public PublicationPartList<MeshTerm> getMeshTerms() {
@@ -262,8 +284,11 @@ public class Publication extends DatabaseEntry<Publication> {
 			.collect(Collectors.toList());
 		setList(meshTermsFull, type, url, fetcherArgs, this::isMeshTermsFinal, this.meshTerms);
 	}
+	public boolean isMeshTermsUsable(FetcherArgs fetcherArgs) {
+		return meshTerms.getList().size() >= fetcherArgs.getKeywordsMinSize();
+	}
 	public boolean isMeshTermsFinal(FetcherArgs fetcherArgs) {
-		return meshTerms.getType().isFinal() && meshTerms.getList().size() >= fetcherArgs.getKeywordsMinSize();
+		return meshTerms.getType().isFinal() && isMeshTermsUsable(fetcherArgs);
 	}
 
 	public PublicationPartList<MinedTerm> getEfoTerms() {
@@ -275,8 +300,11 @@ public class Publication extends DatabaseEntry<Publication> {
 			.collect(Collectors.toList());
 		setList(efoTermsFull, type, url, fetcherArgs, this::isEfoTermsFinal, this.efoTerms);
 	}
+	public boolean isEfoTermsUsable(FetcherArgs fetcherArgs) {
+		return efoTerms.getList().size() >= fetcherArgs.getMinedTermsMinSize();
+	}
 	public boolean isEfoTermsFinal(FetcherArgs fetcherArgs) {
-		return efoTerms.getType().isFinal() && efoTerms.getList().size() >= fetcherArgs.getMinedTermsMinSize();
+		return efoTerms.getType().isFinal() && isEfoTermsUsable(fetcherArgs);
 	}
 
 	public PublicationPartList<MinedTerm> getGoTerms() {
@@ -288,8 +316,11 @@ public class Publication extends DatabaseEntry<Publication> {
 			.collect(Collectors.toList());
 		setList(goTermsFull, type, url, fetcherArgs, this::isGoTermsFinal, this.goTerms);
 	}
+	public boolean isGoTermsUsable(FetcherArgs fetcherArgs) {
+		return goTerms.getList().size() >= fetcherArgs.getMinedTermsMinSize();
+	}
 	public boolean isGoTermsFinal(FetcherArgs fetcherArgs) {
-		return goTerms.getType().isFinal() && goTerms.getList().size() >= fetcherArgs.getMinedTermsMinSize();
+		return goTerms.getType().isFinal() && isGoTermsUsable(fetcherArgs);
 	}
 
 	public PublicationPartString getAbstract() {
@@ -298,8 +329,11 @@ public class Publication extends DatabaseEntry<Publication> {
 	void setAbstract(String theAbstract, PublicationPartType type, String url, FetcherArgs fetcherArgs, boolean clean) {
 		set(theAbstract, type, url, fetcherArgs, this::isAbstractFinal, this.theAbstract, true, clean);
 	}
+	public boolean isAbstractUsable(FetcherArgs fetcherArgs) {
+		return theAbstract.getContent().length() >= fetcherArgs.getAbstractMinLength();
+	}
 	public boolean isAbstractFinal(FetcherArgs fetcherArgs) {
-		return theAbstract.getType().isFinal() && theAbstract.getContent().length() >= fetcherArgs.getAbstractMinLength();
+		return theAbstract.getType().isFinal() && isAbstractUsable(fetcherArgs);
 	}
 
 	public PublicationPartString getFulltext() {
@@ -308,8 +342,11 @@ public class Publication extends DatabaseEntry<Publication> {
 	void setFulltext(String fulltext, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
 		set(fulltext, type, url, fetcherArgs, this::isFulltextFinal, this.fulltext, true, false);
 	}
+	public boolean isFulltextUsable(FetcherArgs fetcherArgs) {
+		return fulltext.getContent().length() >= fetcherArgs.getFulltextMinLength() && fulltext.getType().isBetterThan(PublicationPartType.webpage);
+	}
 	public boolean isFulltextFinal(FetcherArgs fetcherArgs) {
-		return fulltext.getType().isFinal() && fulltext.getContent().length() >= fetcherArgs.getFulltextMinLength();
+		return fulltext.getType().isFinal() && isFulltextUsable(fetcherArgs);
 	}
 
 	public boolean isOA() {
@@ -420,6 +457,22 @@ public class Publication extends DatabaseEntry<Publication> {
 		}
 	}
 
+	public boolean isPartUsable(PublicationPartName name, FetcherArgs fetcherArgs) {
+		switch (name) {
+		case pmid: return isPmidUsable();
+		case pmcid: return isPmcidUsable();
+		case doi: return isDoiUsable();
+		case title: return isTitleUsable(fetcherArgs);
+		case keywords: return isKeywordsUsable(fetcherArgs);
+		case mesh: return isMeshTermsUsable(fetcherArgs);
+		case efo: return isEfoTermsUsable(fetcherArgs);
+		case go: return isGoTermsUsable(fetcherArgs);
+		case theAbstract: return isAbstractUsable(fetcherArgs);
+		case fulltext: return isFulltextUsable(fetcherArgs);
+		default: return false;
+		}
+	}
+
 	@Override
 	public String toStringId() {
 		return "[" + PublicationIds.toString(pmid.getContent(), pmcid.getContent(), doi.getContent(), false) + "]";
@@ -433,6 +486,7 @@ public class Publication extends DatabaseEntry<Publication> {
 	@Override
 	public String toStringPlain() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(toStringId()).append("\n\n");
 		sb.append(title.toStringPlain()).append("\n\n");
 		sb.append(keywords.toStringPlain()).append("\n");
 		sb.append(meshTerms.toStringPlain()).append("\n");
@@ -444,50 +498,63 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	@Override
-	public String toStringPlainHtml() {
+	public String toStringPlainHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<h2>").append(title.toStringPlainHtml()).append("</h2>\n\n");
+		sb.append(prepend).append("<h2>").append(toStringIdHtml()).append("</h2>\n");
+		sb.append(title.toStringPlainHtml()).append("\n");
 		sb.append(keywords.toStringPlainHtml()).append("\n");
 		sb.append(meshTerms.toStringPlainHtml()).append("\n");
 		sb.append(efoTerms.toStringPlainHtml()).append("\n");
-		sb.append(goTerms.toStringPlainHtml()).append("\n\n");
-		sb.append(theAbstract.toStringPlainHtml()).append("\n\n");
+		sb.append(goTerms.toStringPlainHtml()).append("\n");
+		sb.append(theAbstract.toStringPlainHtml()).append("\n");
 		sb.append(fulltext.toStringPlainHtml());
 		return sb.toString();
 	}
 
 	@Override
-	public String toStringHtml() {
+	public String toStringMetaHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<dl>\n").append(super.toString()).append("</dl>\n\n");
-		sb.append(pmid.toStringHtml()).append("\n\n");
-		sb.append(pmcid.toStringHtml()).append("\n\n");
-		sb.append(doi.toStringHtml()).append("\n\n");
-		sb.append(title.toStringHtml()).append("\n\n");
-		sb.append(keywords.toStringHtml()).append("\n\n");
-		sb.append(meshTerms.toStringHtml()).append("\n\n");
-		sb.append(efoTerms.toStringHtml()).append("\n\n");
-		sb.append(goTerms.toStringHtml()).append("\n\n");
-		sb.append(theAbstract.toStringHtml()).append("\n\n");
-		sb.append(fulltext.toStringHtml()).append("\n\n");
-		sb.append("<dl>\n");
-		sb.append("<dt>OPEN ACCESS</dt><dd>").append(oa).append("</dd>\n");
-		sb.append("<dt>JOURNAL TITLE</dt><dd>").append(journalTitle).append("</dd>\n");
-		sb.append("<dt>PUBLICATION DATE</dt><dd>").append(pubDate).append(" ").append(getPubDateHuman()).append("</dd>\n");
-		sb.append("<dt>CITATIONS</dt><dd>").append(citationsCount).append(" (").append(citationsTimestamp).append(" ").append(getCitationsTimestampHuman()).append(")</dd>\n");
-		sb.append("<dt>CORRESPONDING AUTHOR</dt><dd>").append(correspAuthor).append("</dd>\n");
-		sb.append("<dt>VISITED LINKS</dt><dd><ul>\n");
+		sb.append(super.toStringHtml(prepend)).append("\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append("<div><span>Open Access:</span> <span>").append(oa).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Journal title:</span> <span>").append(FetcherCommon.escapeHtml(journalTitle)).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Pub. date:</span> <span>").append(getPubDateHuman()).append(" (").append(pubDate).append(")</span></div>\n");
+		sb.append(prepend).append("<div><span>Citations count:</span> <span>").append(citationsCount).append(" (").append(getCitationsTimestampHuman()).append(" (").append(citationsTimestamp).append("))</span></div>\n");
+		sb.append(prepend).append("<div><span>Corresp. author:</span> <span>").append(FetcherCommon.escapeHtml(correspAuthor)).append("</span></div>\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append("<div><span>Visited sites:</span></div>\n");
+		sb.append(prepend).append("<ul>\n");
 		for (Link link : visitedSites) {
-			sb.append("<li>").append(link.toStringHtml()).append("</li>\n");
+			sb.append(prepend).append("<li>\n");
+			sb.append(link.toStringHtml(prepend)).append("\n");
+			sb.append(prepend).append("</li>\n");
 		}
-		sb.append("</ul></dd></dl>");
+		sb.append(prepend).append("</ul>");
+		return sb.toString();
+	}
+
+	@Override
+	public String toStringHtml(String prepend) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(prepend).append("<h2>Publication</h2>\n");
+		sb.append(pmid.toStringHtml(prepend)).append("\n");
+		sb.append(pmcid.toStringHtml(prepend)).append("\n");
+		sb.append(doi.toStringHtml(prepend)).append("\n");
+		sb.append(title.toStringHtml(prepend)).append("\n");
+		sb.append(keywords.toStringHtml(prepend)).append("\n");
+		sb.append(meshTerms.toStringHtml(prepend)).append("\n");
+		sb.append(efoTerms.toStringHtml(prepend)).append("\n");
+		sb.append(goTerms.toStringHtml(prepend)).append("\n");
+		sb.append(theAbstract.toStringHtml(prepend)).append("\n");
+		sb.append(fulltext.toStringHtml(prepend)).append("\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(toStringMetaHtml(prepend));
 		return sb.toString();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString()).append("\n\n");
 		sb.append(pmid).append("\n");
 		sb.append(pmcid).append("\n");
 		sb.append(doi).append("\n\n");
@@ -498,11 +565,12 @@ public class Publication extends DatabaseEntry<Publication> {
 		sb.append(goTerms).append("\n\n");
 		sb.append(theAbstract).append("\n\n");
 		sb.append(fulltext).append("\n\n");
+		sb.append(super.toString()).append("\n\n");
 		sb.append("OPEN ACCESS: ").append(oa).append("\n");
 		sb.append("JOURNAL TITLE: ").append(journalTitle).append("\n");
-		sb.append("PUBLICATION DATE: ").append(pubDate).append(" ").append(getPubDateHuman()).append("\n");
-		sb.append("CITATIONS: ").append(citationsCount).append(" (").append(citationsTimestamp).append(" ").append(getCitationsTimestampHuman()).append(")\n");
-		sb.append("CORRESPONDING AUTHOR: ").append(correspAuthor).append("\n\n");
+		sb.append("PUB. DATE: ").append(getPubDateHuman()).append(" (").append(pubDate).append(")\n");
+		sb.append("CITATIONS: ").append(citationsCount).append(" (").append(getCitationsTimestampHuman()).append(" (").append(citationsTimestamp).append("))\n");
+		sb.append("CORRESP. AUTHOR: ").append(correspAuthor).append("\n\n");
 		sb.append("VISITED SITES:");
 		for (Link link : visitedSites) {
 			sb.append("\n").append(link);

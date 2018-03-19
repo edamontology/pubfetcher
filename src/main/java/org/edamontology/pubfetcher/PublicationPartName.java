@@ -23,13 +23,13 @@ public enum PublicationPartName {
 	pmid("PMID"),
 	pmcid("PMCID"),
 	doi("DOI"),
-	title("title"),
-	keywords("keywords"),
+	title("Title"),
+	keywords("Keywords"),
 	mesh("MeSH terms"),
 	efo("EFO terms"),
 	go("GO terms"),
-	theAbstract("abstract"),
-	fulltext("fulltext");
+	theAbstract("Abstract"),
+	fulltext("Fulltext");
 
 	private final String name;
 

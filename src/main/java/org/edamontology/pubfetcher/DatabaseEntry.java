@@ -36,6 +36,8 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 
 	public abstract boolean isFinal(FetcherArgs fetcherArgs);
 
+	public abstract boolean isUsable(FetcherArgs fetcherArgs);
+
 	protected boolean canFetch(FetcherArgs fetcherArgs) {
 		long currentTime = System.currentTimeMillis();
 		String finalness = (isEmpty() ? "empty" : (!isFinal(fetcherArgs) ? "non-final" : "final"));
@@ -105,19 +107,21 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 
 	public abstract String toStringPlain();
 
-	public abstract String toStringPlainHtml();
+	public abstract String toStringPlainHtml(String prepend);
 
-	public String toStringHtml() {
+	public abstract String toStringMetaHtml(String prepend);
+
+	public String toStringHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<dt>FETCH TIME</dt>\n").append("<dd>").append(fetchTime).append(" ").append(getFetchTimeHuman()).append("</dd>\n");
-		sb.append("<dt>RETRY COUNTER</dt>\n").append("<dd>").append(retryCounter).append("</dd>\n");
+		sb.append(prepend).append("<div><span>Fetch time:</span> <span>").append(getFetchTimeHuman()).append(" (").append(fetchTime).append(")</span></div>\n");
+		sb.append(prepend).append("<div><span>Retry counter:</span> <span>").append(retryCounter).append("</span></div>");
 		return sb.toString();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("FETCH TIME: ").append(fetchTime).append(" ").append(getFetchTimeHuman()).append("\n");
+		sb.append("FETCH TIME: ").append(getFetchTimeHuman()).append(" (").append(fetchTime).append(")\n");
 		sb.append("RETRY COUNTER: ").append(retryCounter);
 		return sb.toString();
 	}

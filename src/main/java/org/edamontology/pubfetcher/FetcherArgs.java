@@ -66,8 +66,8 @@ public class FetcherArgs {
 	@Parameter(names = { "--user-agent" }, description = "TODO")
 	private String userAgent = HttpConnection.DEFAULT_UA;
 
-	@Parameter(names = { "--connection-timeout" }, description = "TODO")
-	private int connectionTimeout = 15000; // ms
+	@Parameter(names = { "--timeout" }, description = "TODO")
+	private int timeout = 15000; // ms
 
 	public int getEmptyCooldown() {
 		return emptyCooldown;
@@ -167,10 +167,10 @@ public class FetcherArgs {
 		this.userAgent = userAgent;
 	}
 
-	public int getConnectionTimeout() {
-		return connectionTimeout;
+	public int getTimeout() {
+		return timeout;
 	}
-	public void setConnectionTimeout(int connectionTimeout) {
-		this.connectionTimeout = connectionTimeout;
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
 	}
 }

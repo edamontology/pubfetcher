@@ -115,7 +115,7 @@ public final class FetcherUtil {
 	private static void printWebpageSelector(String webpageUrl, String title, String content, boolean javascript, boolean html, Fetcher fetcher) {
 		Webpage webpage = fetcher.initWebpage(webpageUrl);
 		fetcher.getWebpage(webpage, title, content, javascript);
-		if (html) System.out.println(webpage.toStringHtml());
+		if (html) System.out.println(webpage.toStringHtml(""));
 		else System.out.println(webpage.toString());
 	}
 
@@ -887,7 +887,7 @@ public final class FetcherUtil {
 	}
 	private static void txtIdsPub(Set<PublicationIds> pubIds, boolean plain, boolean html, String txt) throws IOException {
 		System.out.println("Output " + pubIds.size() + " publication IDs to file " + txt + (html ? " in HTML" : ""));
-		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt, false))), true, "UTF-8")) {
+		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (pubIds.size() == 0) return;
 			printIdsPub(ps, pubIds, plain, html);
 		}
@@ -896,7 +896,7 @@ public final class FetcherUtil {
 	private static void printIdsWeb(PrintStream ps, Set<String> webUrls, boolean html) throws IOException {
 		if (html) ps.println("<ul>");
 		for (String webUrl : webUrls) {
-			if (html) ps.println("<li><a href=\"" + webUrl + "\">" + webUrl + "</a></li>");
+			if (html) ps.println("<li>" + FetcherCommon.getLinkHtml(webUrl) + "</li>");
 			else ps.println(webUrl);
 		}
 		if (html) ps.println("</ul>");
@@ -908,7 +908,7 @@ public final class FetcherUtil {
 	}
 	private static void txtIdsWeb(Set<String> webUrls, boolean html, String txt) throws IOException {
 		System.out.println("Output " + webUrls.size() + " webpage URLs to file " + txt + (html ? " in HTML" : ""));
-		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt, false))), true, "UTF-8")) {
+		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (webUrls.size() == 0) return;
 			printIdsWeb(ps, webUrls, html);
 		}
@@ -2055,7 +2055,7 @@ public final class FetcherUtil {
 						parts.contains(PublicationPartName.pmcid) ? publication.getPmcid().getContent() : "",
 						parts.contains(PublicationPartName.doi) ? publication.getDoi().getContent() : "", false));
 				}
-				if (parts.contains(PublicationPartName.title)) pubString.add("<h2>" + publication.getTitle().toStringPlainHtml() + "</h2>");
+				if (parts.contains(PublicationPartName.title)) pubString.add(publication.getTitle().toStringPlainHtml());
 				if (parts.contains(PublicationPartName.keywords)) pubString.add(publication.getKeywords().toStringPlainHtml());
 				if (parts.contains(PublicationPartName.mesh)) pubString.add(publication.getMeshTerms().toStringPlainHtml());
 				if (parts.contains(PublicationPartName.efo)) pubString.add(publication.getEfoTerms().toStringPlainHtml());
@@ -2063,13 +2063,18 @@ public final class FetcherUtil {
 				if (parts.contains(PublicationPartName.theAbstract)) pubString.add(publication.getAbstract().toStringPlainHtml());
 				if (parts.contains(PublicationPartName.fulltext)) pubString.add(publication.getFulltext().toStringPlainHtml());
 			} else {
-				if (parts.contains(PublicationPartName.pmid)
+				if (idOnly) {
+					pubString.add(PublicationIds.toString(
+						parts.contains(PublicationPartName.pmid) ? publication.getPmid().getContent() : "",
+						parts.contains(PublicationPartName.pmcid) ? publication.getPmcid().getContent() : "",
+						parts.contains(PublicationPartName.doi) ? publication.getDoi().getContent() : "", true));
+				} else if (parts.contains(PublicationPartName.pmid)
 						|| parts.contains(PublicationPartName.pmcid)
 						|| parts.contains(PublicationPartName.doi)) {
 					pubString.add(PublicationIds.toString(
 						parts.contains(PublicationPartName.pmid) ? publication.getPmid().getContent() : "",
 						parts.contains(PublicationPartName.pmcid) ? publication.getPmcid().getContent() : "",
-						parts.contains(PublicationPartName.doi) ? publication.getDoi().getContent() : "", true));
+						parts.contains(PublicationPartName.doi) ? publication.getDoi().getContent() : "", false));
 				}
 				if (parts.contains(PublicationPartName.title)) pubString.add(publication.getTitle().toStringPlain());
 				if (parts.contains(PublicationPartName.keywords)) pubString.add(publication.getKeywords().toStringPlain());
@@ -2081,16 +2086,16 @@ public final class FetcherUtil {
 			}
 		} else {
 			if (html) {
-				if (parts.contains(PublicationPartName.pmid)) pubString.add(publication.getPmid().toStringHtml());
-				if (parts.contains(PublicationPartName.pmcid)) pubString.add(publication.getPmcid().toStringHtml());
-				if (parts.contains(PublicationPartName.doi)) pubString.add(publication.getDoi().toStringHtml());
-				if (parts.contains(PublicationPartName.title)) pubString.add(publication.getTitle().toStringHtml());
-				if (parts.contains(PublicationPartName.keywords)) pubString.add(publication.getKeywords().toStringHtml());
-				if (parts.contains(PublicationPartName.mesh)) pubString.add(publication.getMeshTerms().toStringHtml());
-				if (parts.contains(PublicationPartName.efo)) pubString.add(publication.getEfoTerms().toStringHtml());
-				if (parts.contains(PublicationPartName.go)) pubString.add(publication.getGoTerms().toStringHtml());
-				if (parts.contains(PublicationPartName.theAbstract)) pubString.add(publication.getAbstract().toStringHtml());
-				if (parts.contains(PublicationPartName.fulltext)) pubString.add(publication.getFulltext().toStringHtml());
+				if (parts.contains(PublicationPartName.pmid)) pubString.add(publication.getPmid().toStringHtml(""));
+				if (parts.contains(PublicationPartName.pmcid)) pubString.add(publication.getPmcid().toStringHtml(""));
+				if (parts.contains(PublicationPartName.doi)) pubString.add(publication.getDoi().toStringHtml(""));
+				if (parts.contains(PublicationPartName.title)) pubString.add(publication.getTitle().toStringHtml(""));
+				if (parts.contains(PublicationPartName.keywords)) pubString.add(publication.getKeywords().toStringHtml(""));
+				if (parts.contains(PublicationPartName.mesh)) pubString.add(publication.getMeshTerms().toStringHtml(""));
+				if (parts.contains(PublicationPartName.efo)) pubString.add(publication.getEfoTerms().toStringHtml(""));
+				if (parts.contains(PublicationPartName.go)) pubString.add(publication.getGoTerms().toStringHtml(""));
+				if (parts.contains(PublicationPartName.theAbstract)) pubString.add(publication.getAbstract().toStringHtml(""));
+				if (parts.contains(PublicationPartName.fulltext)) pubString.add(publication.getFulltext().toStringHtml(""));
 			} else {
 				if (parts.contains(PublicationPartName.pmid)) pubString.add(publication.getPmid().toString());
 				if (parts.contains(PublicationPartName.pmcid)) pubString.add(publication.getPmcid().toString());
@@ -2126,16 +2131,10 @@ public final class FetcherUtil {
 			if (parts != null && entry instanceof Publication) {
 				ps.println(toStringPubParts((Publication) entry, plain, html, parts, idOnly));
 			} else if (plain) {
-				if (html) {
-					ps.println("<p>" + entry.toStringIdHtml() + "</p>");
-					ps.println(entry.toStringPlainHtml());
-				} else {
-					ps.println(entry.toStringId());
-					ps.println();
-					ps.println(entry.toStringPlain());
-				}
+				if (html) ps.println(entry.toStringPlainHtml(""));
+				else ps.println(entry.toStringPlain());
 			} else {
-				if (html) ps.println(entry.toStringHtml());
+				if (html) ps.println(entry.toStringHtml(""));
 				else ps.println(entry.toString());
 			}
 			++i;
@@ -2166,7 +2165,7 @@ public final class FetcherUtil {
 	private static <T extends DatabaseEntry<T>> void txt(List<T> entries, boolean plain, boolean html, List<PublicationPartName> parts, String txt) throws IOException {
 		System.out.println("Output " + entries.size() + " entries to file " + txt + (plain ? " without metadata" : "")
 			+ (parts != null ? " with parts" + parts : "") + (html ? " in HTML" : ""));
-		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt, false))), true, "UTF-8")) {
+		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (entries.size() == 0) return;
 			print(ps, entries, plain, html, parts);
 		}
@@ -2175,7 +2174,7 @@ public final class FetcherUtil {
 	private static void printTopHosts(PrintStream ps, Map<String, Integer> topHosts, boolean html) throws IOException {
 		if (html) ps.println("<ul>");
 		for (Map.Entry<String, Integer> topHost : topHosts.entrySet()) {
-			if (html) ps.println("<li value=\"" + topHost.getValue() + "\">" + topHost.getKey() + "</li>");
+			if (html) ps.println("<li value=\"" + topHost.getValue() + "\">" + FetcherCommon.escapeHtml(topHost.getKey()) + "</li>");
 			else ps.println(topHost.getKey() + "\t" + topHost.getValue());
 		}
 		if (html) ps.println("</ul>");
@@ -2187,7 +2186,7 @@ public final class FetcherUtil {
 	}
 	private static void txtTopHosts(Map<String, Integer> topHosts, boolean html, String txt) throws IOException {
 		System.out.println("Output " + topHosts.size() + " top hosts to file " + txt + (html ? " in HTML" : ""));
-		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt, false))), true, "UTF-8")) {
+		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (topHosts.size() == 0) return;
 			printTopHosts(ps, topHosts, html);
 		}
@@ -2896,17 +2895,19 @@ public final class FetcherUtil {
 		if (args.partTable) partTable(publications);
 	}
 
-	public static <T extends MainArgs> T parseArgs(String[] argv, Class<T> clazz) throws ReflectiveOperationException {
+	public static <T extends MainArgs> T parseArgs(String[] argv, Class<T> clazz, Version version) throws ReflectiveOperationException {
 		T args = clazz.getConstructor().newInstance();
 		JCommander jcommander = new JCommander(args);
 		try {
 			jcommander.parse(argv);
 		} catch (ParameterException e) {
+			System.err.println(version.getName() + " " + version.getVersion());
 			System.err.println(e);
 			System.err.println("Use -h or --help for listing valid options");
 			System.exit(1);
 		}
 		if (args.isHelp()) {
+			System.out.println(version.getName() + " " + version.getVersion());
 			jcommander.usage();
 			System.exit(0);
 		}

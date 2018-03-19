@@ -21,6 +21,7 @@ package org.edamontology.pubfetcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PublicationPartList<T> extends PublicationPart {
 
@@ -59,24 +60,15 @@ public class PublicationPartList<T> extends PublicationPart {
 
 	@Override
 	public String toStringPlain() {
-		return list.toString();
+		return "[" + list.stream().map(e -> e.toString()).collect(Collectors.joining("; ")) + "]";
 	}
 
 	@Override
 	public String toStringPlainHtml() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<ul>\n");
-		for (T e : list) {
-			sb.append("<li>");
-			String link = null;
-			if (e instanceof MeshTerm) link = FetcherCommon.getMeshLink((MeshTerm) e);
-			else if (e instanceof MinedTerm) link = FetcherCommon.getMinedLink((MinedTerm) e);
-			if (link != null) sb.append("<a href=\"" + link + "\">");
-			sb.append(e);
-			if (link != null) sb.append("</a>");
-			sb.append("</li>\n");
-		}
-		sb.append("</ul>\n");
-		return sb.toString();
+		return list.stream().map(e -> {
+			if (e instanceof MeshTerm) return ((MeshTerm) e).toStringHtml();
+			else if (e instanceof MinedTerm) return ((MinedTerm) e).toStringHtml();
+			else return e.toString();
+		}).collect(Collectors.joining("; "));
 	}
 }

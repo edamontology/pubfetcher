@@ -28,6 +28,9 @@ public class MinedTerm implements Serializable {
 
 	private static final long serialVersionUID = 4674690901850332360L;
 
+	private static final String EFOlink = "https://www.ebi.ac.uk/efo/";
+	private static final String GOlink = "http://amigo.geneontology.org/amigo/term/GO:";
+
 	private String term = "";
 
 	private int count = 0;
@@ -111,9 +114,29 @@ public class MinedTerm implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append(term);
 		if (!altNames.isEmpty()) {
-			sb.append(" ");
-			sb.append(altNames);
+			sb.append(" (");
+			sb.append(String.join("; ", altNames));
+			sb.append(")");
 		}
+		return sb.toString();
+	}
+
+	public String toStringLink() {
+		StringBuilder sb = new StringBuilder();
+		if (!dbIds.isEmpty()) {
+			if (dbName.equalsIgnoreCase("efo")) {
+				sb.append(EFOlink).append(dbIds.get(0));
+			} else if (dbName.equalsIgnoreCase("GO")) {
+				sb.append(GOlink).append(dbIds.get(0));
+			}
+		}
+		return sb.toString();
+	}
+
+	public String toStringHtml() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(FetcherCommon.getLinkHtml(toStringLink(), term.isEmpty() ? "NA" : term));
+		if (count != 0) sb.append(" <small>").append(count).append("</small>");
 		return sb.toString();
 	}
 }

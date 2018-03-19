@@ -25,6 +25,8 @@ public class MeshTerm implements Serializable {
 
 	private static final long serialVersionUID = 5663855704880035618L;
 
+	private static final String MESHlink = "https://www.ncbi.nlm.nih.gov/mesh/?term=";
+
 	private String term = "";
 
 	private boolean majorTopic = false;
@@ -62,6 +64,22 @@ public class MeshTerm implements Serializable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(term);
+		return sb.toString();
+	}
+
+	public String toStringLink() {
+		StringBuilder sb = new StringBuilder();
+		if (!uniqueId.isEmpty()) {
+			sb.append(MESHlink).append("%22").append(uniqueId).append("%22");
+		} else if (!term.isEmpty()) {
+			sb.append(MESHlink).append("%22").append(term.replaceAll(" ", "+")).append("%22");
+		}
+		return sb.toString();
+	}
+
+	public String toStringHtml() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(FetcherCommon.getLinkHtml(toStringLink(), (term.isEmpty() ? "NA" : term) + (majorTopic ? "*" : "")));
 		return sb.toString();
 	}
 }

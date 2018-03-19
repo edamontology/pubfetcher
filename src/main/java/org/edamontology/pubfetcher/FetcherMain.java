@@ -25,7 +25,7 @@ import java.text.ParseException;
 public final class FetcherMain {
 
 	public static void main(String[] argv) throws IOException, ParseException, ReflectiveOperationException {
-		FetcherMainArgs args = FetcherUtil.parseArgs(argv, FetcherMainArgs.class);
+		FetcherMainArgs args = FetcherUtil.parseArgs(argv, FetcherMainArgs.class, new Version(FetcherMain.class));
 
 		FetcherUtil.run(args.fetcherUtilArgs, new Fetcher(args.fetcherArgs), null, null, null);
 	}

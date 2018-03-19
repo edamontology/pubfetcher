@@ -137,21 +137,21 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 	public static String toStringHtml(String pmid, String pmcid, String doi, boolean tab) {
 		StringBuilder sb = new StringBuilder();
 		if (tab) sb.append("<tr><td>");
-		String pmidLink = FetcherCommon.getPmidLink(pmid);
-		if (pmidLink != null) {
-			sb.append("<a href=\"").append(pmidLink).append("\">").append(pmid).append("</a>");
+		String pmidLink = FetcherCommon.getPmidLinkHtml(pmid);
+		if (pmidLink != null && !pmidLink.isEmpty()) {
+			sb.append(pmidLink);
 		}
 		if (tab) sb.append("</td><td>");
-		String pmcidLink = FetcherCommon.getPmcidLink(pmcid);
-		if (pmcidLink != null) {
+		String pmcidLink = FetcherCommon.getPmcidLinkHtml(pmcid);
+		if (pmcidLink != null && !pmcidLink.isEmpty()) {
 			if (sb.length() > 0 && !tab) sb.append(", ");
-			sb.append("<a href=\"").append(pmcidLink).append("\">").append(pmcid).append("</a>");
+			sb.append(pmcidLink);
 		}
 		if (tab) sb.append("</td><td>");
-		String doiLink = FetcherCommon.getDoiLink(doi);
-		if (doiLink != null) {
+		String doiLink = FetcherCommon.getDoiLinkHtml(doi);
+		if (doiLink != null && !doiLink.isEmpty()) {
 			if (sb.length() > 0 && !tab) sb.append(", ");
-			sb.append("<a href=\"").append(doiLink).append("\">").append(doi).append("</a>");
+			sb.append(doiLink);
 		}
 		if (tab) sb.append("</td></tr>");
 		return sb.toString();
@@ -195,15 +195,15 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
 		if (!pmid.isEmpty()) {
-			sb.append("<a href=\"").append(pmidUrl).append("\">").append(pmidUrl).append("</a>");
+			sb.append(FetcherCommon.getLinkHtml(pmidUrl));
 		}
 		if (!pmcid.isEmpty()) {
 			if (sb.length() > 1) sb.append(", ");
-			sb.append("<a href=\"").append(pmcidUrl).append("\">").append(pmcidUrl).append("</a>");
+			sb.append(FetcherCommon.getLinkHtml(pmcidUrl));
 		}
 		if (!doi.isEmpty()) {
 			if (sb.length() > 1) sb.append(", ");
-			sb.append("<a href=\"").append(doiUrl).append("\">").append(doiUrl).append("</a>");
+			sb.append(FetcherCommon.getLinkHtml(doiUrl));
 		}
 		sb.append(")");
 		return toStringHtml() + " " + sb.toString();

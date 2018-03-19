@@ -25,6 +25,8 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	private static final long serialVersionUID = -768032243328952543L;
 
+	private static final String HTTP_STATUS_URL = "https://http.cat/";
+
 	private String startUrl = "";
 
 	private String finalUrl = "";
@@ -62,6 +64,15 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	@Override
 	public boolean isFinal(FetcherArgs fetcherArgs) {
 		return content.length() >= fetcherArgs.getWebpageMinLength();
+	}
+
+	public boolean isBroken() {
+		return ((statusCode < 200 || statusCode >= 300) && (statusCode != 0 || finalUrl.isEmpty()));
+	}
+
+	@Override
+	public boolean isUsable(FetcherArgs fetcherArgs) {
+		return !isBroken() && !isEmpty() && isFinal(fetcherArgs);
 	}
 
 	public String getStartUrl() {
@@ -131,7 +142,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public String toStringIdHtml() {
-		return "<a href=\"" + startUrl + "\">" + startUrl + "</a>";
+		return FetcherCommon.getLinkHtml(startUrl);
 	}
 
 	@Override
@@ -143,28 +154,44 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	}
 
 	@Override
-	public String toStringPlainHtml() {
+	public String toStringPlainHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<h2>").append(title).append("</h2>\n\n");
-		sb.append("<p>").append(content.replace("\n\n", "</p>\n<p>").replace("\n", "<br>\n")).append("</p>");
+		sb.append(prepend).append("<h2>").append(FetcherCommon.escapeHtml(title)).append("</h2>\n");
+		sb.append(prepend).append(FetcherCommon.getParagraphsHtml(content));
 		return sb.toString();
 	}
 
 	@Override
-	public String toStringHtml() {
+	public String toStringMetaHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<dl>\n");
-		sb.append(super.toStringHtml());
-		sb.append("<dt>START URL</dt>\n").append("<dd><a href=\"").append(startUrl).append("\">").append(startUrl).append("</a></dd>\n");
-		sb.append("<dt>FINAL URL</dt>\n").append("<dd><a href=\"").append(finalUrl).append("\">").append(finalUrl).append("</a></dd>\n");
-		sb.append("<dt>CONTENT TYPE</dt>\n").append("<dd>").append(contentType).append("</dd>\n");
-		sb.append("<dt>STATUS CODE</dt>\n").append("<dd>").append(statusCode).append("</dd>\n");
-		sb.append("<dt>CONTENT TIME</dt>\n").append("<dd>").append(contentTime).append(" ").append(getContentTimeHuman()).append("</dd>\n");
-		sb.append("<dt>TITLE LENGTH</dt>\n").append("<dd>").append(title.length()).append("</dd>\n");
-		sb.append("<dt>CONTENT LENGTH</dt>\n").append("<dd>").append(content.length()).append("</dd>\n");
-		sb.append("<dt>TITLE</dt>\n").append("<dd>").append(title).append("</dd>\n");
-		sb.append("</dl>\n\n");
-		sb.append(toStringPlainHtml());
+		sb.append(super.toStringHtml(prepend)).append("\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append("<div><span>Start URL:</span> <span>").append(FetcherCommon.getLinkHtml(startUrl)).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Final URL:</span> <span>").append(FetcherCommon.getLinkHtml(finalUrl)).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Content type:</span> <span>").append(FetcherCommon.escapeHtml(contentType)).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Status code:</span> <span>");
+		if (statusCode > 0) {
+			sb.append(FetcherCommon.getLinkHtml(HTTP_STATUS_URL, Integer.toString(statusCode)));
+		} else {
+			sb.append(statusCode);
+		}
+		sb.append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Content time:</span> <span>").append(getContentTimeHuman()).append(" (").append(contentTime).append(")</span></div>\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append("<div><span>Title length:</span> <span>").append(title.length()).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Content length:</span> <span>").append(content.length()).append("</span></div>\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append("<div><span>Title:</span> <span>").append(FetcherCommon.escapeHtml(title)).append("</span></div>");
+		return sb.toString();
+	}
+
+	@Override
+	public String toStringHtml(String prepend) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(prepend).append("<h2>Webpage</h2>\n");
+		sb.append(toStringMetaHtml(prepend)).append("\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append(FetcherCommon.getParagraphsHtml(content));
 		return sb.toString();
 	}
 
@@ -176,7 +203,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 		sb.append("FINAL URL: ").append(finalUrl).append("\n");
 		sb.append("CONTENT TYPE: ").append(contentType).append("\n");
 		sb.append("STATUS CODE: ").append(statusCode).append("\n");
-		sb.append("CONTENT TIME: ").append(contentTime).append(" ").append(getContentTimeHuman()).append("\n\n");
+		sb.append("CONTENT TIME: ").append(getContentTimeHuman()).append(" (").append(contentTime).append(")\n\n");
 		sb.append("TITLE LENGTH: ").append(title.length()).append("\n");
 		sb.append("CONTENT LENGTH: ").append(content.length()).append("\n\n");
 		sb.append("TITLE: ").append(title).append("\n\n");

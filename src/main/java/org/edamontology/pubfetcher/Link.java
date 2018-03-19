@@ -103,14 +103,12 @@ public class Link implements Serializable {
 		return (other instanceof Link);
 	}
 
-	public String toStringHtml() {
+	public String toStringHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<a href=\"").append(url).append("\">").append(url).append("</a>\n");
-		sb.append("<dl>\n");
-		sb.append("<dt>type</dt><dd>").append(type).append("</dd>\n");
-		sb.append("<dt>from</dt><dd><a href=\"").append(from).append("\">").append(from).append("</dd>\n");
-		sb.append("<dt>timestamp</dt><dd>").append(timestamp).append(" ").append(getTimestampHuman()).append("</dd>\n");
-		sb.append("</dl>");
+		sb.append(prepend).append("<span>").append(FetcherCommon.getLinkHtml(url.toString())).append("</span>\n");
+		sb.append(prepend).append("<div><span>Type:</span> <span>").append(type.getType()).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>From:</span> <span>").append(FetcherCommon.getLinkHtml(from)).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Timestamp:</span> <span>").append(getTimestampHuman()).append(" (").append(timestamp).append(")</span></div>");
 		return sb.toString();
 	}
 
@@ -120,7 +118,7 @@ public class Link implements Serializable {
 		sb.append(url).append("\n");
 		sb.append("    type: ").append(type).append("\n");
 		sb.append("    from: ").append(from).append("\n");
-		sb.append("    timestamp: ").append(timestamp).append(" ").append(getTimestampHuman());
+		sb.append("    timestamp: ").append(getTimestampHuman()).append(" (").append(timestamp).append(")");
 		return sb.toString();
 	}
 }

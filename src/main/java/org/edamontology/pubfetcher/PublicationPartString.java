@@ -61,6 +61,6 @@ public class PublicationPartString extends PublicationPart {
 
 	@Override
 	public String toStringPlainHtml() {
-		return "<p>" + content.replace("\n", "<br>\n").replace("<br>\n<br>\n", "</p>\n<p>") + "</p>";
+		return FetcherCommon.getParagraphsHtml(content);
 	}
 }

@@ -57,9 +57,12 @@ public final class FetcherCommon {
 
 	static final String EUROPEPMClink = "http://europepmc.org/articles/";
 
-	private static final String MESHlink = "https://www.ncbi.nlm.nih.gov/mesh/?term=";
-	private static final String EFOlink = "https://www.ebi.ac.uk/efo/";
-	private static final String GOlink = "http://amigo.geneontology.org/amigo/term/GO:";
+	private static final Pattern AMP = Pattern.compile("&");
+	private static final Pattern LT = Pattern.compile("<");
+	private static final Pattern GT = Pattern.compile(">");
+
+	private static final Pattern NEWPARAGRAPH = Pattern.compile("\n\n");
+	private static final Pattern NEWLINE = Pattern.compile("\n");
 
 	private FetcherCommon() {}
 
@@ -114,41 +117,82 @@ public final class FetcherCommon {
 		return doiRegistrant;
 	}
 
+	public static String escapeHtml(String input) {
+		return GT.matcher(LT.matcher(AMP.matcher(input).replaceAll("&amp;")).replaceAll("&lt;")).replaceAll("&gt;");
+	}
+	public static String escapeHtmlAttribute(String input) {
+		StringBuilder sb = new StringBuilder();
+		for (char c : input.toCharArray()) {
+			if (c < 128 && !(c >= '0' && c <= '9') && !(c >= 'A' && c <= 'Z') && !(c >= 'a' && c <= 'z')) {
+				sb.append("&#").append((int) c).append(";");
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+
+	public static String getParagraphsHtml(String input) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<p>");
+		sb.append(NEWLINE.matcher(NEWPARAGRAPH.matcher(escapeHtml(input)).replaceAll("</p><p>")).replaceAll("<br>"));
+		sb.append("</p>");
+		return sb.toString();
+	}
+
+	public static String getLinkHtml(String link) {
+		if (link == null || link.isEmpty()) return "";
+		if (link.startsWith("http://") || link.startsWith("https://") || link.startsWith("ftp://")) {
+			return "<a href=\"" + escapeHtmlAttribute(link) + "\">" + escapeHtml(link) + "</a>";
+		} else {
+			return escapeHtml(link);
+		}
+	}
+	public static String getLinkHtml(String href, String text) {
+		if (text == null || text.isEmpty()) return "";
+		if (href == null || href.isEmpty()) return escapeHtml(text);
+		if (href.startsWith("http://") || href.startsWith("https://") || href.startsWith("ftp://")) {
+			return "<a href=\"" + escapeHtmlAttribute(href) + "\">" + escapeHtml(text) + "</a>";
+		} else {
+			return escapeHtml(text);
+		}
+	}
+
 	public static String getPmidLink(String pmid) {
 		if (isPmid(pmid)) return PMIDlink + pmid;
 		else return null;
 	}
-
 	public static String getPmcidLink(String pmcid) {
 		if (isPmcid(pmcid)) return PMCIDlink + pmcid + "/";
 		else return null;
 	}
-
 	public static String getDoiLink(String doi) {
-		if (isDoi(doi)) return DOIlink + doi;
+		if (isDoi(doi)) return DOIlink + normalizeDoi(doi);
 		else return null;
 	}
 
-	public static String getMeshLink(MeshTerm mesh) {
-		String link = null;
-		if (!mesh.getUniqueId().isEmpty()) {
-			link = MESHlink + "%22" + mesh.getUniqueId() + "%22";
-		} else if (!mesh.getTerm().isEmpty()) {
-			link = MESHlink + "%22" + mesh.getTerm().replaceAll(" ", "+") + "%22";
-		}
-		return link;
+	public static String getPmidLinkHtml(String pmid) {
+		return getLinkHtml(getPmidLink(pmid), pmid);
+	}
+	public static String getPmcidLinkHtml(String pmcid) {
+		return getLinkHtml(getPmcidLink(pmcid), pmcid);
+	}
+	public static String getDoiLinkHtml(String doi) {
+		return getLinkHtml(getDoiLink(doi), doi);
 	}
 
-	public static String getMinedLink(MinedTerm mined) {
-		String link = null;
-		if (!mined.getDbIds().isEmpty()) {
-			if (mined.getDbName().equalsIgnoreCase("efo")) {
-				link = EFOlink + mined.getDbIds().get(0);
-			} else if (mined.getDbName().equalsIgnoreCase("GO")) {
-				link = GOlink + mined.getDbIds().get(0);
-			}
-		}
+	public static String getIdLink(PublicationIds publicationIds) {
+		if (publicationIds == null) return null;
+		String link = getPmidLink(publicationIds.getPmid());
+		if (link == null) link = getPmcidLink(publicationIds.getPmcid());
+		if (link == null) link = getDoiLink(publicationIds.getDoi());
 		return link;
+	}
+	public static String getIdLinkHtml(PublicationIds publicationIds) {
+		return getLinkHtml(getIdLink(publicationIds));
+	}
+	public static String getIdLinkHtml(PublicationIds publicationIds, String text) {
+		return getLinkHtml(getIdLink(publicationIds), text);
 	}
 
 	public static Publication getPublication(PublicationIds publicationIds, Database database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -229,8 +273,8 @@ public final class FetcherCommon {
 	public static URLConnection newConnection(String path, FetcherArgs fetcherArgs) throws MalformedURLException, IOException {
 		URL url = new URL(path);
 		URLConnection con = url.openConnection();
-		con.setConnectTimeout(fetcherArgs.getConnectionTimeout());
-		con.setReadTimeout(fetcherArgs.getConnectionTimeout());
+		con.setConnectTimeout(fetcherArgs.getTimeout());
+		con.setReadTimeout(fetcherArgs.getTimeout());
 		if (con instanceof HttpURLConnection) {
 			CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
 			int i = 0;
@@ -247,8 +291,8 @@ public final class FetcherCommon {
 					}
 					URL next = new URL(url, httpCon.getHeaderField("Location"));
 					con = next.openConnection();
-					con.setConnectTimeout(fetcherArgs.getConnectionTimeout());
-					con.setReadTimeout(fetcherArgs.getConnectionTimeout());
+					con.setConnectTimeout(fetcherArgs.getTimeout());
+					con.setReadTimeout(fetcherArgs.getTimeout());
 				} else {
 					break;
 				}
@@ -257,22 +301,28 @@ public final class FetcherCommon {
 		return con;
 	}
 
-	public static Path outputPath(String file, boolean allowEmptyPath) throws IOException {
+	public static Path outputPath(String file) throws IOException {
+		return outputPath(file, false);
+	}
+
+	public static Path outputPath(String file, boolean directory) throws IOException {
 		if (file == null || file.isEmpty()) {
-			if (allowEmptyPath) {
-				return null;
-			} else {
-				throw new FileNotFoundException("Empty path given!");
-			}
+			throw new FileNotFoundException("Empty path given!");
 		}
 
 		Path path = Paths.get(file);
 		Path parent = (path.getParent() != null ? path.getParent() : Paths.get("."));
 		if (!Files.isDirectory(parent) || !Files.isWritable(parent)) {
-			throw new AccessDeniedException(parent.toAbsolutePath().normalize() + " is not a writeable directory!");
+			throw new AccessDeniedException(parent.toAbsolutePath().normalize() + " is not a writeable directory!"); // TODO don't use absolute in server
 		}
 		if (Files.isDirectory(path)) {
 			throw new FileAlreadyExistsException(path.toAbsolutePath().normalize() + " is an existing directory!");
+		}
+		if (!directory && Files.exists(path) && !Files.isWritable(path)) {
+			throw new AccessDeniedException(path.toAbsolutePath().normalize() + " is not a writeable file!");
+		}
+		if (directory && Files.exists(path)) {
+			throw new FileAlreadyExistsException(path.toAbsolutePath().normalize() + " is an existing file!");
 		}
 		return path;
 	}

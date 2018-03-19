@@ -84,20 +84,20 @@ public abstract class PublicationPart implements Serializable {
 
 	public abstract String toStringPlainHtml();
 
-	public String toStringHtml() {
+	public String toStringMetaHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<dl>\n");
-		sb.append("<dt>").append(name.getName().toUpperCase(Locale.ROOT)).append("</dt>\n");
-		sb.append("<dd>\n");
-		sb.append(toStringPlainHtml()).append("\n");
-		sb.append("<dl>\n");
-		sb.append("<dt>type</dt><dd>").append(type.getType()).append("</dd>\n");
-		sb.append("<dt>url</dt><dd><a href=\"").append(url).append("\">").append(url).append("</a></dd>\n");
-		sb.append("<dt>timestamp</dt><dd>").append(timestamp).append(" ").append(getTimestampHuman()).append("</dd>\n");
-		sb.append("<dt>size</dt><dd>").append(getSize()).append("</dd>\n");
-		sb.append("</dl>\n");
-		sb.append("</dd>\n");
-		sb.append("</dl>");
+		sb.append(prepend).append("<div><span>Type:</span> <span>").append(type.getType()).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>URL:</span> <span>").append(FetcherCommon.getLinkHtml(url)).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Timestamp:</span> <span>").append(getTimestampHuman()).append(" (").append(timestamp).append(")</span></div>\n");
+		sb.append(prepend).append("<div><span>Size:</span> <span>").append(getSize()).append("</span></div>");
+		return sb.toString();
+	}
+
+	public String toStringHtml(String prepend) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(prepend).append("<h3>").append(name.getName()).append("</h3>\n");
+		sb.append(prepend).append(toStringPlainHtml()).append("\n");
+		sb.append(toStringMetaHtml(prepend));
 		return sb.toString();
 	}
 
@@ -108,7 +108,7 @@ public abstract class PublicationPart implements Serializable {
 		sb.append(toStringPlain()).append("\n");
 		sb.append("    type: ").append(type.getType()).append("\n");
 		sb.append("    url: ").append(url).append("\n");
-		sb.append("    timestamp: ").append(timestamp).append(" ").append(getTimestampHuman()).append("\n");
+		sb.append("    timestamp: ").append(getTimestampHuman()).append(" (").append(timestamp).append(")\n");
 		sb.append("    size: ").append(getSize());
 		return sb.toString();
 	}

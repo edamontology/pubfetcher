@@ -8,7 +8,7 @@ title,content,webpage
 10,247,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,115706,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+23,53897,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
 69,64764,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # github.com
@@ -31,7 +31,7 @@ title,content,webpage
 # github.com tree
 9,4371,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
 6,69,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
-5,20856,https://github.com/seqan/seqan/tree/master/apps/razers
+5,20852,https://github.com/seqan/seqan/tree/master/apps/razers
 5,718,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
 14,0,https://github.com/NCIP/cagrid-general/tree/master/demos/06annual/workflow/JRProteomicsGridSkeletonValue-1.0/src/org/globus/cagrid/RProteomics
 
@@ -85,7 +85,7 @@ title,content,webpage
 # cran.r-project.org
 87,412,https://cran.r-project.org/web/packages/linkcomm/index.html
 54,373,https://cran.r-project.org/web/packages/lme4/index.html
-39,162,https://cran.r-project.org/web/packages/GUniFrac/index.html
+39,163,https://cran.r-project.org/web/packages/GUniFrac/index.html
 0,4421,https://cran.r-project.org/web/packages/linkcomm/NEWS
 
 # cran.r-project.org vignettes
@@ -125,10 +125,10 @@ title,content,webpage
 
 # zhanglab.ccmb.med.umich.edu
 47,769,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,2833,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+79,3458,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
-13,3743,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
+13,3718,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
 10,1390,http://bioinformatics.mdanderson.org/main/BreakTrans
 
 # bcgsc.ca platform
@@ -148,5 +148,5 @@ title,content,webpage
 10,2287,http://www.uea.ac.uk/computing/my-closure
 
 # rna.informatik.uni-freiburg.de
-25,2285,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+25,2818,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
 27,1902,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp

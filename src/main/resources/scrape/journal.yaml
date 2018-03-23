@@ -24,8 +24,8 @@
 
 'academic\.oup\.com': oup
 'citeseerx\.ist\.psu\.edu': citeseerx
-'onlinelibrary\.wiley\.com/.+/(abstract|summary)': wiley
-'onlinelibrary\.wiley\.com/.+/full': wiley_full
+'[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com/+doi/+(abs|10)': wiley
+'[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com/+doi/+(full)': wiley_full
 'sciencedirect\.com': sciencedirect
 '[a-zA-Z0-9.-]*biomedcentral\.com': biomedcentral
 'link\.springer\.com/+(article|chapter|protocol|referencework|book)/': springer
@@ -133,26 +133,20 @@ citeseerx:
   pdf_a: '#downloads a:not(:matchesOwn(^DBLP$))'
 
 wiley:
-  doi: '#doi, #header-section-doi + span'
-  title: h1.articleTitle, h1.article-header__title
-  keywords: .keywordLists li, .article-info__keywords-item
-  abstract: '#abstract > div > :not(h2)'
-  fulltext_src: /abstract
-  fulltext_dst: /full
-  fulltext_a: .viewFullTextLink
-  pdf_src: /abstract
-  pdf_dst: /pdf
-  pdf_a: .standardPdfLink, .article-support__item--pdf > a
+  doi: .article-citation .epub-doi
+  title: .article-citation .citation__title
+  #keywords: .keywords li # not working, even if javascript enabled
+  abstract: .article-section__abstract > .article-section__content > *
+  fulltext_a: .coolBar .go-to-full
+  pdf_a: .coolBar .PdfLink > .pdf-download
 
 wiley_full:
-  doi: '#doi, #header-section-doi + span'
-  title: h1.articleTitle, h1.article-header__title
-  keywords: .keywordList li, .article-info__keywords-item
-  abstract: '#abstract > div > :not(h2)'
-  fulltext: '#main-content > section[id]:not([id~=ack]):not([id=abstract]):not([id=pdf-section]) > *, #main-content > section.article-section__notes > *'
-  pdf_src: /full
-  pdf_dst: /pdf
-  pdf_a: .standardPdfLink, .article-support__item--pdf > a
+  doi: .article-citation .epub-doi
+  title: .article-citation .citation__title
+  #keywords: .keywords li # not working, even if javascript enabled
+  abstract: .article-section__abstract > .article-section__content > *
+  fulltext: .article-section__full > [id].article-section__content > :not(.article-section__sub-content), .article-section__full > .article-section__supporting, .article-section__full .article-section__sub-content > :not(.article-section__sub-content)
+  pdf_a: .coolBar .PdfLink > .pdf-download
 
 sciencedirect:
   doi: article .DoiLink > .doi

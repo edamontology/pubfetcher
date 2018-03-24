@@ -32,12 +32,16 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
 public class Publication extends DatabaseEntry<Publication> {
 
 	private static final long serialVersionUID = -97834887073030847L;
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private PublicationPartString pmid;
 	private PublicationPartString pmcid;
@@ -134,16 +138,16 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	private void logSet(String s) {
-		System.out.println("        set " + s + " for " + toStringId());
+		logger.info("        set {} for {}", s, toStringId());
 	}
 
 	private void logFinal(String s, boolean canMakeFinal, FetcherArgs fetcherArgs) {
-		System.out.println("        " + s + " final for " + toStringId());
+		logger.info("        {} final for {}", s, toStringId());
 		if (canMakeFinal && isFinal(fetcherArgs)) {
-			System.out.println("        " + toStringId() + " is final");
+			logger.info("        {} is final", toStringId());
 		}
 		if (isTotallyFinal(fetcherArgs)) {
-			System.out.println("        " + toStringId() + " is totally final");
+			logger.info("        {} is totally final", toStringId());
 		}
 	}
 
@@ -151,19 +155,19 @@ public class Publication extends DatabaseEntry<Publication> {
 		if (content != null && !content.trim().isEmpty()) {
 			content = content.trim();
 			if (!isId.apply(content)) {
-				System.err.println("Unknown ID: " + content);
+				logger.error("Unknown ID: {}", content);
 			} else {
 				if (!part.isEmpty() && !part.getContent().equals(content)) {
-					System.err.println("Old ID " + part.getContent() + " is different from new ID " + content + " from " + url + " of type " + type);
+					logger.warn("Old ID {} is different from new ID {} from {} of type {}", part.getContent(), content, url, type);
 					if (part.getContent().startsWith(content) && VERSIONED.matcher(part.getContent().substring(content.length())).matches()
 							|| content.startsWith(part.getContent()) && VERSIONED.matcher(content.substring(part.getContent().length())).matches()) {
-						System.err.println("Setting ID to " + part.getContent() + " (instead of " + content + ")");
+						logger.warn("Setting ID to {} (instead of {})", part.getContent(), content);
 						content = part.getContent();
 					}
 				}
 				if (!isFinal.getAsBoolean() && type.isBetterThan(part.getType())) {
 					part.set(content, type, url);
-					System.out.println("        set " + part.getName() + " " + part.getContent());
+					logger.info("        set {} {}", part.getName(), part.getContent());
 					if (isIdFinal()) {
 						logFinal("ID", false, fetcherArgs);
 					}
@@ -376,9 +380,9 @@ public class Publication extends DatabaseEntry<Publication> {
 			try {
 				this.pubDate = LocalDate.parse(pubDate).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
 			} catch (DateTimeParseException e) {
-				System.err.println("Could not set publication date from " + e.getParsedString() + " (error index " + e.getErrorIndex() + "): " + e.getMessage());
+				logger.warn("Could not set publication date from {} (error index {}): {}", e.getParsedString(), e.getErrorIndex(), e.getMessage());
 			} catch (ArithmeticException e) {
-				System.err.println("Overflow in setting publication date");
+				logger.error("Overflow in setting publication date");
 			}
 		}
 	}
@@ -394,10 +398,10 @@ public class Publication extends DatabaseEntry<Publication> {
 					this.citationsCount = citationsCountParsed;
 					this.citationsTimestamp = System.currentTimeMillis();
 				} else {
-					System.err.println("Citations count is negative: " + citationsCountParsed);
+					logger.error("Citations count is negative: {}", citationsCountParsed);
 				}
 			} catch (NumberFormatException e) {
-				System.err.println("Illegal citations count: " + citationsCount);
+				logger.error("Illegal citations count: {}", citationsCount);
 			}
 		}
 	}

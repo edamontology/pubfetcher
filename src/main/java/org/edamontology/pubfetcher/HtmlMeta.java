@@ -26,11 +26,15 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public final class HtmlMeta {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private static final String CITATION_PMID_SELECTOR = selectorCombinations("citation_pmid");
 	private static final String CITATION_PMCID_SELECTOR = selectorCombinations("citation_pmcid");
@@ -101,21 +105,21 @@ public final class HtmlMeta {
 	private static void setIds(Publication publication, Document doc, PublicationPartType type, String pmidSelector, String pmcidSelector, String doiSelector, FetcherArgs fetcherArgs) {
 		if (pmidSelector != null && type.isBetterThan(publication.getPmid().getType())) {
 			for (Element metaPmid : doc.select(pmidSelector)) {
-				System.out.println("    Found PMID from meta " + type + " in " + doc.location());
+				logger.info("    Found PMID from meta {} in {}", type, doc.location());
 				publication.setPmid(metaPmid.attr("content"), type, doc.location(), fetcherArgs);
 			}
 		}
 
 		if (pmcidSelector != null && type.isBetterThan(publication.getPmcid().getType())) {
 			for (Element metaPmcid : doc.select(pmcidSelector)) {
-				System.out.println("    Found PMCID from meta " + type + " in " + doc.location());
+				logger.info("    Found PMCID from meta {} in {}", type, doc.location());
 				publication.setPmcid(metaPmcid.attr("content"), type, doc.location(), fetcherArgs);
 			}
 		}
 
 		if (doiSelector != null && type.isBetterThan(publication.getDoi().getType())) {
 			for (Element metaDoi : doc.select(doiSelector)) {
-				System.out.println("    Found DOI from meta " + type + " in " + doc.location());
+				logger.info("    Found DOI from meta {} in {}", type, doc.location());
 				publication.setDoi(metaDoi.attr("content"), type, doc.location(), fetcherArgs);
 			}
 		}
@@ -126,7 +130,7 @@ public final class HtmlMeta {
 			if (type.isBetterThan(publication.getTitle().getType())) {
 				Element metaTitle = doc.select(titleSelector).first();
 				if (metaTitle != null) {
-					System.out.println("    Found title from meta " + type + " in " + doc.location());
+					logger.info("    Found title from meta {} in {}", type, doc.location());
 					publication.setTitle(metaTitle.attr("content"), type, doc.location(), fetcherArgs, true);
 				}
 			}
@@ -146,7 +150,7 @@ public final class HtmlMeta {
 					List<String> keywords = metaKeywords.stream()
 							.flatMap(k -> SEPARATOR.splitAsStream(k.attr("content")))
 							.collect(Collectors.toList());
-					System.out.println("    Found keywords from meta " + type + " in " + doc.location());
+					logger.info("    Found keywords from meta {} in {}", type, doc.location());
 					publication.setKeywords(keywords, type, doc.location(), fetcherArgs, true);
 				}
 			}
@@ -162,7 +166,7 @@ public final class HtmlMeta {
 						.map(a -> a.attr("content").trim())
 						.filter(a -> !a.isEmpty())
 						.collect(Collectors.joining("\n\n"));
-					System.out.println("    Found abstract from meta " + type + " in " + doc.location());
+					logger.info("    Found abstract from meta {} in {}", type, doc.location());
 					publication.setAbstract(theAbstract, type, doc.location(), fetcherArgs, true);
 				}
 			}

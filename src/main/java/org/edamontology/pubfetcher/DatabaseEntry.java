@@ -22,9 +22,14 @@ package org.edamontology.pubfetcher;
 import java.io.Serializable;
 import java.time.Instant;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 
 	private static final long serialVersionUID = -2280508730664091054L;
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private long fetchTime = 0;
 
@@ -40,28 +45,28 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 
 	protected boolean canFetch(FetcherArgs fetcherArgs) {
 		long currentTime = System.currentTimeMillis();
-		String finalness = (isEmpty() ? "empty" : (!isFinal(fetcherArgs) ? "non-final" : "final"));
+		String finality = (isEmpty() ? "empty" : (!isFinal(fetcherArgs) ? "non-final" : "final"));
 		boolean canFetch = false;
 		if (fetchTime == 0) {
-			System.out.println("    can fetch " + finalness + " entry: first fetch");
+			logger.info("    can fetch {} entry: first fetch", finality);
 			canFetch = true;
 		} else if (isEmpty() && currentTime > fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000) {
-			System.out.println("    can fetch " + finalness + " entry: more than " + fetcherArgs.getEmptyCooldown() + " min since " + getFetchTimeHuman());
+			logger.info("    can fetch {} entry: more than {} min since {}", finality, fetcherArgs.getEmptyCooldown(), getFetchTimeHuman());
 			canFetch = true;
 		} else if (!isFinal(fetcherArgs) && !isEmpty() && currentTime > fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000) {
-			System.out.println("    can fetch " + finalness + " entry: more than " + fetcherArgs.getNonFinalCooldown() + " min since " + getFetchTimeHuman());
+			logger.info("    can fetch {} entry: more than {} min since {}", finality, fetcherArgs.getNonFinalCooldown(), getFetchTimeHuman());
 			canFetch = true;
 		} else if (fetchException && currentTime > fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000) {
-			System.out.println("    can fetch " + finalness + " entry with fetching exception: more than " + fetcherArgs.getFetchExceptionCooldown() + " min since " + getFetchTimeHuman());
+			logger.info("    can fetch {} entry with fetching exception: more than {} min since {}", finality, fetcherArgs.getFetchExceptionCooldown(), getFetchTimeHuman());
 			canFetch = true;
 		} else if ((isEmpty() || !isFinal(fetcherArgs) || fetchException) && (retryCounter < fetcherArgs.getRetryLimit() || fetcherArgs.getRetryLimit() < 0)) {
-			System.out.println("    can fetch " + finalness + " entry: retry count " + retryCounter + " has not reached limit " + fetcherArgs.getRetryLimit());
+			logger.info("    can fetch {} entry: retry count {} has not reached limit {}", finality, retryCounter, fetcherArgs.getRetryLimit());
 			canFetch = true;
 		}
 		if (canFetch) {
 			return true;
 		} else {
-			System.out.println("    can not fetch " + finalness + " entry " + (fetchException ? "with fetching exception " : "") + "from " + fetchTime + " with retry count " + retryCounter);
+			logger.info("    can not fetch {} entry {}from {} with retry count {}", finality, fetchException ? "with fetching exception " : "", getFetchTimeHuman(), retryCounter);
 			return false;
 		}
 	}

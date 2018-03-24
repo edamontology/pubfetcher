@@ -51,11 +51,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.beust.jcommander.JCommander;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 public final class FetcherUtil {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	static final String EXTERNAL_ID_URL = "http://localhost/";
 
@@ -64,25 +68,25 @@ public final class FetcherUtil {
 	}
 
 	private static void initDb(String database) throws FileAlreadyExistsException {
-		System.out.println("Init database: " + database);
+		logger.info("Init database: {}", database);
 		Database.init(database);
-		System.out.println("Init: success");
+		logger.info("Init: success");
 	}
 
 	private static void commitDb(String database) throws IOException {
-		System.out.println("Commit database: " + database);
+		logger.info("Commit database: {}", database);
 		try (Database db = new Database(database)) {
 			db.commit();
 		}
-		System.out.println("Commit: success");
+		logger.info("Commit: success");
 	}
 
 	private static void compactDb(String database) throws IOException {
-		System.out.println("Compact database: " + database);
+		logger.info("Compact database: {}", database);
 		try (Database db = new Database(database)) {
 			db.compact();
 		}
-		System.out.println("Compact: success");
+		logger.info("Compact: success");
 	}
 
 	private static void publicationsSize(String database) throws IOException {
@@ -163,11 +167,11 @@ public final class FetcherUtil {
 		try {
 			testInt = Integer.valueOf(test);
 		} catch (NumberFormatException e) {
-			System.err.println(e);
+			logger.error(e);
 			return 1;
 		}
 		if (testInt != actual) {
-			System.err.println(label + " must be " + testInt + ", actually is " + actual);
+			logger.error("{} must be {}, actually is {}" , label, testInt, actual);
 			return 1;
 		} else {
 			return 0;
@@ -175,7 +179,7 @@ public final class FetcherUtil {
 	}
 	private static int equalString(String test, String actual, String label) {
 		if (!test.equals(actual)) {
-			System.err.println(label + " must be " + test + ", actually is " + actual);
+			logger.error("{} must be {}, actually is {}", label, test, actual);
 			return 1;
 		} else {
 			return 0;
@@ -273,7 +277,7 @@ public final class FetcherUtil {
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
-			System.out.println(test[0] + " " + progress(i, tests.size()));
+			logger.info("{} {}", test[0], progress(i, tests.size()));
 			Publication publication = (Publication) FetcherUtil.class.getDeclaredMethod(fetchMethod, test[0].getClass(), fetcher.getClass(), EnumMap.class)
 				.invoke(null, test[0], fetcher, parts);
 			if (publication != null) {
@@ -281,8 +285,8 @@ public final class FetcherUtil {
 					.invoke(null, test, publication);
 			} else ++mismatch;
 		}
-		if (mismatch == 0) System.out.println("OK");
-		else System.err.println("There were " + mismatch + " mismatches!");
+		if (mismatch == 0) logger.info("OK");
+		else logger.error("There were {} mismatches!", mismatch);
 	}
 
 	private static Publication fetchEuropepmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -403,7 +407,7 @@ public final class FetcherUtil {
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
-			System.out.println(test[0] + " " + progress(i, tests.size()));
+			logger.info("{} {}", test[0], progress(i, tests.size()));
 			Publication publication = fetcher.initPublication(new PublicationIds(test[0], "", "", EXTERNAL_ID_URL, "", ""));
 			if (publication != null) {
 				FetcherPublicationState state = new FetcherPublicationState();
@@ -411,8 +415,8 @@ public final class FetcherUtil {
 				mismatch += testEuropepmc(test, publication, state);
 			} else ++mismatch;
 		}
-		if (mismatch == 0) System.out.println("OK");
-		else System.err.println("There were " + mismatch + " mismatches!");
+		if (mismatch == 0) logger.info("OK");
+		else logger.error("There were {} mismatches!", mismatch);
 	}
 
 	private static Publication fetchEuropepmcMined(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
@@ -470,12 +474,12 @@ public final class FetcherUtil {
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
-			System.out.println(test[8] + " " + progress(i, tests.size()));
+			logger.info("{} {}", test[8], progress(i, tests.size()));
 			Publication publication = fetchSite(test[8], fetcher, parts);
 			mismatch += testSite(test, publication);
 		}
-		if (mismatch == 0) System.out.println("OK");
-		else System.err.println("There were " + mismatch + " mismatches!");
+		if (mismatch == 0) logger.info("OK");
+		else logger.error("There were {} mismatches!", mismatch);
 	}
 
 	private static Webpage fetchWebpage(String url, Fetcher fetcher) {
@@ -494,52 +498,52 @@ public final class FetcherUtil {
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
-			System.out.println(test[2] + " " + progress(i, tests.size()));
+			logger.info("{} {}", test[2], progress(i, tests.size()));
 			Webpage webpage = fetchWebpage(test[2], fetcher);
 			mismatch += equal(test[0], webpage.getTitle().length(), "title length");
 			mismatch += equal(test[1], webpage.getContent().length(), "content length");
 		}
-		if (mismatch == 0) System.out.println("OK");
-		else System.err.println("There were " + mismatch + " mismatches!");
+		if (mismatch == 0) logger.info("OK");
+		else logger.error("There were {} mismatches!", mismatch);
 	}
 
 	public static List<PublicationIds> pubFile(List<String> files) throws IOException {
 		List<PublicationIds> publicationIds = new ArrayList<>();
-		System.out.println("Load publication IDs from file " + files);
+		logger.info("Load publication IDs from file {}", files);
 		for (String file : files) {
 			try (Stream<String> lines = Files.lines(Paths.get(file), StandardCharsets.UTF_8)) {
 				publicationIds.addAll(lines.map(l -> l.split("\t", 3))
 					.filter(l -> {
-						if (l.length != 3) System.err.println("Invalid line in " + file + ": starting with " + l[0]);
+						if (l.length != 3) logger.error("Invalid line in {}: starting with {}", file, l[0]);
 						return l.length == 3;
 					})
 					.map(l -> new PublicationIds(l[0], l[1], l[2], FetcherUtil.EXTERNAL_ID_URL, FetcherUtil.EXTERNAL_ID_URL, FetcherUtil.EXTERNAL_ID_URL))
 					.collect(Collectors.toList()));
 			}
 		}
-		System.out.println("Loaded " + publicationIds.size() + " publication IDs");
+		logger.info("Loaded {} publication IDs", publicationIds.size());
 		return publicationIds;
 	}
 
 	private static List<String> webFile(List<String> files) throws IOException {
 		List<String> webpageUrls = new ArrayList<>();
-		System.out.println("Load webpage URLs from file " + files);
+		logger.info("Load webpage URLs from file {}", files);
 		for (String file : files) {
 			try (Stream<String> lines = Files.lines(Paths.get(file), StandardCharsets.UTF_8)) {
 				webpageUrls.addAll(lines.collect(Collectors.toList()));
 			}
 		}
-		System.out.println("Loaded " + webpageUrls.size() + " webpage URLs");
+		logger.info("Loaded {} webpage URLs", webpageUrls.size());
 		return webpageUrls;
 	}
 
 	private static List<PublicationIds> pub(List<String> pubIds) {
 		List<PublicationIds> publicationIds = new ArrayList<>();
 		if (pubIds.isEmpty()) {
-			System.err.println("Check publication IDs: no publication IDs given");
+			logger.error("Check publication IDs: no publication IDs given");
 			return publicationIds;
 		}
-		System.out.println("Check publication IDs: " + pubIds.size() + " publication IDs given");
+		logger.info("Check publication IDs: {} publication IDs given", pubIds.size());
 		for (String pubId : pubIds) {
 			PublicationIds onePublicationIds =
 				FetcherCommon.isPmid(pubId) ? new PublicationIds(pubId, "", "", EXTERNAL_ID_URL, "", "") : (
@@ -547,15 +551,15 @@ public final class FetcherUtil {
 				FetcherCommon.isDoi(pubId) ? new PublicationIds("", "", pubId, "", "", EXTERNAL_ID_URL) : (
 				null)));
 			if (onePublicationIds == null) {
-				System.err.println("Unknown publication ID: " + pubId);
+				logger.error("Unknown publication ID: {}", pubId);
 			} else {
 				publicationIds.add(onePublicationIds);
 			}
 		}
 		if (publicationIds.size() < pubIds.size()) {
-			System.err.println(publicationIds.size() + " publication IDs OK, " + (pubIds.size() - publicationIds.size()) + " not OK");
+			logger.warn("{} publication IDs OK, {} not OK", publicationIds.size(), pubIds.size() - publicationIds.size());
 		} else {
-			System.out.println(publicationIds.size() + " publication IDs OK");
+			logger.info("{} publication IDs OK", publicationIds.size());
 		}
 		return publicationIds;
 	}
@@ -563,36 +567,36 @@ public final class FetcherUtil {
 	private static List<PublicationIds> pubCheck(List<PublicationIds> pubIds) {
 		List<PublicationIds> publicationIds = new ArrayList<>();
 		if (pubIds.isEmpty()) {
-			System.err.println("Check publication IDs: no publication IDs given");
+			logger.error("Check publication IDs: no publication IDs given");
 			return publicationIds;
 		}
-		System.out.println("Check publication IDs: " + pubIds.size() + " publication IDs given");
+		logger.info("Check publication IDs: {} publication IDs given", pubIds.size());
 		for (PublicationIds pubId : pubIds) {
 			String pmid = pubId.getPmid();
 			if (!pmid.isEmpty() && !FetcherCommon.isPmid(pmid)) {
-				System.err.println("Unknown PMID: " + pubId);
+				logger.error("Unknown PMID: {}", pubId);
 				pmid = "";
 			}
 			String pmcid = pubId.getPmcid();
 			if (!pmcid.isEmpty() && !FetcherCommon.isPmcid(pmcid)) {
-				System.err.println("Unknown PMCID: " + pubId);
+				logger.error("Unknown PMCID: {}", pubId);
 				pmcid = "";
 			}
 			String doi = pubId.getDoi();
 			if (!doi.isEmpty() && !FetcherCommon.isDoi(doi)) {
-				System.err.println("Unknown DOI: " + pubId);
+				logger.error("Unknown DOI: {}", pubId);
 				doi = "";
 			}
 			if (pmid.isEmpty() && pmcid.isEmpty() && doi.isEmpty()) {
-				System.err.println("Not adding empty publication ID");
+				logger.warn("Not adding empty publication ID");
 			} else {
 				publicationIds.add(new PublicationIds(pmid, pmcid, doi, pubId.getPmidUrl(), pubId.getPmcidUrl(), pubId.getDoiUrl()));
 			}
 		}
 		if (publicationIds.size() < pubIds.size()) {
-			System.err.println(publicationIds.size() + " publication IDs OK, " + (pubIds.size() - publicationIds.size()) + " not OK");
+			logger.warn("{} publication IDs OK, {} not OK", publicationIds.size(), pubIds.size() - publicationIds.size());
 		} else {
-			System.out.println(publicationIds.size() + " publication IDs OK");
+			logger.info("{} publication IDs OK", publicationIds.size());
 		}
 		return publicationIds;
 	}
@@ -600,123 +604,123 @@ public final class FetcherUtil {
 	private static List<String> web(List<String> webUrls) {
 		List<String> webpageUrls = new ArrayList<>();
 		if (webUrls.isEmpty()) {
-			System.err.println("Check webpage URLs: no webpage URLs given");
+			logger.error("Check webpage URLs: no webpage URLs given");
 			return webpageUrls;
 		}
-		System.out.println("Check webpage URLs: " + webUrls.size() + " webpage URLs given");
+		logger.info("Check webpage URLs: {} webpage URLs given", webUrls.size());
 		for (String webUrl : webUrls) {
 			try {
 				new URL(webUrl);
 			} catch (MalformedURLException e) {
-				System.err.println("Malformed URL: " + webUrl);
+				logger.error("Malformed URL: {}", webUrl);
 				continue;
 			}
 			webpageUrls.add(webUrl);
 		}
 		if (webpageUrls.size() < webUrls.size()) {
-			System.err.println(webpageUrls.size() + " webpage URLs OK, " + (webUrls.size() - webpageUrls.size()) + " not OK");
+			logger.warn("{} webpage URLs OK, {} not OK", webpageUrls.size(), webUrls.size() - webpageUrls.size());
 		} else {
-			System.out.println(webpageUrls.size() + " webpage URLs OK");
+			logger.info("{} webpage URLs OK", webpageUrls.size());
 		}
 		return webpageUrls;
 	}
 
 	private static Set<PublicationIds> pubDb(String database) throws IOException {
 		Set<PublicationIds> publicationIds;
-		System.out.println("Get publication IDs from database: " + database);
+		logger.info("Get publication IDs from database: {}", database);
 		try (Database db = new Database(database)) {
 			publicationIds = db.getPublicationIds();
 		}
-		System.out.println("Got " + publicationIds.size() + " publication IDs");
+		logger.info("Got {} publication IDs", publicationIds.size());
 		return publicationIds;
 	}
 	private static Set<String> webDb(String database) throws IOException {
 		Set<String> webpageUrls;
-		System.out.println("Get webpage URLs from database: " + database);
+		logger.info("Get webpage URLs from database: {}", database);
 		try (Database db = new Database(database)) {
 			webpageUrls = db.getWebpageUrls();
 		}
-		System.out.println("Got " + webpageUrls.size() + " webpage URLs");
+		logger.info("Got {} webpage URLs", webpageUrls.size());
 		return webpageUrls;
 	}
 	private static Set<String> docDb(String database) throws IOException {
 		Set<String> docUrls;
-		System.out.println("Get doc URLs from database: " + database);
+		logger.info("Get doc URLs from database: {}", database);
 		try (Database db = new Database(database)) {
 			docUrls = db.getDocUrls();
 		}
-		System.out.println("Got " + docUrls.size() + " doc URLs");
+		logger.info("Got {} doc URLs", docUrls.size());
 		return docUrls;
 	}
 
 	private static void hasPmid(Set<PublicationIds> pubIds) {
-		System.out.print("Filter publication IDs with PMID: before " + pubIds.size());
+		logger.info("Filter publication IDs with PMID: before {}", pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (it.next().getPmid().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with PMID: after {}", pubIds.size());
 	}
 	private static void notHasPmid(Set<PublicationIds> pubIds) {
-		System.out.print("Filter publication IDs with no PMID: before " + pubIds.size());
+		logger.info("Filter publication IDs with no PMID: before {}", pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (!it.next().getPmid().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with no PMID: after {}", pubIds.size());
 	}
 	private static void pmid(Set<PublicationIds> pubIds, String regex) {
-		System.out.print("Filter publication IDs with PMID matching " + regex + ": before " + pubIds.size());
+		logger.info("Filter publication IDs with PMID matching {}: before {}", regex, pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (!it.next().getPmid().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with PMID matching {}: after {}", regex, pubIds.size());
 	}
 
 	private static void hasPmcid(Set<PublicationIds> pubIds) {
-		System.out.print("Filter publication IDs with PMCID: before " + pubIds.size());
+		logger.info("Filter publication IDs with PMCID: before {}", pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (it.next().getPmcid().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with PMCID: after {}", pubIds.size());
 	}
 	private static void notHasPmcid(Set<PublicationIds> pubIds) {
-		System.out.print("Filter publication IDs with no PMCID: before " + pubIds.size());
+		logger.info("Filter publication IDs with no PMCID: before {}", pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (!it.next().getPmcid().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with no PMCID: after {}", pubIds.size());
 	}
 	private static void pmcid(Set<PublicationIds> pubIds, String regex) {
-		System.out.print("Filter publication IDs with PMCID matching " + regex + ": before " + pubIds.size());
+		logger.info("Filter publication IDs with PMCID matching {}: before {}", regex, pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (!it.next().getPmcid().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with PMCID matching {}: after {}", regex, pubIds.size());
 	}
 
 	private static void hasDoi(Set<PublicationIds> pubIds) {
-		System.out.print("Filter publication IDs with DOI: before " + pubIds.size());
+		logger.info("Filter publication IDs with DOI: before {}", pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (it.next().getDoi().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with DOI: after {}", pubIds.size());
 	}
 	private static void notHasDoi(Set<PublicationIds> pubIds) {
-		System.out.print("Filter publication IDs with no DOI: before " + pubIds.size());
+		logger.info("Filter publication IDs with no DOI: before {}", pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (!it.next().getDoi().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with no DOI: after {}", pubIds.size());
 	}
 	private static void doi(Set<PublicationIds> pubIds, String regex) {
-		System.out.print("Filter publication IDs with DOI matching " + regex + ": before " + pubIds.size());
+		logger.info("Filter publication IDs with DOI matching {}: before {}", regex, pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			if (!it.next().getDoi().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with DOI matching {}: after {}", regex, pubIds.size());
 	}
 
 	private static void doiRegistrant(Set<PublicationIds> pubIds, List<String> registrants, boolean not) {
-		System.out.print("Filter publication IDs with DOI" + (not ? " not " : " ") + "of registrant " + registrants + ": before " + pubIds.size());
+		logger.info("Filter publication IDs with DOI {}of registrant {}: before {}", not ? "not " : "", registrants, pubIds.size());
 		for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 			String doi = it.next().getDoi();
 			boolean matches = !doi.isEmpty() && registrants.contains(FetcherCommon.getDoiRegistrant(doi));
@@ -724,19 +728,19 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + pubIds.size());
+		logger.info("Filter publication IDs with DOI {}of registrant {}: after {}", not ? "not " : "", registrants, pubIds.size());
 	}
 
 	private static void url(Set<String> webUrls, String regex) {
-		System.out.print("Filter webpage URLs matching " + regex + ": before " + webUrls.size());
+		logger.info("Filter webpage URLs matching {}: before {}", regex, webUrls.size());
 		for (Iterator<String> it = webUrls.iterator(); it.hasNext(); ) {
 			if (!it.next().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + webUrls.size());
+		logger.info("Filter webpage URLs matching {}: after {}", regex, webUrls.size());
 	}
 
 	private static void urlHost(Set<String> webUrls, List<String> hosts, boolean not) {
-		System.out.print("Filter webpage URLs" + (not ? " not " : " ") + "of host " + hosts + ": before " + webUrls.size());
+		logger.info("Filter webpage URLs {}of host {}: before {}", not ? "not " : "", hosts, webUrls.size());
 		for (Iterator<String> it = webUrls.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			try {
@@ -749,116 +753,116 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + webUrls.size());
+		logger.info("Filter webpage URLs {}of host {}: after {}", not ? "not " : "", hosts, webUrls.size());
 	}
 
 	private static void inDbPub(Set<PublicationIds> pubIds, String database) throws IOException {
-		System.out.println("Filter " + pubIds.size() + " publication IDs being present in database: " + database);
+		logger.info("Filter {} publication IDs being present in database: {}", pubIds.size(), database);
 		try (Database db = new Database(database)) {
 			for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 				if (!db.containsPublication(it.next())) it.remove();
 			}
 		}
-		System.out.println(pubIds.size() + " publication IDs were present in database");
+		logger.info("{} publication IDs were present in database", pubIds.size());
 	}
 	private static void notInDbPub(Set<PublicationIds> pubIds, String database) throws IOException {
-		System.out.println("Filter " + pubIds.size() + " publication IDs being not present in database: " + database);
+		logger.info("Filter {} publication IDs being not present in database: {}", pubIds.size(), database);
 		try (Database db = new Database(database)) {
 			for (Iterator<PublicationIds> it = pubIds.iterator(); it.hasNext(); ) {
 				if (db.containsPublication(it.next())) it.remove();
 			}
 		}
-		System.out.println(pubIds.size() + " publication IDs were not present in database");
+		logger.info("{} publication IDs were not present in database", pubIds.size());
 	}
 
 	private static void inDbWeb(Set<String> webUrls, String database) throws IOException {
-		System.out.println("Filter " + webUrls.size() + " webpage URLs being present in database: " + database);
+		logger.info("Filter {} webpage URLs being present in database: {}", webUrls.size(), database);
 		try (Database db = new Database(database)) {
 			for (Iterator<String> it = webUrls.iterator(); it.hasNext(); ) {
 				if (!db.containsWebpage(it.next())) it.remove();
 			}
 		}
-		System.out.println(webUrls.size() + " webpage URLs were present in database");
+		logger.info("{} webpage URLs were present in database", webUrls.size());
 	}
 	private static void notInDbWeb(Set<String> webUrls, String database) throws IOException {
-		System.out.println("Filter " + webUrls.size() + " webpage URLs being not present in database: " + database);
+		logger.info("Filter {} webpage URLs being not present in database: {}", webUrls.size(), database);
 		try (Database db = new Database(database)) {
 			for (Iterator<String> it = webUrls.iterator(); it.hasNext(); ) {
 				if (db.containsWebpage(it.next())) it.remove();
 			}
 		}
-		System.out.println(webUrls.size() + " webpage URLs were not present in database");
+		logger.info("{} webpage URLs were not present in database", webUrls.size());
 	}
 
 	private static void inDbDoc(Set<String> docUrls, String database) throws IOException {
-		System.out.println("Filter " + docUrls.size() + " doc URLs being present in database: " + database);
+		logger.info("Filter {} doc URLs being present in database: {}", docUrls.size(), database);
 		try (Database db = new Database(database)) {
 			for (Iterator<String> it = docUrls.iterator(); it.hasNext(); ) {
 				if (!db.containsDoc(it.next())) it.remove();
 			}
 		}
-		System.out.println(docUrls.size() + " doc URLs were present in database");
+		logger.info("{} doc URLs were present in database", docUrls.size());
 	}
 	private static void notInDbDoc(Set<String> docUrls, String database) throws IOException {
-		System.out.println("Filter " + docUrls.size() + " doc URLs being not present in database: " + database);
+		logger.info("Filter {} doc URLs being not present in database: {}", docUrls.size(), database);
 		try (Database db = new Database(database)) {
 			for (Iterator<String> it = docUrls.iterator(); it.hasNext(); ) {
 				if (db.containsDoc(it.next())) it.remove();
 			}
 		}
-		System.out.println(docUrls.size() + " doc URLs were not present in database");
+		logger.info("{} doc URLs were not present in database", docUrls.size());
 	}
 
 	private static <T extends Comparable<T>> LinkedHashSet<T> ascIds(Set<T> ids) {
-		System.out.println("Sort " + ids.size() + " IDs in ascending order");
+		logger.info("Sort {} IDs in ascending order", ids.size());
 		return ids.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 	private static <T extends Comparable<T>> LinkedHashSet<T> descIds(Set<T> ids) {
-		System.out.println("Sort " + ids.size() + " IDs in descending order");
+		logger.info("Sort {} IDs in descending order", ids.size());
 		return ids.stream().sorted(Collections.reverseOrder()).collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	private static void removeIdsPub(Set<PublicationIds> pubIds, String database) throws IOException {
-		System.out.println("Remove " + pubIds.size() + " publication IDs from database: " + database);
+		logger.info("Remove {} publication IDs from database: {}", pubIds.size(), database);
 		int fail = 0;
 		try (Database db = new Database(database)) {
 			for (PublicationIds pubId : pubIds) {
 				if (!db.removePublication(pubId)) {
-					System.err.println("Failed to remove publication ID: " + pubId);
+					logger.warn("Failed to remove publication ID: {}", pubId);
 					++fail;
 				} else db.commit();
 			}
 		}
-		if (fail > 0) System.err.println("Failed to remove " + fail + " publication IDs");
-		else System.out.println("Remove publication IDs: success");
+		if (fail > 0) logger.warn("Failed to remove {} publication IDs", fail);
+		else logger.info("Remove publication IDs: success");
 	}
 	private static void removeIdsWeb(Set<String> webUrls, String database) throws IOException {
-		System.out.println("Remove " + webUrls.size() + " webpage URLs from database: " + database);
+		logger.info("Remove {} webpage URLs from database: {}", webUrls.size(), database);
 		int fail = 0;
 		try (Database db = new Database(database)) {
 			for (String webUrl : webUrls) {
 				if (!db.removeWebpage(webUrl)) {
-					System.err.println("Failed to remove webpage URL: " + webUrl);
+					logger.warn("Failed to remove webpage URL: {}", webUrl);
 					++fail;
 				} else db.commit();
 			}
 		}
-		if (fail > 0) System.err.println("Failed to remove " + fail + " webpage URLs");
-		else System.out.println("Remove webpage URLs: success");
+		if (fail > 0) logger.warn("Failed to remove {} webpage URLs", fail);
+		else logger.info("Remove webpage URLs: success");
 	}
 	private static void removeIdsDoc(Set<String> docUrls, String database) throws IOException {
-		System.out.println("Remove " + docUrls.size() + " doc URLs from database: " + database);
+		logger.info("Remove {} doc URLs from database: {}", docUrls.size(), database);
 		int fail = 0;
 		try (Database db = new Database(database)) {
 			for (String docUrl : docUrls) {
 				if (!db.removeDoc(docUrl)) {
-					System.err.println("Failed to remove doc URL: " + docUrl);
+					logger.warn("Failed to remove doc URL: {}", docUrl);
 					++fail;
 				} else db.commit();
 			}
 		}
-		if (fail > 0) System.err.println("Failed to remove " + fail + " doc URLs");
-		else System.out.println("Remove doc URLs: success");
+		if (fail > 0) logger.warn("Failed to remove {} doc URLs", fail);
+		else logger.info("Remove doc URLs: success");
 	}
 
 	private static void printIdsPub(PrintStream ps, Set<PublicationIds> pubIds, boolean plain, boolean html) throws IOException {
@@ -882,11 +886,11 @@ public final class FetcherUtil {
 	}
 	private static void outIdsPub(Set<PublicationIds> pubIds, boolean plain, boolean html) throws IOException {
 		if (pubIds.size() == 0) return;
-		System.out.println("Output " + pubIds.size() + " publication IDs" + (html ? " in HTML" : ""));
+		logger.info("Output {} publication IDs{}", pubIds.size(), html ? " in HTML" : "");
 		printIdsPub(System.out, pubIds, plain, html);
 	}
 	private static void txtIdsPub(Set<PublicationIds> pubIds, boolean plain, boolean html, String txt) throws IOException {
-		System.out.println("Output " + pubIds.size() + " publication IDs to file " + txt + (html ? " in HTML" : ""));
+		logger.info("Output {} publication IDs to file {}{}", pubIds.size(), txt, html ? " in HTML" : "");
 		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (pubIds.size() == 0) return;
 			printIdsPub(ps, pubIds, plain, html);
@@ -903,11 +907,11 @@ public final class FetcherUtil {
 	}
 	private static void outIdsWeb(Set<String> webUrls, boolean html) throws IOException {
 		if (webUrls.size() == 0) return;
-		System.out.println("Output " + webUrls.size() + " webpage URLs" + (html ? " in HTML" : ""));
+		logger.info("Output {} webpage URLs{}", webUrls.size(), html ? " in HTML" : "");
 		printIdsWeb(System.out, webUrls, html);
 	}
 	private static void txtIdsWeb(Set<String> webUrls, boolean html, String txt) throws IOException {
-		System.out.println("Output " + webUrls.size() + " webpage URLs to file " + txt + (html ? " in HTML" : ""));
+		logger.info("Output {} webpage URLs to file {}{}", webUrls.size(), txt, html ? " in HTML" : "");
 		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (webUrls.size() == 0) return;
 			printIdsWeb(ps, webUrls, html);
@@ -919,17 +923,17 @@ public final class FetcherUtil {
 	}
 
 	private static void gotLog(String what, int initial, int current) {
-		if (current != initial) System.err.println("Got " + current + " " + what);
-		else System.out.println("Got " + current + " " + what);
+		if (current != initial) logger.warn("Got {} {}", current, what);
+		else logger.info("Got {} {}", current, what);
 	}
 	private static void fetchedLog(String what, int initial, int current) {
-		if (current != initial) System.err.println("Fetched " + current + " " + what);
-		else System.out.println("Fetched " + current + " " + what);
+		if (current != initial) logger.warn("Fetched {} {}", current, what);
+		else logger.info("Fetched {} {}", current, what);
 	}
 
 	private static List<Publication> dbPub(Set<PublicationIds> pubIds, String database) throws IOException {
 		List<Publication> publications;
-		System.out.println("Get " + pubIds.size() + " publications from database: " + database);
+		logger.info("Get {} publications from database: {}", pubIds.size(), database);
 		try (Database db = new Database(database)) {
 			publications = pubIds.stream().map(db::getPublication).filter(Objects::nonNull).collect(Collectors.toList());
 		}
@@ -938,7 +942,7 @@ public final class FetcherUtil {
 	}
 	private static List<Webpage> dbWeb(Set<String> webUrls, String database) throws IOException {
 		List<Webpage> webpages;
-		System.out.println("Get " + webUrls.size() + " webpages from database: " + database);
+		logger.info("Get {} webpages from database: {}", webUrls.size(), database);
 		try (Database db = new Database(database)) {
 			webpages = webUrls.stream().map(db::getWebpage).filter(Objects::nonNull).collect(Collectors.toList());
 		}
@@ -947,7 +951,7 @@ public final class FetcherUtil {
 	}
 	private static List<Webpage> dbDoc(Set<String> docUrls, String database) throws IOException {
 		List<Webpage> docs;
-		System.out.println("Get " + docUrls.size() + " docs from database: " + database);
+		logger.info("Get {} docs from database: {}", docUrls.size(), database);
 		try (Database db = new Database(database)) {
 			docs = docUrls.stream().map(db::getDoc).filter(Objects::nonNull).collect(Collectors.toList());
 		}
@@ -959,11 +963,11 @@ public final class FetcherUtil {
 		List<Publication> publications = new ArrayList<>();
 		List<PublicationIds> publicationsException = new ArrayList<>();
 		int pubIdsSize = pubIds.size();
-		System.out.println("Fetch " + pubIdsSize + " publications");
+		logger.info("Fetch {} publications", pubIdsSize);
 		int i = 0;
 		for (PublicationIds pubId : pubIds) {
 			++i;
-			System.out.println("Fetch publication " + progress(i, pubIdsSize));
+			logger.info("Fetch publication {}", progress(i, pubIdsSize));
 			Publication publication = fetcher.initPublication(pubId);
 			if (publication != null && fetcher.getPublication(publication, parts)) {
 				if (publication.isFetchException()) {
@@ -975,11 +979,11 @@ public final class FetcherUtil {
 		}
 		int publicationsExceptionSize = publicationsException.size();
 		if (publicationsExceptionSize > 0) {
-			System.out.println("Refetch " + publicationsExceptionSize + " publications with exception");
+			logger.info("Refetch {} publications with exception", publicationsExceptionSize);
 			i = 0;
 			for (PublicationIds pubId : publicationsException) {
 				++i;
-				System.out.println("Refetch publication " + progress(i, publicationsExceptionSize));
+				logger.info("Refetch publication {}", progress(i, publicationsExceptionSize));
 				Publication publication = fetcher.initPublication(pubId);
 				if (publication != null && fetcher.getPublication(publication, parts)) {
 					publications.add(publication);
@@ -993,11 +997,11 @@ public final class FetcherUtil {
 		List<Webpage> webpages = new ArrayList<>();
 		List<String> webpagesException = new ArrayList<>();
 		int webUrlsSize = webUrls.size();
-		System.out.println("Fetch " + webUrlsSize + " webpages");
+		logger.info("Fetch {} webpages", webUrlsSize);
 		int i = 0;
 		for (String webUrl : webUrls) {
 			++i;
-			System.out.println("Fetch webpage " + progress(i, webUrlsSize));
+			logger.info("Fetch webpage {}", progress(i, webUrlsSize));
 			Webpage webpage = fetcher.initWebpage(webUrl);
 			if (webpage != null && fetcher.getWebpage(webpage)) {
 				if (webpage.isFetchException()) {
@@ -1009,11 +1013,11 @@ public final class FetcherUtil {
 		}
 		int webpagesExceptionSize = webpagesException.size();
 		if (webpagesExceptionSize > 0) {
-			System.out.println("Refetch " + webpagesExceptionSize + " webpages with exception");
+			logger.info("Refetch {} webpages with exception", webpagesExceptionSize);
 			i = 0;
 			for (String webUrl : webpagesException) {
 				++i;
-				System.out.println("Refetch webpage " + progress(i, webpagesExceptionSize));
+				logger.info("Refetch webpage {}", progress(i, webpagesExceptionSize));
 				Webpage webpage = fetcher.initWebpage(webUrl);
 				if (webpage != null && fetcher.getWebpage(webpage)) {
 					fetcher.getWebpage(webpage);
@@ -1028,12 +1032,12 @@ public final class FetcherUtil {
 		List<Publication> publications = new ArrayList<>();
 		List<PublicationIds> pubIdsException = new ArrayList<>();
 		int pubIdsSize = pubIds.size();
-		System.out.println("Get " + pubIdsSize + " publications from database: " + database + " (or fetch if not present)");
+		logger.info("Get {} publications from database: {} (or fetch if not present)", pubIdsSize, database);
 		try (Database db = new Database(database)) {
 			int i = 0;
 			for (PublicationIds pubId : pubIds) {
 				++i;
-				System.out.println("Fetch publication " + progress(i, pubIdsSize));
+				logger.info("Fetch publication {}", progress(i, pubIdsSize));
 				Publication publication = FetcherCommon.getPublication(pubId, db, fetcher, parts);
 				if (publication != null) {
 					if (publication.isFetchException()) {
@@ -1045,11 +1049,11 @@ public final class FetcherUtil {
 			}
 			int pubIdsExceptionSize = pubIdsException.size();
 			if (pubIdsExceptionSize > 0) {
-				System.out.println("Refetch " + pubIdsExceptionSize + " publications with exception");
+				logger.info("Refetch {} publications with exception", pubIdsExceptionSize);
 				i = 0;
 				for (PublicationIds pubId : pubIdsException) {
 					++i;
-					System.out.println("Refetch publication " + progress(i, pubIdsExceptionSize));
+					logger.info("Refetch publication {}", progress(i, pubIdsExceptionSize));
 					Publication publication = FetcherCommon.getPublication(pubId, db, fetcher, parts);
 					if (publication != null) {
 						publications.add(publication);
@@ -1064,12 +1068,12 @@ public final class FetcherUtil {
 		List<Webpage> webpages = new ArrayList<>();
 		List<String> webUrlsException = new ArrayList<>();
 		int webUrlsSize = webUrls.size();
-		System.out.println("Get " + webUrlsSize + " webpages from database: " + database + " (or fetch if not present)");
+		logger.info("Get {} webpages from database: {} (or fetch if not present)", webUrlsSize, database);
 		try (Database db = new Database(database)) {
 			int i = 0;
 			for (String webUrl : webUrls) {
 				++i;
-				System.out.println("Fetch webpage " + progress(i, webUrlsSize));
+				logger.info("Fetch webpage {}", progress(i, webUrlsSize));
 				Webpage webpage = FetcherCommon.getWebpage(webUrl, db, fetcher);
 				if (webpage != null) {
 					if (webpage.isFetchException()) {
@@ -1081,11 +1085,11 @@ public final class FetcherUtil {
 			}
 			int webUrlsExceptionSize = webUrlsException.size();
 			if (webUrlsExceptionSize > 0) {
-				System.out.println("Refetch " + webUrlsExceptionSize + " webpages with exception");
+				logger.info("Refetch {} webpages with exception", webUrlsExceptionSize);
 				i = 0;
 				for (String webUrl : webUrlsException) {
 					++i;
-					System.out.println("Refetch webpage " + progress(i, webUrlsExceptionSize));
+					logger.info("Refetch webpage {}", progress(i, webUrlsExceptionSize));
 					Webpage webpage = FetcherCommon.getWebpage(webUrl, db, fetcher);
 					if (webpage != null) {
 						webpages.add(webpage);
@@ -1100,12 +1104,12 @@ public final class FetcherUtil {
 		List<Webpage> docs = new ArrayList<>();
 		List<String> docUrlsException = new ArrayList<>();
 		int docUrlsSize = docUrls.size();
-		System.out.println("Get " + docUrlsSize + " docs from database: " + database + " (or fetch if not present)");
+		logger.info("Get {} docs from database: {} (or fetch if not present)", docUrlsSize, database);
 		try (Database db = new Database(database)) {
 			int i = 0;
 			for (String docUrl : docUrls) {
 				++i;
-				System.out.println("Fetch doc " + progress(i, docUrlsSize));
+				logger.info("Fetch doc {}", progress(i, docUrlsSize));
 				Webpage doc = FetcherCommon.getDoc(docUrl, db, fetcher);
 				if (doc != null) {
 					if (doc.isFetchException()) {
@@ -1117,11 +1121,11 @@ public final class FetcherUtil {
 			}
 			int docUrlsExceptionSize = docUrlsException.size();
 			if (docUrlsExceptionSize > 0) {
-				System.out.println("Refetch " + docUrlsExceptionSize + " docs with exception");
+				logger.info("Refetch {} docs with exception", docUrlsExceptionSize);
 				i = 0;
 				for (String docUrl : docUrlsException) {
 					++i;
-					System.out.println("Refetch doc " + progress(i, docUrlsExceptionSize));
+					logger.info("Refetch doc {}", progress(i, docUrlsExceptionSize));
 					Webpage doc = FetcherCommon.getDoc(docUrl, db, fetcher);
 					if (doc != null) {
 						docs.add(doc);
@@ -1137,12 +1141,12 @@ public final class FetcherUtil {
 		List<Publication> publications = new ArrayList<>();
 		List<PublicationIds> publicationsException = new ArrayList<>();
 		int pubIdsSize = pubIds.size();
-		System.out.println("Fetch " + pubIdsSize + " publications and put to database: " + database);
+		logger.info("Fetch {} publications and put to database: {}", pubIdsSize, database);
 		try (Database db = new Database(database)) {
 			int i = 0;
 			for (PublicationIds pubId : pubIds) {
 				++i;
-				System.out.println("Fetch publication " + progress(i, pubIdsSize));
+				logger.info("Fetch publication {}", progress(i, pubIdsSize));
 				Publication publication = fetcher.initPublication(pubId);
 				if (publication != null && fetcher.getPublication(publication, parts)) {
 					if (publication.isFetchException()) {
@@ -1156,11 +1160,11 @@ public final class FetcherUtil {
 			}
 			int publicationsExceptionSize = publicationsException.size();
 			if (publicationsExceptionSize > 0) {
-				System.out.println("Refetch " + publicationsExceptionSize + " publications with exception");
+				logger.info("Refetch {} publications with exception", publicationsExceptionSize);
 				i = 0;
 				for (PublicationIds pubId : publicationsException) {
 					++i;
-					System.out.println("Refetch publication " + progress(i, publicationsExceptionSize));
+					logger.info("Refetch publication {}", progress(i, publicationsExceptionSize));
 					Publication publication = fetcher.initPublication(pubId);
 					if (publication != null && fetcher.getPublication(publication, parts)) {
 						db.putPublication(publication);
@@ -1177,12 +1181,12 @@ public final class FetcherUtil {
 		List<Webpage> webpages = new ArrayList<>();
 		List<String> webpagesException = new ArrayList<>();
 		int webUrlsSize = webUrls.size();
-		System.out.println("Fetch " + webUrlsSize + " webpages and put to database: " + database);
+		logger.info("Fetch {} webpages and put to database: {}", webUrlsSize, database);
 		try (Database db = new Database(database)) {
 			int i = 0;
 			for (String webUrl : webUrls) {
 				++i;
-				System.out.println("Fetch webpage " + progress(i, webUrlsSize));
+				logger.info("Fetch webpage {}", progress(i, webUrlsSize));
 				Webpage webpage = fetcher.initWebpage(webUrl);
 				if (webpage != null && fetcher.getWebpage(webpage)) {
 					if (webpage.isFetchException()) {
@@ -1196,11 +1200,11 @@ public final class FetcherUtil {
 			}
 			int webpagesExceptionSize = webpagesException.size();
 			if (webpagesExceptionSize > 0) {
-				System.out.println("Refetch " + webpagesExceptionSize + " webpages with exception");
+				logger.info("Refetch {} webpages with exception", webpagesExceptionSize);
 				i = 0;
 				for (String webUrl : webpagesException) {
 					++i;
-					System.out.println("Refetch webpage " + progress(i, webpagesExceptionSize));
+					logger.info("Refetch webpage {}", progress(i, webpagesExceptionSize));
 					Webpage webpage = fetcher.initWebpage(webUrl);
 					if (webpage != null && fetcher.getWebpage(webpage)) {
 						db.putWebpage(webpage);
@@ -1217,12 +1221,12 @@ public final class FetcherUtil {
 		List<Webpage> docs = new ArrayList<>();
 		List<String> docsException = new ArrayList<>();
 		int docUrlsSize = docUrls.size();
-		System.out.println("Fetch " + docUrlsSize + " docs and put to database: " + database);
+		logger.info("Fetch {} docs and put to database: {}", docUrlsSize, database);
 		try (Database db = new Database(database)) {
 			int i = 0;
 			for (String docUrl : docUrls) {
 				++i;
-				System.out.println("Fetch doc " + progress(i, docUrlsSize));
+				logger.info("Fetch doc {}", progress(i, docUrlsSize));
 				Webpage doc = fetcher.initWebpage(docUrl);
 				if (doc != null && fetcher.getWebpage(doc)) {
 					if (doc.isFetchException()) {
@@ -1236,11 +1240,11 @@ public final class FetcherUtil {
 			}
 			int docsExceptionSize = docsException.size();
 			if (docsExceptionSize > 0) {
-				System.out.println("Refetch " + docsExceptionSize + " docs with exception");
+				logger.info("Refetch {} docs with exception", docsExceptionSize);
 				i = 0;
 				for (String docUrl : docsException) {
 					++i;
-					System.out.println("Refetch doc " + progress(i, docsExceptionSize));
+					logger.info("Refetch doc {}", progress(i, docsExceptionSize));
 					Webpage doc = fetcher.initWebpage(docUrl);
 					if (doc != null && fetcher.getWebpage(doc)) {
 						db.putDoc(doc);
@@ -1255,97 +1259,97 @@ public final class FetcherUtil {
 	}
 
 	private static void fetchTimeMore(List<? extends DatabaseEntry<?>> entries, Long time) {
-		System.out.print("Filter entries with fetch time more than " + timeHuman(time) + ": before " + entries.size());
+		logger.info("Filter entries with fetch time more than {}: before {}", timeHuman(time), entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (it.next().getFetchTime() < time) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries with fetch time more than {}: after {}", timeHuman(time), entries.size());
 	}
 	private static void fetchTimeLess(List<? extends DatabaseEntry<?>> entries, Long time) {
-		System.out.print("Filter entries with fetch time less than " + timeHuman(time) + ": before " + entries.size());
+		logger.info("Filter entries with fetch time less than {}: before {}", timeHuman(time), entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (it.next().getFetchTime() > time) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries with fetch time less than {}: after {}", timeHuman(time), entries.size());
 	}
 
 	private static void retryCounter(List<? extends DatabaseEntry<?>> entries, List<Integer> counts) {
-		System.out.print("Filter entries with retry count " + counts + ": before " + entries.size());
+		logger.info("Filter entries with retry count {}: before {}", counts, entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (!counts.contains(it.next().getRetryCounter())) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries with retry count {}: after {}", counts, entries.size());
 	}
 	private static void notRetryCounter(List<? extends DatabaseEntry<?>> entries, List<Integer> counts) {
-		System.out.print("Filter entries with retry count not " + counts + ": before " + entries.size());
+		logger.info("Filter entries with retry count not {}: before {}", counts, entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (counts.contains(it.next().getRetryCounter())) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries with retry count not {}: after {}", counts, entries.size());
 	}
 
 	private static void retryCounterMore(List<? extends DatabaseEntry<?>> entries, int count) {
-		System.out.print("Filter entries with retry count more than " + count + ": before " + entries.size());
+		logger.info("Filter entries with retry count more than {}: before {}", count, entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (it.next().getRetryCounter() <= count) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries with retry count more than {}: after {}", count, entries.size());
 	}
 	private static void retryCounterLess(List<? extends DatabaseEntry<?>> entries, int count) {
-		System.out.print("Filter entries with retry count less than " + count + ": before " + entries.size());
+		logger.info("Filter entries with retry count less than {}: before {}", count, entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (it.next().getRetryCounter() >= count) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries with retry count less than {}: after {}", count, entries.size());
 	}
 
 	private static void empty(List<? extends DatabaseEntry<?>> entries) {
-		System.out.print("Filter empty entries: before " + entries.size());
+		logger.info("Filter empty entries: before {}", entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (!it.next().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter empty entries: after {}", entries.size());
 	}
 	private static void notEmpty(List<? extends DatabaseEntry<?>> entries) {
-		System.out.print("Filter not empty entries: before " + entries.size());
+		logger.info("Filter not empty entries: before {}", entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (it.next().isEmpty()) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter not empty entries: after {}", entries.size());
 	}
 
 	private static void isFinal(List<? extends DatabaseEntry<?>> entries, FetcherArgs fetcherArgs) {
-		System.out.print("Filter final entries: before " + entries.size());
+		logger.info("Filter final entries: before {}", entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (!it.next().isFinal(fetcherArgs)) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter final entries: after {}", entries.size());
 	}
 	private static void notIsFinal(List<? extends DatabaseEntry<?>> entries, FetcherArgs fetcherArgs) {
-		System.out.print("Filter not final entries: before " + entries.size());
+		logger.info("Filter not final entries: before {}", entries.size());
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (it.next().isFinal(fetcherArgs)) it.remove();
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter not final entries: after {}", entries.size());
 	}
 
 	private static void totallyFinal(List<Publication> publications, FetcherArgs fetcherArgs) {
-		System.out.print("Filter totally final publications: before " + publications.size());
+		logger.info("Filter totally final publications: before {}", publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (!it.next().isTotallyFinal(fetcherArgs)) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter totally final publications: after {}", publications.size());
 	}
 	private static void notTotallyFinal(List<Publication> publications, FetcherArgs fetcherArgs) {
-		System.out.print("Filter not totally final publications: before " + publications.size());
+		logger.info("Filter not totally final publications: before {}", publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (it.next().isTotallyFinal(fetcherArgs)) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter not totally final publications: after {}", publications.size());
 	}
 
 	private static void partEmpty(List<Publication> publications, List<PublicationPartName> names, boolean not) {
-		System.out.print("Filter publications with parts " + names + (not ? " not " : " ") + "empty: before " + publications.size());
+		logger.info("Filter publications with parts {} {}empty: before {}", names, not ? "not " : "", publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1356,11 +1360,11 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} {}empty: after {}", names, not ? "not " : "", publications.size());
 	}
 
 	private static void partFinal(List<Publication> publications, List<PublicationPartName> names, FetcherArgs fetcherArgs, boolean not) {
-		System.out.print("Filter publications with parts " + names + (not ? " not " : " ") + "final: before " + publications.size());
+		logger.info("Filter publications with parts {} {}final: before {}", names, not ? "not " : "", publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1371,12 +1375,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} {}final: after {}", names, not ? "not " : "", publications.size());
 	}
 
 	@SuppressWarnings({ "unchecked", "unused" })
 	private static void partContent(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, String regex, Boolean not) {
-		System.out.print("Filter publications with parts " + names + " matching " + regex + ": before " + publications.size());
+		logger.info("Filter publications with parts {} matching {}: before {}", names, regex, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1417,12 +1421,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} matching {}: after {}", names, regex, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partContentSize(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, ArrayList<Integer> sizes, Boolean not) {
-		System.out.print("Filter publications with parts " + names + (not ? " not " : " ") + "having size " + sizes + ": before " + publications.size());
+		logger.info("Filter publications with parts {} {}having size {}: before {}", names, not ? "not " : "", sizes, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1433,12 +1437,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} {}having size {}: after {}", names, not ? "not " : "", sizes, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partContentSizeMore(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, Integer size) {
-		System.out.print("Filter publications with parts " + names + " having size more than " + size + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having size more than {}: before {}", names, size, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1449,11 +1453,11 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having size more than {}: after {}", names, size, publications.size());
 	}
 	@SuppressWarnings("unused")
 	private static void partContentSizeLess(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, Integer size) {
-		System.out.print("Filter publications with parts " + names + " having size less than " + size + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having size less than {}: before {}", names, size, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1464,12 +1468,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having size less than {}: after {}", names, size, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partType(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, ArrayList<PublicationPartType> types, Boolean not) {
-		System.out.print("Filter publications with parts " + names + (not ? " not " : " ") + "having type " + types + ": before " + publications.size());
+		logger.info("Filter publications with parts {} {}having type {}: before {}", names, not ? "not " : "", types, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1480,12 +1484,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} {}having type {}: after {}", names, not ? "not " : "", types, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partTypeEquivalent(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, PublicationPartType type) {
-		System.out.print("Filter publications with parts " + names + " having type equivalent to " + type + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having type equivalent to {}: before {}", names, type, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1495,11 +1499,11 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having type equivalent to {}: after {}", names, type, publications.size());
 	}
 	@SuppressWarnings("unused")
 	private static void partTypeMore(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, PublicationPartType type) {
-		System.out.print("Filter publications with parts " + names + " having type more than " + type + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having type more than {}: before {}", names, type, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1509,11 +1513,11 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having type more than {}: after {}", names, type, publications.size());
 	}
 	@SuppressWarnings("unused")
 	private static void partTypeLess(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, PublicationPartType type) {
-		System.out.print("Filter publications with parts " + names + " having type less than " + type + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having type less than {}: before {}", names, type, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1523,12 +1527,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having type less than {}: after {}", names, type, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partUrl(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, String regex) {
-		System.out.print("Filter publications with parts " + names + " having url matching " + regex + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having url matching {}: before {}", names, regex, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1538,12 +1542,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having url matching {}: after {}", names, regex, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partUrlHost(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, ArrayList<String> hosts, Boolean not) {
-		System.out.print("Filter publications with parts " + names + (not ? " not " : " ") + " having url of host " + hosts + ": before " + publications.size());
+		logger.info("Filter publications with parts {} {}having url of host {}: before {}", names, not ? "not " : "", hosts, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1560,12 +1564,12 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} {}having url of host {}: after {}", names, not ? "not " : "", hosts, publications.size());
 	}
 
 	@SuppressWarnings("unused")
 	private static void partTimeMore(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, Long time) {
-		System.out.print("Filter publications with parts " + names + " having time more than " + timeHuman(time) + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having time more than {}: before {}", names, timeHuman(time), publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1575,11 +1579,11 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having time more than {}: after {}", names, timeHuman(time), publications.size());
 	}
 	@SuppressWarnings("unused")
 	private static void partTimeLess(ArrayList<Publication> publications, ArrayList<PublicationPartName> names, Long time) {
-		System.out.print("Filter publications with parts " + names + " having time less than " + timeHuman(time) + ": before " + publications.size());
+		logger.info("Filter publications with parts {} having time less than {}: before {}", names, timeHuman(time), publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			Publication publication = it.next();
 			for (PublicationPartName name : names) {
@@ -1589,28 +1593,28 @@ public final class FetcherUtil {
 				}
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with parts {} having time less than {}: after {}", names, timeHuman(time), publications.size());
 	}
 
 	private static void oa(List<Publication> publications) {
-		System.out.print("Filter publications that are Open Access: before " + publications.size());
+		logger.info("Filter publications that are Open Access: before {}", publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (!it.next().isOA()) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications that are Open Access: after {}", publications.size());
 	}
 	private static void notOa(List<Publication> publications) {
-		System.out.print("Filter publications that are not Open Access: before " + publications.size());
+		logger.info("Filter publications that are not Open Access: before {}", publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (it.next().isOA()) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications that are not Open Access: after {}", publications.size());
 	}
 
 	// TODO journalTitle, pubDate, citationsCount, citationsTimestamp, correspAuthor
 
 	private static void visited(List<Publication> publications, String regex) {
-		System.out.print("Filter publications with visited site matching " + regex + ": before " + publications.size());
+		logger.info("Filter publications with visited site matching {}: before {}", regex, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			for (Link link : it.next().getVisitedSites()) {
@@ -1623,11 +1627,11 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with visited site matching {}: after {}", regex, publications.size());
 	}
 
 	private static void visitedHost(List<Publication> publications, List<String> hosts, boolean not) {
-		System.out.print("Filter publications with" + (not ? " no " : " ") + "visited site of host " + hosts + ": before " + publications.size());
+		logger.info("Filter publications with {}visited site of host {}: before {}", not ? "no " : "", hosts, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			for (Link link : it.next().getVisitedSites()) {
@@ -1640,11 +1644,11 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with {}visited site of host {}: after {}", not ? "no " : "", hosts, publications.size());
 	}
 
 	private static void visitedType(List<Publication> publications, List<PublicationPartType> types, boolean not) {
-		System.out.print("Filter publications with" + (not ? " no " : " ") + "visited site of type " + types + ": before " + publications.size());
+		logger.info("Filter publications with {}visited site of type {}: before {}", not ? "no " : "", types, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			for (Link link : it.next().getVisitedSites()) {
@@ -1657,11 +1661,11 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with {}visited site of type {}: after {}", not ? "no " : "", types, publications.size());
 	}
 
 	private static void visitedFrom(List<Publication> publications, String regex) {
-		System.out.print("Filter publications with visited site from URL matching " + regex + ": before " + publications.size());
+		logger.info("Filter publications with visited site from URL matching {}: before {}", regex, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			for (Link link : it.next().getVisitedSites()) {
@@ -1674,11 +1678,11 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with visited site from URL matching {}: after {}", regex, publications.size());
 	}
 
 	private static void visitedFromHost(List<Publication> publications, List<String> hosts, boolean not) {
-		System.out.print("Filter publications with" + (not ? " no " : " ") + "visited site from URL of host " + hosts + ": before " + publications.size());
+		logger.info("Filter publications with {}visited site from URL of host {}: before {}", not ? "no " : "", hosts, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			for (Link link : it.next().getVisitedSites()) {
@@ -1694,49 +1698,49 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with {}visited site from URL of host {}: after {}", not ? "no " : "", hosts, publications.size());
 	}
 
 	private static void visitedSize(List<Publication> publications, List<Integer> sizes) {
-		System.out.print("Filter publications with visited sites size " + sizes + ": before " + publications.size());
+		logger.info("Filter publications with visited sites size {}: before {}", sizes, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (!sizes.contains(it.next().getVisitedSites().size())) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with visited sites size {}: after {}", sizes, publications.size());
 	}
 	private static void notVisitedSize(List<Publication> publications, List<Integer> sizes) {
-		System.out.print("Filter publications with visited sites size not " + sizes + ": before " + publications.size());
+		logger.info("Filter publications with visited sites size not {}: before {}", sizes, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (sizes.contains(it.next().getVisitedSites().size())) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with visited sites size not {}: after {}", sizes, publications.size());
 	}
 
 	private static void visitedSizeMore(List<Publication> publications, int size) {
-		System.out.print("Filter publications with visited sites size more than " + size + ": before " + publications.size());
+		logger.info("Filter publications with visited sites size more than {}: before {}", size, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (it.next().getVisitedSites().size() <= size) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with visited sites size more than {}: after {}", size, publications.size());
 	}
 	private static void visitedSizeLess(List<Publication> publications, int size) {
-		System.out.print("Filter publications with visited sites size less than " + size + ": before " + publications.size());
+		logger.info("Filter publications with visited sites size less than {}: before {}", size, publications.size());
 		for (Iterator<Publication> it = publications.iterator(); it.hasNext(); ) {
 			if (it.next().getVisitedSites().size() >= size) it.remove();
 		}
-		System.out.println(", after " + publications.size());
+		logger.info("Filter publications with visited sites size less than {}: after {}", size, publications.size());
 	}
 
 	private static void startUrl(List<Webpage> webpages, String regex) {
-		System.out.print("Filter webpages with start URL matching " + regex + ": before " + webpages.size());
+		logger.info("Filter webpages with start URL matching {}: before {}", regex, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (!it.next().getStartUrl().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with start URL matching {}: after {}", regex, webpages.size());
 	}
 
 	private static void startUrlHost(List<Webpage> webpages, List<String> hosts, boolean not) {
-		System.out.print("Filter webpages with start URL" + (not ? " not " : " ") + "of host " + hosts + ": before " + webpages.size());
+		logger.info("Filter webpages with start URL {}of host {}: before {}", not ? "not " : "", hosts, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			try {
@@ -1749,19 +1753,19 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with start URL {}of host {}: after {}", not ? "not " : "", hosts, webpages.size());
 	}
 
 	private static void finalUrl(List<Webpage> webpages, String regex) {
-		System.out.print("Filter webpages with final URL matching " + regex + ": before " + webpages.size());
+		logger.info("Filter webpages with final URL matching {}: before {}", regex, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (!it.next().getFinalUrl().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with final URL matching {}: after {}", regex, webpages.size());
 	}
 
 	private static void finalUrlHost(List<Webpage> webpages, List<String> hosts, boolean not) {
-		System.out.print("Filter webpages with final URL" + (not ? " not " : " ") + "of host " + hosts + ": before " + webpages.size());
+		logger.info("Filter webpages with final URL {}of host {}: before {}", not ? "not " : "", hosts, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			boolean matches = false;
 			try {
@@ -1774,125 +1778,125 @@ public final class FetcherUtil {
 				it.remove();
 			}
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with final URL {}of host {}: after {}", not ? "not " : "", hosts, webpages.size());
 	}
 
 	private static void contentType(List<Webpage> webpages, String regex) {
-		System.out.print("Filter webpages with content type matching " + regex + ": before " + webpages.size());
+		logger.info("Filter webpages with content type matching {}: before {}", regex, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (!it.next().getContentType().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with content type matching {}: after {}", regex, webpages.size());
 	}
 
 	private static void statusCode(List<Webpage> webpages, List<Integer> codes) {
-		System.out.print("Filter webpages with status code " + codes + ": before " + webpages.size());
+		logger.info("Filter webpages with status code {}: before {}", codes, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (!codes.contains(it.next().getStatusCode())) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with status code {}: after {}", codes, webpages.size());
 	}
 	private static void notStatusCode(List<Webpage> webpages, List<Integer> codes) {
-		System.out.print("Filter webpages with status code not " + codes + ": before " + webpages.size());
+		logger.info("Filter webpages with status code not {}: before {}", codes, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (codes.contains(it.next().getStatusCode())) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with status code not {}: after {}", codes, webpages.size());
 	}
 
 	private static void title(List<Webpage> webpages, String regex) {
-		System.out.print("Filter webpages with title matching " + regex + ": before " + webpages.size());
+		logger.info("Filter webpages with title matching {}: before {}", regex, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (!it.next().getTitle().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with title matching {}: after {}", regex, webpages.size());
 	}
 
 	private static void titleMore(List<Webpage> webpages, int count) {
-		System.out.print("Filter webpages with title length more than " + count + ": before " + webpages.size());
+		logger.info("Filter webpages with title length more than {}: before {}", count, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (it.next().getTitle().length() <= count) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with title length more than {}: after {}", count, webpages.size());
 	}
 	private static void titleLess(List<Webpage> webpages, int count) {
-		System.out.print("Filter webpages with title length less than " + count + ": before " + webpages.size());
+		logger.info("Filter webpages with title length less than {}: before {}", count, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (it.next().getTitle().length() >= count) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with title length less than {}: after {}", count, webpages.size());
 	}
 
 	private static void content(List<Webpage> webpages, String regex) {
-		System.out.print("Filter webpages with content matching " + regex + ": before " + webpages.size());
+		logger.info("Filter webpages with content matching {}: before {}", regex, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (!it.next().getContent().matches(regex)) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with content matching {}: after {}", regex, webpages.size());
 	}
 
 	private static void contentMore(List<Webpage> webpages, int count) {
-		System.out.print("Filter webpages with content length more than " + count + ": before " + webpages.size());
+		logger.info("Filter webpages with content length more than {}: before {}", count, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (it.next().getContent().length() <= count) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with content length more than {}: after {}", count, webpages.size());
 	}
 	private static void contentLess(List<Webpage> webpages, int count) {
-		System.out.print("Filter webpages with content length less than " + count + ": before " + webpages.size());
+		logger.info("Filter webpages with content length less than {}: before {}", count, webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (it.next().getContent().length() >= count) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with content length less than {}: after {}", count, webpages.size());
 	}
 
 	private static void contentTimeMore(List<Webpage> webpages, Long time) {
-		System.out.print("Filter webpages with content time more than " + timeHuman(time) + ": before " + webpages.size());
+		logger.info("Filter webpages with content time more than {}: before {}", timeHuman(time), webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (it.next().getContentTime() < time) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with content time more than {}: after {}", timeHuman(time), webpages.size());
 	}
 	private static void contentTimeLess(List<Webpage> webpages, Long time) {
-		System.out.print("Filter webpages with content time less than " + timeHuman(time) + ": before " + webpages.size());
+		logger.info("Filter webpages with content time less than {}: before {}", timeHuman(time), webpages.size());
 		for (Iterator<Webpage> it = webpages.iterator(); it.hasNext(); ) {
 			if (it.next().getContentTime() > time) it.remove();
 		}
-		System.out.println(", after " + webpages.size());
+		logger.info("Filter webpages with content time less than {}: after {}", timeHuman(time), webpages.size());
 	}
 
 	private static void grep(List<? extends DatabaseEntry<?>> entries, String regex) {
-		System.out.print("Filter entries matching " + regex + ": before " + entries.size());
+		logger.info("Filter entries matching {}: before {}", regex, entries.size());
 		Pattern pattern = Pattern.compile(regex);
 		for (Iterator<? extends DatabaseEntry<?>> it = entries.iterator(); it.hasNext(); ) {
 			if (!pattern.matcher(it.next().toStringPlain()).find()) it.remove(); // TODO
 		}
-		System.out.println(", after " + entries.size());
+		logger.info("Filter entries matching {}: after {}", regex, entries.size());
 	}
 
 	private static <T extends DatabaseEntry<T>> void asc(List<T> entries) {
-		System.out.println("Sort " + entries.size() + " entries in ascending order");
+		logger.info("Sort {} entries in ascending order", entries.size());
 		Collections.sort(entries);
 	}
 	private static <T extends DatabaseEntry<T>> void desc(List<T> entries) {
-		System.out.println("Sort " + entries.size() + " entries in descending order");
+		logger.info("Sort {} entries in descending order", entries.size());
 		Collections.sort(entries, Collections.reverseOrder());
 	}
 
 	private static <T extends DatabaseEntry<T>> void ascTime(List<T> entries) {
-		System.out.println("Sort " + entries.size() + " entries in ascending order by fetch time");
+		logger.info("Sort {} entries in ascending order by fetch time", entries.size());
 		Collections.sort(entries, (a, b) -> a.getFetchTime() < b.getFetchTime() ? -1 : a.getFetchTime() > b.getFetchTime() ? 1 : 0);
 	}
 	private static <T extends DatabaseEntry<T>> void descTime(List<T> entries) {
-		System.out.println("Sort " + entries.size() + " entries in descending order by fetch time");
+		logger.info("Sort {} entries in descending order by fetch time", entries.size());
 		Collections.sort(entries, (a, b) -> a.getFetchTime() < b.getFetchTime() ? 1 : a.getFetchTime() > b.getFetchTime() ? -1 : 0);
 	}
 
 	private static Map<String, Integer> topHostsPub(List<Publication> publications, Scrape scrape) {
 		if (scrape == null) {
-			System.out.println("Get top hosts from " + publications.size() + " publications");
+			logger.info("Get top hosts from {} publications", publications.size());
 		} else {
-			System.out.println("Get top hosts without scrape rules from " + publications.size() + " publications");
+			logger.info("Get top hosts without scrape rules from {} publications", publications.size());
 		}
 		Map<String, Integer> hosts = new LinkedHashMap<>();
 		for (Publication publication : publications) {
@@ -1912,15 +1916,15 @@ public final class FetcherUtil {
 		Map<String, Integer> topHostsPub = hosts.entrySet().stream()
 			.sorted((c1, c2) -> c2.getValue().compareTo(c1.getValue()))
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k, v) -> { throw new AssertionError(); }, LinkedHashMap::new));
-		System.out.println("Got " + topHostsPub.size() + " top hosts");
+		logger.info("Got {} top hosts", topHostsPub.size());
 		return topHostsPub;
 	}
 
 	private static Map<String, Integer> topHostsWeb(List<Webpage> webpages, Scrape scrape) {
 		if (scrape == null) {
-			System.out.println("Get top hosts from " + webpages.size() + " webpages");
+			logger.info("Get top hosts from {} webpages", webpages.size());
 		} else {
-			System.out.println("Get top hosts without scrape rules from " + webpages.size() + " webpages");
+			logger.info("Get top hosts without scrape rules from {} webpages", webpages.size());
 		}
 		Map<String, Integer> hosts = new LinkedHashMap<>();
 		for (Webpage webpage : webpages) {
@@ -1936,18 +1940,18 @@ public final class FetcherUtil {
 					hosts.put(host, 1);
 				}
 			} catch (MalformedURLException e) {
-				System.err.println("Malformed URL: " + webpage.getFinalUrl());
+				logger.error("Malformed URL: {}", webpage.getFinalUrl());
 			}
 		}
 		Map<String, Integer> topHostsWeb = hosts.entrySet().stream()
 			.sorted((c1, c2) -> c2.getValue().compareTo(c1.getValue()))
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k, v) -> { throw new AssertionError(); }, LinkedHashMap::new));
-		System.out.println("Got " + topHostsWeb.size() + " top hosts");
+		logger.info("Got {} top hosts", topHostsWeb.size());
 		return topHostsWeb;
 	}
 
 	private static void head(Collection<?> entries, int count) {
-		System.out.println("Limit to " + count + " first entries");
+		logger.info("Limit to {} first entries", count);
 		int i = 0;
 		for (Iterator<?> it = entries.iterator(); it.hasNext(); ++i) {
 			it.next();
@@ -1955,7 +1959,7 @@ public final class FetcherUtil {
 		}
 	}
 	private static void tail(Collection<?> entries, int count) {
-		System.out.println("Limit to " + count + " last entries");
+		logger.info("Limit to {} last entries", count);
 		int i = 0;
 		int n = entries.size();
 		for (Iterator<?> it = entries.iterator(); it.hasNext(); ++i) {
@@ -1965,77 +1969,77 @@ public final class FetcherUtil {
 	}
 
 	private static void putPub(List<Publication> publications, String database) throws IOException {
-		System.out.println("Put " + publications.size() + " publications to database: " + database);
+		logger.info("Put {} publications to database: {}", publications.size(), database);
 		try (Database db = new Database(database)) {
 			for (Publication publication : publications) {
 				db.putPublication(publication);
 				db.commit();
 			}
 		}
-		System.out.println("Put publications: success");
+		logger.info("Put publications: success");
 	}
 	private static void putWeb(List<Webpage> webpages, String database) throws IOException {
-		System.out.println("Put " + webpages.size() + " webpages to database: " + database);
+		logger.info("Put {} webpages to database: {}", webpages.size(), database);
 		try (Database db = new Database(database)) {
 			for (Webpage webpage : webpages) {
 				db.putWebpage(webpage);
 				db.commit();
 			}
 		}
-		System.out.println("Put webpages: success");
+		logger.info("Put webpages: success");
 	}
 	private static void putDoc(List<Webpage> docs, String database) throws IOException {
-		System.out.println("Put " + docs.size() + " docs to database: " + database);
+		logger.info("Put {} docs to database: {}", docs.size(), database);
 		try (Database db = new Database(database)) {
 			for (Webpage doc : docs) {
 				db.putWebpage(doc);
 				db.commit();
 			}
 		}
-		System.out.println("Put docs: success");
+		logger.info("Put docs: success");
 	}
 
 	private static void removePub(List<Publication> publications, String database) throws IOException {
-		System.out.println("Remove " + publications.size() + " publications from database: " + database);
+		logger.info("Remove {} publications from database: {}", publications.size(), database);
 		int fail = 0;
 		try (Database db = new Database(database)) {
 			for (Publication publication : publications) {
 				if (!db.removePublication(publication)) {
-					System.err.println("Failed to remove publication: " + publication.toStringId());
+					logger.warn("Failed to remove publication: {}", publication.toStringId());
 					++fail;
 				} else db.commit();
 			}
 		}
-		if (fail > 0) System.err.println("Failed to remove " + fail + " publications");
-		else System.out.println("Remove publications: success");
+		if (fail > 0) logger.warn("Failed to remove {} publications", fail);
+		else logger.info("Remove publications: success");
 	}
 	private static void removeWeb(List<Webpage> webpages, String database) throws IOException {
-		System.out.println("Remove " + webpages.size() + " webpages from database: " + database);
+		logger.info("Remove {} webpages from database: {}", webpages.size(), database);
 		int fail = 0;
 		try (Database db = new Database(database)) {
 			for (Webpage webpage : webpages) {
 				if (!db.removeWebpage(webpage)) {
-					System.err.println("Failed to remove webpage: " + webpage.toStringId());
+					logger.warn("Failed to remove webpage: {}", webpage.toStringId());
 					++fail;
 				} else db.commit();
 			}
 		}
-		if (fail > 0) System.err.println("Failed to remove " + fail + " webpages");
-		else System.out.println("Remove webpages: success");
+		if (fail > 0) logger.warn("Failed to remove {} webpages", fail);
+		else logger.info("Remove webpages: success");
 	}
 	private static void removeDoc(List<Webpage> docs, String database) throws IOException {
-		System.out.println("Remove " + docs.size() + " docs from database: " + database);
+		logger.info("Remove {} docs from database: {}", docs.size(), database);
 		int fail = 0;
 		try (Database db = new Database(database)) {
 			for (Webpage doc : docs) {
 				if (!db.removeDoc(doc)) {
-					System.err.println("Failed to remove doc: " + doc.toStringId());
+					logger.warn("Failed to remove doc: {}", doc.toStringId());
 					++fail;
 				} else db.commit();
 			}
 		}
-		if (fail > 0) System.err.println("Failed to remove " + fail + " docs");
-		else System.out.println("Remove docs: success");
+		if (fail > 0) logger.warn("Failed to remove {} docs", fail);
+		else logger.info("Remove docs: success");
 	}
 
 	private static String toStringPubParts(Publication publication, boolean plain, boolean html, List<PublicationPartName> parts, boolean idOnly) {
@@ -2158,13 +2162,13 @@ public final class FetcherUtil {
 
 	private static <T extends DatabaseEntry<T>> void out(List<T> entries, boolean plain, boolean html, List<PublicationPartName> parts) throws IOException {
 		if (entries.size() == 0) return;
-		System.out.println("Output " + entries.size() + " entries" + (plain ? " without metadata" : "")
-			+ (parts != null ? " with parts " + parts : "") + (html ? " in HTML" : ""));
+		logger.info("Output {} entries{}{}{}",
+			entries.size(), plain ? " without metadata" : "", parts != null ? " with parts " + parts : "", html ? " in HTML" : "");
 		print(System.out, entries, plain, html, parts);
 	}
 	private static <T extends DatabaseEntry<T>> void txt(List<T> entries, boolean plain, boolean html, List<PublicationPartName> parts, String txt) throws IOException {
-		System.out.println("Output " + entries.size() + " entries to file " + txt + (plain ? " without metadata" : "")
-			+ (parts != null ? " with parts" + parts : "") + (html ? " in HTML" : ""));
+		logger.info("Output {} entries to file {}{}{}{}",
+				entries.size(), txt, plain ? " without metadata" : "", parts != null ? " with parts " + parts : "", html ? " in HTML" : "");
 		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (entries.size() == 0) return;
 			print(ps, entries, plain, html, parts);
@@ -2181,11 +2185,11 @@ public final class FetcherUtil {
 	}
 	private static void outTopHosts(Map<String, Integer> topHosts, boolean html) throws IOException {
 		if (topHosts.size() == 0) return;
-		System.out.println("Output " + topHosts.size() + " top hosts" + (html ? " in HTML" : ""));
+		logger.info("Output {} top hosts{}", topHosts.size(), html ? " in HTML" : "");
 		printTopHosts(System.out, topHosts, html);
 	}
 	private static void txtTopHosts(Map<String, Integer> topHosts, boolean html, String txt) throws IOException {
-		System.out.println("Output " + topHosts.size() + " top hosts to file " + txt + (html ? " in HTML" : ""));
+		logger.info("Output {} top hosts to file {}{}", topHosts.size(), txt, html ? " in HTML" : "");
 		try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(FetcherCommon.outputPath(txt))), true, "UTF-8")) {
 			if (topHosts.size() == 0) return;
 			printTopHosts(ps, topHosts, html);
@@ -2380,76 +2384,76 @@ public final class FetcherUtil {
 
 		if (externalPublicationIds != null) {
 			publicationIds.addAll(pubCheck(externalPublicationIds));
-			System.out.println("Got " + publicationIds.size() + " new distinct external publication IDs");
+			logger.info("Got {} new distinct external publication IDs", publicationIds.size());
 		}
 		if (externalWebpageUrls != null) {
 			webpageUrls.addAll(web(externalWebpageUrls));
-			System.out.println("Got " + webpageUrls.size() + " new distinct external webpage URLs");
+			logger.info("Got {} new distinct external webpage URLs", webpageUrls.size());
 		}
 		if (externalDocUrls != null) {
 			docUrls.addAll(web(externalDocUrls));
-			System.out.println("Got " + docUrls.size() + " new distinct external doc URLs");
+			logger.info("Got {} new distinct external doc URLs", docUrls.size());
 		}
 
 		if (args.pubFile != null) {
 			int sizeBefore = publicationIds.size();
 			publicationIds.addAll(pubCheck(pubFile(args.pubFile)));
-			System.out.println("Got " + (publicationIds.size() - sizeBefore) + " new distinct publication IDs from file " + args.pubFile);
+			logger.info("Got {} new distinct publication IDs from file {}", publicationIds.size() - sizeBefore, args.pubFile);
 		}
 		if (args.webFile != null) {
 			int sizeBefore = webpageUrls.size();
 			webpageUrls.addAll(web(webFile(args.webFile)));
-			System.out.println("Got " + (webpageUrls.size() - sizeBefore) + " new distinct webpage URLs from file " + args.webFile);
+			logger.info("Got {} new distinct webpage URLs from file {}", webpageUrls.size() - sizeBefore, args.webFile);
 		}
 		if (args.docFile != null) {
 			int sizeBefore = docUrls.size();
 			docUrls.addAll(web(webFile(args.docFile)));
-			System.out.println("Got " + (docUrls.size() - sizeBefore) + " new distinct doc URLs from file " + args.docFile);
+			logger.info("Got {} new distinct doc URLs from file {}", docUrls.size() - sizeBefore, args.docFile);
 		}
 
 		if (args.pub != null) {
 			int sizeBefore = publicationIds.size();
 			publicationIds.addAll(pub(args.pub));
-			System.out.println("Got " + (publicationIds.size() - sizeBefore) + " new distinct publication IDs from command line");
+			logger.info("Got {} new distinct publication IDs from command line", publicationIds.size() - sizeBefore);
 		}
 		if (args.web != null) {
 			int sizeBefore = webpageUrls.size();
 			webpageUrls.addAll(web(args.web));
-			System.out.println("Got " + (webpageUrls.size() - sizeBefore) + " new distinct webpage URLs from command line");
+			logger.info("Got {} new distinct webpage URLs from command line", webpageUrls.size() - sizeBefore);
 		}
 		if (args.doc != null) {
 			int sizeBefore = docUrls.size();
 			docUrls.addAll(web(args.doc));
-			System.out.println("Got " + (docUrls.size() - sizeBefore) + " new distinct doc URLs from command line");
+			logger.info("Got {} new distinct doc URLs from command line", docUrls.size() - sizeBefore);
 		}
 
 		if (args.pubDb != null) {
 			int sizeBefore = publicationIds.size();
 			publicationIds.addAll(pubDb(args.pubDb));
-			System.out.println("Got " + (publicationIds.size() - sizeBefore) + " new distinct publication IDs from database " + args.pubDb);
+			logger.info("Got {} new distinct publication IDs from database {}", publicationIds.size() - sizeBefore, args.pubDb);
 		}
 		if (args.webDb != null) {
 			int sizeBefore = webpageUrls.size();
 			webpageUrls.addAll(webDb(args.webDb));
-			System.out.println("Got " + (webpageUrls.size() - sizeBefore) + " new distinct webpage URLs from database " + args.webDb);
+			logger.info("Got {} new distinct webpage URLs from database {}", webpageUrls.size() - sizeBefore, args.webDb);
 		}
 		if (args.docDb != null) {
 			int sizeBefore = docUrls.size();
 			docUrls.addAll(docDb(args.docDb));
-			System.out.println("Got " + (docUrls.size() - sizeBefore) + " new distinct doc URLs from database " + args.docDb);
+			logger.info("Got {} new distinct doc URLs from database {}", docUrls.size() - sizeBefore, args.docDb);
 		}
 		if (args.allDb != null) {
 			int sizeBefore = publicationIds.size();
 			publicationIds.addAll(pubDb(args.pubDb));
-			System.out.println("Got " + (publicationIds.size() - sizeBefore) + " new distinct publication IDs from database " + args.allDb);
+			logger.info("Got {} new distinct publication IDs from database {}", publicationIds.size() - sizeBefore, args.allDb);
 
 			sizeBefore = webpageUrls.size();
 			webpageUrls.addAll(webDb(args.webDb));
-			System.out.println("Got " + (webpageUrls.size() - sizeBefore) + " new distinct webpage URLs from database " + args.allDb);
+			logger.info("Got {} new distinct webpage URLs from database {}", webpageUrls.size() - sizeBefore, args.allDb);
 
 			sizeBefore = docUrls.size();
 			docUrls.addAll(docDb(args.docDb));
-			System.out.println("Got " + (docUrls.size() - sizeBefore) + " new distinct doc URLs from database " + args.allDb);
+			logger.info("Got {} new distinct doc URLs from database {}", docUrls.size() - sizeBefore, args.allDb);
 		}
 
 		// filter IDs
@@ -2893,24 +2897,5 @@ public final class FetcherUtil {
 		if (args.txtTopHostsDocNoScrape != null) txtTopHosts(topHostsDocsNoScrape, args.html, args.txtTopHostsDocNoScrape);
 
 		if (args.partTable) partTable(publications);
-	}
-
-	public static <T extends MainArgs> T parseArgs(String[] argv, Class<T> clazz, Version version) throws ReflectiveOperationException {
-		T args = clazz.getConstructor().newInstance();
-		JCommander jcommander = new JCommander(args);
-		try {
-			jcommander.parse(argv);
-		} catch (ParameterException e) {
-			System.err.println(version.getName() + " " + version.getVersion());
-			System.err.println(e);
-			System.err.println("Use -h or --help for listing valid options");
-			System.exit(1);
-		}
-		if (args.isHelp()) {
-			System.out.println(version.getName() + " " + version.getVersion());
-			jcommander.usage();
-			System.exit(0);
-		}
-		return args;
 	}
 }

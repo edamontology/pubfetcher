@@ -154,3 +154,9 @@
   title: head > title
   content: body
   javascript: 'false'
+
+# java.lang.OutOfMemoryError in htmlunit
+'dad\.fao\.org':
+  title: head > title
+  content: body
+  javascript: 'false'

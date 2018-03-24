@@ -19,6 +19,9 @@
 
 package org.edamontology.pubfetcher;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public enum PublicationPartType {
 	// order is important
 	europepmc("Europe PubMed Central"),
@@ -54,6 +57,8 @@ public enum PublicationPartType {
 	pdf_meta("PDF from HTML meta"),
 	webpage("Whole webpage"),
 	na("NA");
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private final String type;
 
@@ -116,9 +121,9 @@ public enum PublicationPartType {
 		case link_meta: return pdf_meta;
 		default:
 			if (isPdf()) {
-				System.err.println("Publication part type " + this + " is already of PDF type");
+				logger.warn("Publication part type {} is already of PDF type", this);
 			} else {
-				System.err.println("Publication part type " + this + " can't be converted to PDF type");
+				logger.warn("Publication part type {} can't be converted to PDF type", this);
 			}
 			return this;
 		}

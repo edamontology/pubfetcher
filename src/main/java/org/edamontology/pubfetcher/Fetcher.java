@@ -37,12 +37,12 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -68,10 +68,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 public class Fetcher {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private static int LINKS_LIMIT = 10;
 
@@ -110,9 +113,6 @@ public class Fetcher {
 		}
 		scrape = new Scrape();
 		this.fetcherArgs = fetcherArgs;
-
-		// TODO
-		Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
 	}
 
 	public Scrape getScrape() {
@@ -126,13 +126,13 @@ public class Fetcher {
 	private void setFetchException(Webpage webpage, Publication publication, String exceptionUrl) {
 		if (webpage != null) {
 			if (!webpage.isFetchException()) {
-				System.err.println("Set fetching exception for webpage " + webpage.toStringId());
+				logger.warn("Set fetching exception for webpage {}", webpage.toStringId());
 				webpage.setFetchException(true);
 			}
 		}
 		if (publication != null && (exceptionUrl == null || !EXCEPTION_EXCEPTION.matcher(exceptionUrl).find())) {
 			if (!publication.isFetchException()) {
-				System.err.println("Set fetching exception for publication " + publication.toStringId());
+				logger.warn("Set fetching exception for publication {}", publication.toStringId());
 				publication.setFetchException(true);
 			}
 		}
@@ -153,7 +153,7 @@ public class Fetcher {
 	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout) {
 		Document doc = null;
 
-		System.out.println("    GET " + url + (javascript ? " (with JavaScript)" : ""));
+		logger.info("    GET {}{}", url, javascript ? " (with JavaScript)" : "");
 
 		try {
 			if (webpage != null) {
@@ -176,6 +176,7 @@ public class Fetcher {
 					webClient.getOptions().setDownloadImages(false);
 
 					webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+					webClient.setCssErrorHandler(new SilentCssErrorHandler());
 
 					Page page = webClient.getPage(url);
 
@@ -223,13 +224,13 @@ public class Fetcher {
 			if (webpage != null) {
 				webpage.setFinalUrl(doc.location());
 				webpage.setTitle(doc.title());
-				System.out.println("        final url: " + webpage.getFinalUrl());
-				System.out.println("        content type: " + webpage.getContentType());
-				System.out.println("        status code: " + webpage.getStatusCode());
-				System.out.println("        title: " + webpage.getTitle());
-				System.out.println("        content length: " + doc.text().length());
+				logger.info("        final url: {}", webpage.getFinalUrl());
+				logger.info("        content type: {}", webpage.getContentType());
+				logger.info("        status code: {}", webpage.getStatusCode());
+				logger.info("        title: {}", webpage.getTitle());
+				logger.info("        content length: {}", doc.text().length());
 			} else {
-				System.out.println("    GOT " + doc.location());
+				logger.info("    GOT {}", doc.location());
 			}
 
 			if (links != null) {
@@ -237,13 +238,13 @@ public class Fetcher {
 			}
 		} catch (MalformedURLException e) {
 			// if the request URL is not a HTTP or HTTPS URL, or is otherwise malformed
-			System.err.println(e);
+			logger.warn(e);
 			if (webpage != null || publication != null) {
 				fetchPdf(url, webpage, publication, type, from, links, parts);
 			}
 		} catch (HttpStatusException e) {
 			// if the response is not OK and HTTP response errors are not ignored
-			System.err.println(e);
+			logger.warn(e);
 			if (webpage != null) {
 				webpage.setFinalUrl(e.getUrl());
 				webpage.setStatusCode(e.getStatusCode());
@@ -254,7 +255,7 @@ public class Fetcher {
 				setFetchException(null, publication, e.getUrl());
 			}
 		} catch (FailingHttpStatusCodeException e) {
-			System.err.println(e);
+			logger.warn(e);
 			if (webpage != null) {
 				webpage.setFinalUrl(e.getResponse().getWebRequest().getUrl().toString());
 				webpage.setStatusCode(e.getStatusCode());
@@ -265,7 +266,7 @@ public class Fetcher {
 				setFetchException(null, publication, e.getResponse().getWebRequest().getUrl().toString());
 			}
 		} catch (java.net.ConnectException | java.net.NoRouteToHostException e) {
-			System.err.println(e);
+			logger.warn(e);
 			setFetchException(webpage, publication, null);
 		} catch (UnsupportedMimeTypeException e) {
 			// if the response mime type is not supported and those errors are not ignored
@@ -278,29 +279,29 @@ public class Fetcher {
 				if (webpage != null || publication != null) {
 					fetchPdf(e.getUrl(), webpage, publication, type, from, links, parts);
 				} else {
-					System.err.println(e);
+					logger.warn(e);
 				}
 			} else {
-				System.err.println(e);
+				logger.warn(e);
 			}
 		} catch (SocketTimeoutException e) {
 			// if the connection times out
-			System.err.println(e);
+			logger.warn(e);
 			if (!timeout) {
 				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true);
 			} else {
 				setFetchException(webpage, publication, null);
 			}
 		} catch (javax.net.ssl.SSLHandshakeException | javax.net.ssl.SSLProtocolException e) {
-			System.err.println(e);
+			logger.warn(e);
 			if (!javascript) {
 				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout);
 			}
 		} catch (IOException e) {
 			// if a connection or read error occurs
-			System.err.println(e);
+			logger.warn(e);
 		} catch (Exception | org.jsoup.UncheckedIOException e) {
-			e.printStackTrace();
+			logger.warn("Exception!", e);
 			setFetchException(webpage, publication, null);
 		}
 
@@ -318,16 +319,13 @@ public class Fetcher {
 					PublicationPartName.title, PublicationPartName.theAbstract, PublicationPartName.fulltext
 				}, parts, false))) return;
 
-		// TODO
-		Logger.getLogger("org.apache.pdfbox").setLevel(Level.SEVERE);
-
-		System.out.println("    GET PDF " + url);
+		logger.info("    GET PDF {}", url);
 
 		URLConnection con;
 		try {
 			con = FetcherCommon.newConnection(url, fetcherArgs);
 		} catch (IOException e) {
-			System.err.println(e);
+			logger.warn(e);
 			return;
 		}
 
@@ -337,7 +335,7 @@ public class Fetcher {
 		}
 
 		try (PDDocument doc = PDDocument.load(con.getInputStream())) {
-			System.out.println("    GOT PDF " + finalUrl);
+			logger.info("    GOT PDF {}", finalUrl);
 			if (webpage != null) {
 				if (con instanceof HttpURLConnection) {
 					HttpURLConnection httpCon = (HttpURLConnection) con;
@@ -368,7 +366,7 @@ public class Fetcher {
 							if (title != null) {
 								webpage.setTitle(title);
 								if (!webpage.getTitle().isEmpty()) {
-									System.out.println("        title: " + webpage.getTitle());
+									logger.info("        title: {}", webpage.getTitle());
 								}
 							}
 						}
@@ -403,14 +401,14 @@ public class Fetcher {
 					if (pdfText != null) {
 						if (webpage != null) {
 							webpage.setContent(pdfText);
-							System.out.println("        content length: " + webpage.getContent().length());
+							logger.info("        content length: {}", webpage.getContent().length());
 						}
 						if (publication != null && !publication.isFulltextFinal(fetcherArgs) && fulltextPart) {
 							publication.setFulltext(pdfText, type, finalUrl, fetcherArgs);
 						}
 					}
 				} catch (IOException e) {
-					System.out.println(e);
+					logger.warn(e);
 				}
 			}
 
@@ -429,7 +427,7 @@ public class Fetcher {
 									if (title != null) {
 										webpage.setTitle(title);
 										if (!webpage.getTitle().isEmpty()) {
-											System.out.println("        title: " + webpage.getTitle());
+											logger.info("        title: {}", webpage.getTitle());
 										}
 									}
 								}
@@ -466,26 +464,26 @@ public class Fetcher {
 							}
 						}
 					} catch (IOException e) {
-						System.out.println(e);
+						logger.warn(e);
 					} catch (XmpParsingException e) {
-						System.err.println(e);
+						logger.warn(e);
 					} catch (IllegalArgumentException e) {
-						System.err.println(e);
+						logger.warn(e);
 					}
 				}
 			}
 		} catch (InvalidPasswordException e) {
-			System.err.println(e);
+			logger.warn(e);
 		} catch (java.net.ConnectException | java.net.NoRouteToHostException e) {
-			System.err.println(e);
+			logger.warn(e);
 			setFetchException(webpage, publication, null);
 		} catch (SocketTimeoutException e) {
-			System.err.println(e);
+			logger.warn(e);
 			setFetchException(webpage, publication, null);
 		} catch (IOException e) {
-			System.err.println(e);
+			logger.warn(e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn("Exception!", e);
 			setFetchException(webpage, publication, null);
 		}
 	}
@@ -493,19 +491,19 @@ public class Fetcher {
 	private static String getFirstTrimmed(Document doc, String selector, boolean logMissing) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
-			System.err.println("Empty selector given for " + doc.location());
+			logger.error("Empty selector given for {}", doc.location());
 			return "";
 		}
 		Element tag = doc.select(selector).first();
 		if (tag != null) {
 			String firstTrimmed = tag.text();
 			if (logMissing && firstTrimmed.isEmpty()) {
-				System.err.println("Empty content in element selected by " + selector + " in " + doc.location());
+				logger.warn("Empty content in element selected by {} in {}", selector, doc.location());
 			}
 			return firstTrimmed;
 		} else {
 			if (logMissing) {
-				System.err.println("No element found for selector " + selector + " in " + doc.location());
+				logger.warn("No element found for selector {} in {}", selector, doc.location());
 			}
 			return "";
 		}
@@ -514,12 +512,12 @@ public class Fetcher {
 	private static Elements getAll(Document doc, String selector, boolean logMissing) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
-			System.err.println("Empty selector given for " + doc.location());
+			logger.error("Empty selector given for {}", doc.location());
 			return new Elements();
 		}
 		Elements all = doc.select(selector);
 		if (logMissing && all.isEmpty()) {
-			System.err.println("No elements found for selector " + selector + " in " + doc.location());
+			logger.warn("No elements found for selector {} in {}", selector, doc.location());
 		}
 		return all;
 	}
@@ -527,7 +525,7 @@ public class Fetcher {
 	private static String text(Document doc, String selector, boolean logMissing) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
-			System.err.println("Empty selector given for " + doc.location());
+			logger.error("Empty selector given for {}", doc.location());
 			return "";
 		}
 		String text = getAll(doc, selector, false).stream()
@@ -535,7 +533,7 @@ public class Fetcher {
 			.map(e -> e.text())
 			.collect(Collectors.joining("\n\n"));
 		if (logMissing && text.isEmpty()) {
-			System.err.println("No text found for selector " + selector + " in " + doc.location());
+			logger.warn("No text found for selector {} in {}", selector, doc.location());
 		}
 		return text;
 	}
@@ -554,7 +552,7 @@ public class Fetcher {
 				if (pmidExtracted != null && FetcherCommon.isPmid(pmidExtracted)) {
 					publication.setPmid(pmidExtracted, type, doc.location(),fetcherArgs);
 				} else {
-					System.err.println("Trying to set invalid PMID " + pmidText + " from " + doc.location());
+					logger.warn("Trying to set invalid PMID {} from {}", pmidText, doc.location());
 				}
 			}
 		}
@@ -575,7 +573,7 @@ public class Fetcher {
 				if (pmcidExtracted != null && FetcherCommon.isPmcid(pmcidExtracted)) {
 					publication.setPmcid(pmcidExtracted, type, doc.location(), fetcherArgs);
 				} else {
-					System.err.println("Trying to set invalid PMCID " + pmcidText + " from " + doc.location());
+					logger.warn("Trying to set invalid PMCID {} from {}", pmcidText, doc.location());
 				}
 			}
 		}
@@ -592,7 +590,7 @@ public class Fetcher {
 				if (doiExtracted != null && FetcherCommon.isDoi(doiExtracted) && doiExtracted.indexOf(" ") < 0) {
 					publication.setDoi(doiExtracted, type, doc.location(),fetcherArgs);
 				} else {
-					System.err.println("Trying to set invalid DOI " + doiText + " from " + doc.location());
+					logger.warn("Trying to set invalid DOI {} from {}", doiText, doc.location());
 				}
 			}
 		}
@@ -671,21 +669,21 @@ public class Fetcher {
 	private void setJournalTitle(Publication publication, Document doc, String selector) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
-			System.err.println("Empty selector given for journal title in " + doc.location());
+			logger.error("Empty selector given for journal title in {}", doc.location());
 			return;
 		}
 		Element journalTitle = doc.selectFirst(selector);
 		if (journalTitle != null && journalTitle.hasText()) {
 			publication.setJournalTitle(journalTitle.text());
 		} else {
-			System.err.println("Journal title not found in " + doc.location());
+			logger.warn("Journal title not found in {}", doc.location());
 		}
 	}
 
 	private void setPubDate(Publication publication, Document doc, String selector, boolean separated) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
-			System.err.println("Empty selector given for publication date in " + doc.location());
+			logger.error("Empty selector given for publication date in {}", doc.location());
 			return;
 		}
 		Element pubDate = doc.selectFirst(selector);
@@ -711,27 +709,27 @@ public class Fetcher {
 				if (!date.isEmpty()) {
 					publication.setPubDate(date);
 				} else {
-					System.err.println("Publication date (separated) not found in " + doc.location());
+					logger.warn("Publication date (separated) not found in {}", doc.location());
 				}
 			} else {
 				publication.setPubDate(pubDate.text());
 			}
 		} else {
-			System.err.println("Publication date not found in " + doc.location());
+			logger.warn("Publication date not found in {}", doc.location());
 		}
 	}
 
 	private void setCitationsCount(Publication publication, Document doc, String selector) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
-			System.err.println("Empty selector given for citations count in " + doc.location());
+			logger.error("Empty selector given for citations count in {}", doc.location());
 			return;
 		}
 		Element citationsCount = doc.selectFirst(selector);
 		if (citationsCount != null && citationsCount.hasText()) {
 			publication.setCitationsCount(citationsCount.text());
 		} else {
-			System.err.println("Citations count not found in " + doc.location());
+			logger.error("Citations count not found in {}", doc.location());
 		}
 	}
 
@@ -857,7 +855,7 @@ public class Fetcher {
 								addPhone(contribEmail.text(), phones, null);
 							}
 						} catch (SelectorParseException e) {
-							System.err.println(e);
+							logger.error(e);
 						}
 					}
 				}
@@ -907,7 +905,7 @@ public class Fetcher {
 							}
 						}
 					} catch (SelectorParseException e) {
-						System.err.println(e);
+						logger.error(e);
 					}
 				}
 			}
@@ -930,7 +928,7 @@ public class Fetcher {
 		if (!correspAuthor.isEmpty()) {
 			publication.setCorrespAuthor(correspAuthor);
 		} else {
-			System.err.println("Corresponding author not found in " + doc.location());
+			logger.warn("Corresponding author not found in {}", doc.location());
 		}
 	}
 
@@ -973,7 +971,7 @@ public class Fetcher {
 			}, parts, true)) return;
 
 		if (publication.getIdCount() < 1) {
-			System.err.println("Can't fetch publication with no IDs");
+			logger.error("Can't fetch publication with no IDs");
 			return;
 		}
 
@@ -999,7 +997,7 @@ public class Fetcher {
 		try {
 			europepmc = new URI("https", "www.ebi.ac.uk", "/europepmc/webservices/rest/search", europepmcQuery, null).toASCIIString();
 		} catch (URISyntaxException e) {
-			System.err.println(e);
+			logger.error(e);
 			return;
 		}
 
@@ -1014,15 +1012,15 @@ public class Fetcher {
 				if (hitCount != null) {
 					count = Integer.parseInt(hitCount.text());
 				} else {
-					System.err.println("Tag hitCount not found in " + doc.location());
+					logger.warn("Tag hitCount not found in {}", doc.location());
 				}
 			} catch (NumberFormatException e) {
-				System.err.println("Tag hitCount does not contain an integer in " + doc.location());
+				logger.warn("Tag hitCount does not contain an integer in {}", doc.location());
 			}
 
 			int realCount = doc.select("resultList > result").size();
 			if (count != realCount) {
-				System.err.println("Tag hitCount value (" + count + ") does not match resultList size (" + realCount + ") in " + doc.location());
+				logger.warn("Tag hitCount value ({}) does not match resultList size ({}) in {}", count, realCount, doc.location());
 			}
 
 			if (realCount == 1) {
@@ -1045,18 +1043,18 @@ public class Fetcher {
 							if (majorTopic_YN != null) {
 								meshTerm.setMajorTopic(majorTopic_YN.text().equalsIgnoreCase("Y"));
 							} else {
-								System.err.println("Tag majorTopic_YN not found in " + doc.location());
+								logger.warn("Tag majorTopic_YN not found in {}", doc.location());
 							}
 
 							Element descriptorName = meshHeading.getElementsByTag("descriptorName").first();
 							if (descriptorName != null) {
 								String descriptorNameText = descriptorName.text();
 								if (descriptorNameText.isEmpty()) {
-									System.err.println("Tag descriptorName has no content in " + doc.location());
+									logger.warn("Tag descriptorName has no content in {}", doc.location());
 								}
 								meshTerm.setTerm(descriptorNameText);
 							} else {
-								System.err.println("Tag descriptorName not found in " + doc.location());
+								logger.warn("Tag descriptorName not found in {}", doc.location());
 							}
 
 							meshTerms.add(meshTerm);
@@ -1096,7 +1094,7 @@ public class Fetcher {
 					state.europepmcHasMinedTerms = true;
 				}
 			} else {
-				System.err.println("There are " + realCount + " results for " + doc.location());
+				logger.error("There are {} results for {}", realCount, doc.location());
 			}
 		}
 	}
@@ -1106,7 +1104,7 @@ public class Fetcher {
 	// https://jats.nlm.nih.gov/publishing/tag-library/1.1/
 	private boolean fillWithPubMedCentralXml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts) {
 		if (doc.getElementsByTag("article").first() == null) {
-			System.err.println("No article found in " + doc.location());
+			logger.warn("No article found in {}", doc.location());
 			return false;
 		}
 
@@ -1196,7 +1194,7 @@ public class Fetcher {
 								}
 							}
 						} else {
-							System.err.println("Missing href for .fig or .table-wrap link in " + doc.location());
+							logger.warn("Missing href for .fig or .table-wrap link in {}", doc.location());
 						}
 					}
 					publication.setFulltext(sb.toString(), type, doc.location(), fetcherArgs);
@@ -1259,10 +1257,10 @@ public class Fetcher {
 					links.add(pdfHref, type.toPdf(), doc.location(), publication, fetcherArgs, true);
 					pdfAdded = true;
 				} else {
-					System.err.println("Missing href for PDF link in " + doc.location());
+					logger.warn("Missing href for PDF link in {}", doc.location());
 				}
 			} else {
-				System.err.println("PDF link not found in " + doc.location());
+				logger.warn("PDF link not found in {}", doc.location());
 			}
 		}
 
@@ -1279,7 +1277,7 @@ public class Fetcher {
 		if (doc != null) {
 			Elements elements = doc.getElementsByTag("tmSummary");
 			if (elements.isEmpty()) {
-				System.err.println("No mined terms found in " + doc.location());
+				logger.warn("No mined terms found in {}", doc.location());
 			}
 			for (Element tmSummary : elements) {
 				MinedTerm minedTerm = new MinedTerm();
@@ -1288,11 +1286,11 @@ public class Fetcher {
 				if (term != null) {
 					String termText = term.text();
 					if (termText.isEmpty()) {
-						System.err.println("Tag term has no content in " + doc.location());
+						logger.warn("Tag term has no content in {}", doc.location());
 					}
 					minedTerm.setTerm(termText);
 				} else {
-					System.err.println("Tag term not found in " + doc.location());
+					logger.warn("Tag term not found in {}", doc.location());
 				}
 
 				Element count = tmSummary.getElementsByTag("count").first();
@@ -1300,14 +1298,14 @@ public class Fetcher {
 					try {
 						int countInt = Integer.parseInt(count.text());
 						if (countInt < 1) {
-							System.err.println("Tag count has value less than 1 in " + doc.location());
+							logger.warn("Tag count has value less than 1 in {}", doc.location());
 						}
 						minedTerm.setCount(countInt);
 					} catch (NumberFormatException e) {
-						System.err.println("Tag count does not contain an integer in " + doc.location());
+						logger.warn("Tag count does not contain an integer in {}", doc.location());
 					}
 				} else {
-					System.err.println("Tag count not found in " + doc.location());
+					logger.warn("Tag count not found in {}", doc.location());
 				}
 
 				Element altNameList = tmSummary.getElementsByTag("altNameList").first();
@@ -1410,7 +1408,7 @@ public class Fetcher {
 		Document doc = getDoc(EUTILS + "efetch.fcgi?retmode=xml&db=pubmed&id=" + pmid, publication);
 		if (doc != null) {
 			if (doc.getElementsByTag("PubmedArticle").first() == null) {
-				System.err.println("No article found in " + doc.location());
+				logger.warn("No article found in {}", doc.location());
 				return;
 			}
 
@@ -1431,19 +1429,19 @@ public class Fetcher {
 
 						String descriptorNameText = descriptorName.text();
 						if (descriptorNameText.isEmpty()) {
-							System.err.println("Tag DescriptorName has no content in " + doc.location());
+							logger.warn("Tag DescriptorName has no content in {}", doc.location());
 						}
 						meshTerm.setTerm(descriptorNameText);
 
 						String majorTopic_YN = descriptorName.attr("MajorTopicYN").trim();
 						if (majorTopic_YN.isEmpty()) {
-							System.err.println("Attribute MajorTopicYN has no content in " + doc.location());
+							logger.warn("Attribute MajorTopicYN has no content in {}", doc.location());
 						}
 						meshTerm.setMajorTopic(majorTopic_YN.equalsIgnoreCase("Y"));
 
 						String descriptorNameUI = descriptorName.attr("UI").trim();
 						if (descriptorNameUI.isEmpty()) {
-							System.err.println("Attribute UI has no content in " + doc.location());
+							logger.warn("Attribute UI has no content in {}", doc.location());
 						}
 						meshTerm.setUniqueId(descriptorNameUI);
 
@@ -1481,7 +1479,7 @@ public class Fetcher {
 		Document doc = getDoc(FetcherCommon.PMIDlink + pmid, publication);
 		if (doc != null) {
 			if (doc.getElementsByClass("rprt").first() == null) {
-				System.err.println("No article found in " + doc.location());
+				logger.warn("No article found in {}", doc.location());
 				return;
 			}
 
@@ -1512,7 +1510,7 @@ public class Fetcher {
 							meshTerm.setMajorTopic(true);
 						}
 						if (descriptorNameText.isEmpty()) {
-							System.err.println("MeSH term has no content in " + doc.location());
+							logger.warn("MeSH term has no content in {}", doc.location());
 						}
 						meshTerm.setTerm(descriptorNameText);
 
@@ -1574,10 +1572,10 @@ public class Fetcher {
 					links.add(pdfHref, type.toPdf(), doc.location(), publication, fetcherArgs, true);
 					pdfAdded = true;
 				} else {
-					System.err.println("Missing href for PDF link in " + doc.location());
+					logger.warn("Missing href for PDF link in {}", doc.location());
 				}
 			} else {
-				System.err.println("PDF link not found in " + doc.location());
+				logger.warn("PDF link not found in {}", doc.location());
 			}
 		}
 
@@ -1597,13 +1595,13 @@ public class Fetcher {
 						new URL(newUrl);
 						href = newUrl;
 					} catch (MalformedURLException e) {
-						System.err.println("New URL is malformed (" + newUrl + ") (old " + url + ", src " + src + ", dst " + dst + ")");
+						logger.warn("New URL is malformed ({}) (old {}, src {}, dst {})", newUrl, url, src, dst);
 					}
 				} else {
-					System.err.println("New URL (" + newUrl + ") is empty or equal to old URL (" + url + ") (src " + src + ", dst " + dst + ")");
+					logger.warn("New URL ({}) is empty or equal to old URL ({}) (src {}, dst {})", newUrl, url, src, dst);
 				}
 			} else {
-				System.err.println("Can't transform empty URL (src " + src + ", dst " + dst + ")");
+				logger.warn("Can't transform empty URL (src {}, dst {})", src, dst);
 			}
 		}
 		return href;
@@ -1614,7 +1612,7 @@ public class Fetcher {
 		if (a != null && !a.trim().isEmpty()) {
 			Elements aTags = doc.select(a.trim());
 			if (aTags.isEmpty()) {
-				System.err.println("Can't find link with " + a + " in " + doc.location());
+				logger.warn("Can't find link with {} in {}", a, doc.location());
 			}
 			for (Element aTag : aTags) {
 				String aHref = aTag.attr("abs:href");
@@ -1623,10 +1621,10 @@ public class Fetcher {
 						new URL(aHref);
 						hrefs.add(aHref);
 					} catch (MalformedURLException e) {
-						System.err.println("Attribute href malformed for link found with " + a + " in " + doc.location());
+						logger.warn("Attribute href malformed for link found with {} in {}", a, doc.location());
 					}
 				} else {
-					System.err.println("Attribute href empty for link found with " + a + " in " + doc.location());
+					logger.warn("Attribute href empty for link found with {} in {}", a, doc.location());
 				}
 			}
 		}
@@ -1702,7 +1700,7 @@ public class Fetcher {
 					links.add(pdfHrefA, type.toPdf(), finalUrl, publication, fetcherArgs, false);
 				}
 			} else {
-				System.err.println("No scrape rules for " + finalUrl);
+				logger.warn("No scrape rules for {}", finalUrl);
 				if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {
 					publication.setTitle(doc.title().split("\\|", 2)[0], PublicationPartType.webpage, finalUrl, fetcherArgs, false);
 				}
@@ -1718,7 +1716,7 @@ public class Fetcher {
 			try {
 				publication.addVisitedSite(new Link(finalUrl, type, from));
 			} catch (MalformedURLException e) {
-				System.err.println("Can't add malformed visited site " + url + " found in " + from + " of type " + type);
+				logger.error("Can't add malformed visited site {} found in {} of type {}", url, from, type);
 			}
 		}
 	}
@@ -1739,7 +1737,7 @@ public class Fetcher {
 		try {
 			doiLink = new URI("https", "doi.org", "/" + doi, null, null).toASCIIString();
 		} catch (URISyntaxException e) {
-			System.err.println(e);
+			logger.error(e);
 			return;
 		}
 
@@ -1763,16 +1761,16 @@ public class Fetcher {
 		URLConnection con;
 		try {
 			String oaDOI = new URI("https", "api.oadoi.org", "/v2/" + doi, "email=" + fetcherArgs.getOadoiEmail(), null).toASCIIString();
-			System.out.println("    GET oaDOI " + oaDOI);
+			logger.info("    GET oaDOI {}", oaDOI);
 			con = FetcherCommon.newConnection(oaDOI, fetcherArgs);
 		} catch (URISyntaxException | IOException e) {
-			System.err.println(e);
+			logger.error(e);
 			return;
 		}
 
 		try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
 			String finalUrl = con.getURL().toString();
-			System.out.println("    GOT oaDOI " + finalUrl);
+			logger.info("    GOT oaDOI {}", finalUrl);
 
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(SerializationFeature.CLOSE_CLOSEABLE);
@@ -1792,10 +1790,10 @@ public class Fetcher {
 					if (journalNameText != null && !journalNameText.trim().isEmpty() && !journalNameText.trim().equals("null")) {
 						publication.setJournalTitle(journalNameText.trim());
 					} else {
-						System.err.println("Journal title empty in oaDOI " + finalUrl);
+						logger.warn("Journal title empty in oaDOI {}", finalUrl);
 					}
 				} else {
-					System.err.println("Journal title not found in oaDOI " + finalUrl);
+					logger.warn("Journal title not found in oaDOI {}", finalUrl);
 				}
 			}
 
@@ -1839,19 +1837,19 @@ public class Fetcher {
 				}
 			}
 		} catch (SocketTimeoutException e) {
-			System.err.println(e);
+			logger.warn(e);
 			setFetchException(null, publication, null);
 		} catch (IOException e) {
-			System.err.println(e);
+			logger.warn(e);
 		} catch (Exception e) {
 			// any checked exception
-			e.printStackTrace();
+			logger.warn("Exception!", e);
 			setFetchException(null, publication, null);
 		}
 	}
 
 	private boolean fetchAll(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println("Fetch sources " + publication.toStringId());
+		logger.info("Fetch sources {}", publication.toStringId());
 
 		String pmid = publication.getPmid().getContent();
 		String pmcid = publication.getPmcid().getContent();
@@ -1875,15 +1873,15 @@ public class Fetcher {
 		fetchOaDoi(publication, links, state, parts);
 
 		if (!pmid.isEmpty() && !publication.getPmid().isEmpty() && !pmid.equals(publication.getPmid().getContent())) {
-			System.err.println("PMID changed from " + pmid + " to " + publication.getPmid().getContent());
+			logger.error("PMID changed from {} to {}", pmid, publication.getPmid().getContent());
 			return false;
 		}
 		if (!pmcid.isEmpty() && !publication.getPmcid().isEmpty() && !pmcid.equals(publication.getPmcid().getContent())) {
-			System.err.println("PMCID changed from " + pmcid + " to " + publication.getPmcid().getContent());
+			logger.error("PMCID changed from {} to {}", pmcid, publication.getPmcid().getContent());
 			return false;
 		}
 		if (!doi.isEmpty() && !publication.getDoi().isEmpty() && !doi.equals(publication.getDoi().getContent())) {
-			System.err.println("DOI changed from " + doi + " to " + publication.getDoi().getContent());
+			logger.error("DOI changed from {} to {}", doi, publication.getDoi().getContent());
 			return false;
 		}
 
@@ -1894,7 +1892,7 @@ public class Fetcher {
 		publication.setFetchException(false);
 
 		if (reset) {
-			System.out.println("Resetting publication " + publication.toStringId());
+			logger.info("Resetting publication {}", publication.toStringId());
 			publication.reset();
 		}
 
@@ -1910,7 +1908,7 @@ public class Fetcher {
 		}
 
 		if (goon) {
-			System.out.println("Fetch links " + publication.toStringId());
+			logger.info("Fetch links {}", publication.toStringId());
 		}
 		for (int linksFetched = 0; linksFetched < LINKS_LIMIT && goon; ++linksFetched) {
 			if (isFinal(publication, new PublicationPartName[] {
@@ -1952,7 +1950,7 @@ public class Fetcher {
 
 	public Publication initPublication(PublicationIds publicationIds) {
 		if (publicationIds == null) {
-			System.err.println("null IDs given for publication init");
+			logger.error("null IDs given for publication init");
 			return null;
 		}
 
@@ -1966,7 +1964,7 @@ public class Fetcher {
 			if (FetcherCommon.isPmid(pmid)) {
 				publication.setPmid(pmid, PublicationPartType.external, publicationIds.getPmidUrl(), fetcherArgs);
 			} else {
-				System.err.println("Unknown PMID: " + pmid);
+				logger.error("Unknown PMID: {}", pmid);
 			}
 		}
 
@@ -1974,7 +1972,7 @@ public class Fetcher {
 			if (FetcherCommon.isPmcid(pmcid)) {
 				publication.setPmcid(pmcid, PublicationPartType.external, publicationIds.getPmcidUrl(), fetcherArgs);
 			} else {
-				System.err.println("Unknown PMCID: " + pmcid);
+				logger.error("Unknown PMCID: {}", pmcid);
 			}
 		}
 
@@ -1982,12 +1980,12 @@ public class Fetcher {
 			if (FetcherCommon.isDoi(doi)) {
 				publication.setDoi(doi, PublicationPartType.external, publicationIds.getDoiUrl(), fetcherArgs);
 			} else {
-				System.err.println("Unknown DOI: " + doi);
+				logger.error("Unknown DOI: {}", doi);
 			}
 		}
 
 		if (publication.getIdCount() < 1) {
-			System.err.println("Can't init publication with no IDs");
+			logger.error("Can't init publication with no IDs");
 			return null;
 		}
 
@@ -2000,14 +1998,14 @@ public class Fetcher {
 
 	public boolean getPublication(Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
 		if (publication == null) {
-			System.err.println("null publication given for getting publication");
+			logger.error("null publication given for getting publication");
 			return false;
 		}
 		if (publication.getIdCount() < 1) {
-			System.err.println("Publication with no IDs given for getting publication");
+			logger.error("Publication with no IDs given for getting publication");
 			return false;
 		}
-		System.out.println("Get publication " + publication.toStringId());
+		logger.info("Get publication {}", publication.toStringId());
 
 		if (publication.canFetch(fetcherArgs)) {
 			publication.updateCounters(fetcherArgs);
@@ -2015,28 +2013,28 @@ public class Fetcher {
 			fetchPublication(publication, parts, false);
 
 			if (publication.isEmpty()) {
-				System.err.println("Empty publication returned for " + publication.toStringId());
+				logger.error("Empty publication returned for {}", publication.toStringId());
 				// still return true, as publication metadata has been updated
 			} else {
-				System.out.println("Got publication " + publication.toStringId());
+				logger.info("Got publication {}", publication.toStringId());
 			}
 
 			return true;
 		} else {
-			System.out.println("Not fetching publication " + publication.toStringId());
+			logger.info("Not fetching publication {}", publication.toStringId());
 			return false;
 		}
 	}
 
 	public Webpage initWebpage(String url) {
 		if (url == null) {
-			System.err.println("null URL given for webpage init");
+			logger.error("null URL given for webpage init");
 			return null;
 		}
 		try {
 			new URL(url);
 		} catch (MalformedURLException e) {
-			System.err.println("Malformed URL given for webpage init");
+			logger.error("Malformed URL given for webpage init");
 			return null;
 		}
 		Webpage webpage = new Webpage();
@@ -2050,18 +2048,17 @@ public class Fetcher {
 
 	public boolean getWebpage(Webpage webpage, String title, String content, boolean javascript) {
 		if (webpage == null) {
-			System.err.println("null webpage given for getting webpage");
+			logger.error("null webpage given for getting webpage");
 			return false;
 		}
 		if (webpage.getStartUrl().isEmpty()) {
-			System.err.println("Webpage with no start URL given for getting webpage");
+			logger.error("Webpage with no start URL given for getting webpage");
 			return false;
 		}
 		if (title != null && !title.isEmpty() || content != null && !content.isEmpty()) {
-			System.out.println("Get " + (javascript ? "javascript " : "") + "webpage " + webpage.getStartUrl()
-				+ " (with title selector " + title + " and content selector " + content + ")");
+			logger.info("Get {}{} (with title selector {} and content selector {})", javascript ? "javascript " : "", webpage.getStartUrl(), title, content);
 		} else {
-			System.out.println("Get " + (javascript ? "javascript " : "") + "webpage " + webpage.getStartUrl());
+			logger.info("Get {}{}", javascript ? "javascript " : "", webpage.getStartUrl());
 		}
 
 		if (webpage.canFetch(fetcherArgs)) {
@@ -2070,20 +2067,29 @@ public class Fetcher {
 			Webpage newWebpage = new Webpage();
 			newWebpage.setStartUrl(webpage.getStartUrl());
 
-			Boolean webpageJavascript = false;
+			Boolean webpageJavascript = null;
 			Map<String, String> startWebpage = scrape.getWebpage(newWebpage.getStartUrl());
 			if (startWebpage != null) {
-				webpageJavascript = Boolean.valueOf(startWebpage.get(ScrapeWebpageKey.javascript.toString()));
+				String webpageJavascriptString = startWebpage.get(ScrapeWebpageKey.javascript.toString());
+				if (webpageJavascriptString != null) {
+					if (webpageJavascriptString.equalsIgnoreCase("true")) {
+						webpageJavascript = Boolean.valueOf(true);
+					} else if (webpageJavascriptString.equalsIgnoreCase("false")) {
+						webpageJavascript = Boolean.valueOf(false);
+					} else {
+						logger.warn("Invalid javascript value: {}", webpageJavascriptString); // TODO move to Scrape
+					}
+				}
 			} else {
-				System.err.println("No scrape rules for start webpage " + newWebpage.getStartUrl());
+				logger.warn("No scrape rules for start webpage {}", newWebpage.getStartUrl());
 			}
 
-			Document doc = getDoc(newWebpage, javascript || webpageJavascript);
+			Document doc = getDoc(newWebpage, javascript || (webpageJavascript != null && webpageJavascript.equals(Boolean.valueOf(true))));
 
-			if (doc != null && !(javascript || webpageJavascript) && scrape.getWebpage(newWebpage.getFinalUrl()) == null) {
+			if (doc != null && (!javascript && webpageJavascript == null) && scrape.getWebpage(newWebpage.getFinalUrl()) == null) {
 				int textLength = doc.text().length();
 				if (textLength < fetcherArgs.getWebpageMinLengthJavascript() || !doc.select("noscript").isEmpty()) {
-					System.err.println("Refetching " + newWebpage.getStartUrl() + " with JavaScript enabled");
+					logger.info("Refetching {} with JavaScript enabled", newWebpage.getStartUrl());
 					Webpage newWebpageJavascript = new Webpage();
 					newWebpageJavascript.setStartUrl(newWebpage.getStartUrl());
 					Document docJavascript = getDoc(newWebpageJavascript, true);
@@ -2092,12 +2098,12 @@ public class Fetcher {
 						newWebpage = newWebpageJavascript;
 						int textLengthAfter = doc.text().length();
 						if (textLength != textLengthAfter) {
-							System.err.println("Content length changed from " + textLength + " to " + textLengthAfter);
+							logger.info("Content length changed from {} to {}", textLength, textLengthAfter);
 						} else {
-							System.err.println("Content length did not change with JavaScript");
+							logger.info("Content length did not change with JavaScript");
 						}
 					} else {
-						System.err.println("Discarding failed JavaScript webpage");
+						logger.warn("Discarding failed JavaScript webpage");
 					}
 				}
 			}
@@ -2105,7 +2111,7 @@ public class Fetcher {
 			if (doc != null) {
 				Map<String, String> finalWebpage = scrape.getWebpage(newWebpage.getFinalUrl());
 				if (finalWebpage == null) {
-					System.err.println("No scrape rules for final webpage " + newWebpage.getFinalUrl());
+					logger.warn("No scrape rules for final webpage {}", newWebpage.getFinalUrl());
 				}
 				if (finalWebpage != null && (title == null || title.isEmpty()) && (content == null || content.isEmpty())) {
 					if (finalWebpage.get(ScrapeWebpageKey.title.toString()) != null) {
@@ -2126,21 +2132,21 @@ public class Fetcher {
 			}
 
 			if (newWebpage.isEmpty()) {
-				System.err.println("Empty webpage returned for " + newWebpage.getStartUrl());
+				logger.error("Empty webpage returned for {}", newWebpage.getStartUrl());
 			}
 
 			if (newWebpage.isFinal(fetcherArgs)
 				|| !newWebpage.isFinal(fetcherArgs) && !newWebpage.isEmpty() && !webpage.isFinal(fetcherArgs)
 				|| newWebpage.isEmpty() && webpage.isEmpty()) {
 				webpage.overwrite(newWebpage);
-				System.out.println("Got webpage for " + newWebpage.getStartUrl());
+				logger.info("Got webpage for {}", newWebpage.getStartUrl());
 			} else {
-				System.out.println("Not overwriting previous webpage for " + newWebpage.getStartUrl());
+				logger.warn("Not overwriting previous webpage for {}", newWebpage.getStartUrl());
 			}
 
 			return true;
 		} else {
-			System.out.println("Not fetching webpage " + webpage.getStartUrl());
+			logger.info("Not fetching webpage {}", webpage.getStartUrl());
 			return false;
 		}
 	}

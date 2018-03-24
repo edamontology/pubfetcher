@@ -19,21 +19,13 @@
 
 package org.edamontology.pubfetcher;
 
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
-public class FetcherMainArgs implements MainArgs {
-	@Parameter(names = { "-h", "--help" }, help = true, description = "Print this help")
-	boolean help;
+public class FetcherMainArgs extends BasicArgs {
 
 	@ParametersDelegate
 	FetcherArgs fetcherArgs = new FetcherArgs();
 
 	@ParametersDelegate
 	FetcherUtilArgs fetcherUtilArgs = new FetcherUtilArgs();
-
-	@Override
-	public boolean isHelp() {
-		return help;
-	}
 }

@@ -22,11 +22,28 @@ package org.edamontology.pubfetcher;
 import java.io.IOException;
 import java.text.ParseException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public final class FetcherMain {
 
-	public static void main(String[] argv) throws IOException, ParseException, ReflectiveOperationException {
-		FetcherMainArgs args = FetcherUtil.parseArgs(argv, FetcherMainArgs.class, new Version(FetcherMain.class));
+	private static Logger logger;
 
-		FetcherUtil.run(args.fetcherUtilArgs, new Fetcher(args.fetcherArgs), null, null, null);
+	public static void main(String[] argv) throws IOException, ParseException, ReflectiveOperationException {
+		Version version = new Version(FetcherMain.class);
+
+		FetcherMainArgs args = BasicArgs.parseArgs(argv, FetcherMainArgs.class, version);
+
+		// logger must be called only after configuration changes have been made in BasicArgs.parseArgs()
+		// otherwise invalid.log will be created if arg --log is null
+		logger = LogManager.getLogger();
+		logger.debug(String.join(" ", argv));
+		logger.info("This is {} {}", version.getName(), version.getVersion());
+
+		try {
+			FetcherUtil.run(args.fetcherUtilArgs, new Fetcher(args.fetcherArgs), null, null, null);
+		} catch (Throwable e) {
+			logger.error("Exception!", e);
+		}
 	}
 }

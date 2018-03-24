@@ -28,7 +28,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Links {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private static final Pattern EUROPEPMC = Pattern.compile("EUROPEPMC\\.ORG/ARTICLES/(" + FetcherCommon.PMCID.pattern() + ")");
 	private static final Pattern EUROPEPMC_PMID = Pattern.compile("EUROPEPMC\\.ORG/ABSTRACT/MED/(" + FetcherCommon.PMID.pattern() + ")");
@@ -73,7 +78,7 @@ public class Links {
 				String pmcid = pmcidMatcher.group(1);
 				if (pmcid != null) {
 					if (publication.setPmcid(pmcid, type, from, fetcherArgs)) {
-						System.out.println("    Extracted PMCID " + pmcid + " from " + url + " found in " + from + " of type " + type);
+						logger.info("    Extracted PMCID {} from {} found in {} of type {}", pmcid, url, from, type);
 					}
 				}
 			}
@@ -84,7 +89,7 @@ public class Links {
 				String pmid = pmidMatcher.group(1);
 				if (pmid != null) {
 					if (publication.setPmid(pmid, type, from, fetcherArgs)) {
-						System.out.println("    Extracted PMID " + pmid + " from " + url + " found in " + from + " of type " + type);
+						logger.info("    Extracted PMID {} from {} found in {} of type {}", pmid, url, from, type);
 					}
 				}
 			}
@@ -96,7 +101,7 @@ public class Links {
 		try {
 			link = new Link(url, type, from);
 		} catch (MalformedURLException e) {
-			System.err.println("Can't add malformed link " + url + " found in " + from + " of type " + type);
+			logger.warn("Can't add malformed link {} found in {} of type {}", url, from, type);
 			return;
 		}
 		String urlString = link.getUrl().toString();
@@ -131,8 +136,7 @@ public class Links {
 		if (equalIndex > -1) {
 			Link equalLink = links.get(equalIndex);
 			if (type.isBetterThan(equalLink.getType())) {
-				System.out.println("    Remove link " + equalLink.getUrl() + " found in " + equalLink.getFrom()
-					+ " of type " + equalLink.getType() + " from position " + equalIndex);
+				logger.info("    Remove link {} found in {} of type {} from position {}", equalLink.getUrl(), equalLink.getFrom(), equalLink.getType(), equalIndex);
 				links.remove(equalIndex);
 			} else {
 				return;
@@ -151,14 +155,14 @@ public class Links {
 		if (!added) {
 			links.add(link);
 		}
-		System.out.println("    Add link " + urlString + " found in " + from + " of type " + type + " to position " + i);
+		logger.info("    Add link {} found in {} of type {} to position {}", urlString, from, type, i);
 	}
 
 	void addTriedLink(String url, PublicationPartType type, String from) {
 		try {
 			triedLinks.add(new Link(url, type, from));
 		} catch (MalformedURLException e) {
-			System.err.println("Can't add malformed tried link " + url + " found in " + from + " of type " + type);
+			logger.error("Can't add malformed tried link {} found in {} of type {}", url, from, type);
 		}
 	}
 }

@@ -36,7 +36,12 @@ import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public final class FetcherCommon {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private static int REDIRECT_LIMIT = 10;
 
@@ -197,7 +202,7 @@ public final class FetcherCommon {
 
 	public static Publication getPublication(PublicationIds publicationIds, Database database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
 		if (publicationIds == null) {
-			System.err.println("null IDs given for getting publication");
+			logger.error("null IDs given for getting publication");
 			return null;
 		}
 		Publication publication = null;
@@ -222,7 +227,7 @@ public final class FetcherCommon {
 
 	public static Webpage getWebpage(String webpageUrl, Database database, Fetcher fetcher) {
 		if (webpageUrl == null) {
-			System.err.println("null start URL given for getting webpage");
+			logger.error("null start URL given for getting webpage");
 			return null;
 		}
 		Webpage webpage = null;
@@ -247,7 +252,7 @@ public final class FetcherCommon {
 
 	public static Webpage getDoc(String docUrl, Database database, Fetcher fetcher) {
 		if (docUrl == null) {
-			System.err.println("null start URL given for getting doc");
+			logger.error("null start URL given for getting doc");
 			return null;
 		}
 		Webpage doc = null;
@@ -286,7 +291,7 @@ public final class FetcherCommon {
 				if (httpCon.getResponseCode() >= 300 && httpCon.getResponseCode() < 400) {
 					++i;
 					if (i > REDIRECT_LIMIT) {
-						System.err.println("Too many redirects (" + i + ") in " + path + " (last location " + httpCon.getURL() + ")");
+						logger.error("Too many redirects ({}) in {} (last location {})", i, path, httpCon.getURL());
 						break;
 					}
 					URL next = new URL(url, httpCon.getHeaderField("Location"));

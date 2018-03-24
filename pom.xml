@@ -53,6 +53,7 @@
     <mapdb.version>3.0.5</mapdb.version>
     <jackson.version>2.9.4</jackson.version>
     <htmlunit.version>2.29</htmlunit.version>
+    <log4j.version>2.11.0</log4j.version>
   </properties>
 
   <dependencies>
@@ -110,6 +111,16 @@
       <groupId>net.sourceforge.htmlunit</groupId>
       <artifactId>htmlunit</artifactId>
       <version>${htmlunit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
   </dependencies>
 
@@ -196,17 +207,18 @@
               <excludes>
                 <exclude>org/edamontology/pubfetcher/FetcherMain.class</exclude>
                 <exclude>org/edamontology/pubfetcher/FetcherMainArgs.class</exclude>
+                <exclude>log4j2.xml</exclude>
               </excludes>
             </configuration>
           </execution>
           <execution>
-            <id>bin-jar</id>
+            <id>cli-jar</id>
             <phase>package</phase>
             <goals>
               <goal>jar</goal>
             </goals>
             <configuration>
-              <classifier>bin</classifier>
+              <classifier>cli</classifier>
               <outputDirectory>target</outputDirectory>
               <archive>
                 <manifest>
@@ -222,6 +234,7 @@
               <includes>
                 <include>org/edamontology/pubfetcher/FetcherMain.class</include>
                 <include>org/edamontology/pubfetcher/FetcherMainArgs.class</include>
+                <include>log4j2.xml</include>
               </includes>
             </configuration>
           </execution>

@@ -28,12 +28,16 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 import org.mapdb.Serializer;
 
 public class Database implements Closeable {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	private final DB db;
 
@@ -82,12 +86,11 @@ public class Database implements Closeable {
 	private boolean removeOldId(String primaryId, String newId, String oldId, boolean primaryRemoved) {
 		if (!newId.isEmpty() && !oldId.isEmpty() && !newId.equals(oldId)) {
 			if (!primaryRemoved && primaryId.equals(oldId)) {
-				System.err.println("Removing old primary ID " + primaryId + " (overridden by " + newId + ")"
-					+ " and corresponding publication from database");
+				logger.warn("Removing old primary ID {} (overridden by {}) and corresponding publication from database", primaryId, newId);
 				removePublication(primaryId, false);
 				return true;
 			}
-			System.err.println("Removing old ID " + oldId + " (overridden by " + newId + ") from database");
+			logger.warn("Removing old ID {} (overridden by {}) from database", oldId, newId);
 			publicationsMap.remove(oldId);
 		}
 		if (primaryRemoved) return true;
@@ -102,17 +105,17 @@ public class Database implements Closeable {
 			primaryRemoved = removeOldId(primaryId, doi, oldPublicationIds.getDoi(), primaryRemoved);
 			if (primaryRemoved) return true;
 		} else {
-			System.err.println("Missing publication IDs for primary ID " + primaryId + " in database");
+			logger.error("Missing publication IDs for primary ID {} in database", primaryId);
 		}
 		return false;
 	}
 	public boolean putPublication(Publication publication) {
 		if (publication == null) {
-			System.err.println("Not putting null publication to database");
+			logger.error("Not putting null publication to database");
 			return false;
 		}
 		if (publication.getIdCount() < 1) {
-			System.err.println("Not putting publication with no IDs to database");
+			logger.error("Not putting publication with no IDs to database");
 			return false;
 		}
 
@@ -135,8 +138,8 @@ public class Database implements Closeable {
 			pmcidPrimary = publicationsMap.get(pmcid);
 			if (pmcidPrimary != null) {
 				if (pmidPrimary != null && !pmidPrimary.equals(pmcidPrimary)) {
-					System.err.println("Removing " + publicationsMapReverse.get(pmcid)
-						+ ", equivalent to " + publicationsMapReverse.get(pmid) + ", merged by " + publication.toStringId());
+					logger.warn("Removing {}, equivalent to {}, merged by {}",
+						publicationsMapReverse.get(pmcid), publicationsMapReverse.get(pmid), publication.toStringId());
 					removePublication(pmcid, false);
 					pmcidPrimary = null;
 				} else if (pmidPrimary == null) {
@@ -153,11 +156,11 @@ public class Database implements Closeable {
 			if (doiPrimary != null) {
 				if (pmidPrimary != null && !pmidPrimary.equals(doiPrimary) || pmcidPrimary != null && !pmcidPrimary.equals(doiPrimary)) {
 					if (pmidPrimary != null) {
-						System.err.println("Removing " + publicationsMapReverse.get(doi)
-							+ ", equivalent to " + publicationsMapReverse.get(pmid) + ", merged by " + publication.toStringId());
+						logger.warn("Removing {}, equivalent to {}, merged by {}",
+							publicationsMapReverse.get(doi), publicationsMapReverse.get(pmid), publication.toStringId());
 					} else {
-						System.err.println("Removing " + publicationsMapReverse.get(doi)
-							+ ", equivalent to " + publicationsMapReverse.get(pmcid) + ", merged by " + publication.toStringId());
+						logger.warn("Removing {}, equivalent to {}, merged by {}",
+							publicationsMapReverse.get(doi), publicationsMapReverse.get(pmcid), publication.toStringId());
 					}
 					removePublication(doi, false);
 					doiPrimary = null;
@@ -188,7 +191,7 @@ public class Database implements Closeable {
 					!pmcidUrl.isEmpty() ? pmcidUrl : oldPublicationIds.getPmcidUrl(),
 					!doiUrl.isEmpty() ? doiUrl : oldPublicationIds.getDoiUrl());
 			} else {
-				System.err.println("Missing publication IDs for ID " + id + " in database");
+				logger.error("Missing publication IDs for ID {} in database", id);
 			}
 		} else {
 			if (!pmid.isEmpty()) {
@@ -220,11 +223,11 @@ public class Database implements Closeable {
 
 	public boolean putWebpage(Webpage webpage) {
 		if (webpage == null) {
-			System.err.println("Not putting null webpage to database");
+			logger.error("Not putting null webpage to database");
 			return false;
 		}
 		if (webpage.getStartUrl().isEmpty()) {
-			System.err.println("Not putting webpage with no start URL to database");
+			logger.error("Not putting webpage with no start URL to database");
 			return false;
 		}
 		webpages.put(webpage.getStartUrl(), webpage);
@@ -232,11 +235,11 @@ public class Database implements Closeable {
 	}
 	public boolean putDoc(Webpage doc) {
 		if (doc == null) {
-			System.err.println("Not putting null doc to database");
+			logger.error("Not putting null doc to database");
 			return false;
 		}
 		if (doc.getStartUrl().isEmpty()) {
-			System.err.println("Not putting doc with no start URL to database");
+			logger.error("Not putting doc with no start URL to database");
 			return false;
 		}
 		docs.put(doc.getStartUrl(), doc);
@@ -245,13 +248,13 @@ public class Database implements Closeable {
 
 	public boolean removePublication(String publicationId, boolean alreadyRemoved) {
 		if (publicationId == null) {
-			System.err.println("No ID given for publication removal from database");
+			logger.error("No ID given for publication removal from database");
 			return false;
 		}
 		String id = publicationsMap.get(publicationId);
 		if (id != null) {
 			if (alreadyRemoved) {
-				System.err.println("Another publication was already removed with an ID corresponding to " + publicationId);
+				logger.warn("Another publication was already removed with an ID corresponding to {}", publicationId);
 			}
 			Publication publication = publications.get(id);
 			if (publication != null) {
@@ -270,10 +273,10 @@ public class Database implements Closeable {
 				PublicationIds removedPublicationIds = publicationsMapReverse.remove(id);
 				Publication removedPublication = publications.remove(id);
 				if (removedPublicationIds == null) {
-					System.err.println("Can't remove publication IDs for primary ID " + id + " from database");
+					logger.error("Can't remove publication IDs for primary ID {} from database", id);
 				}
 				if (removedPublication == null) {
-					System.err.println("Can't remove publication for primary ID " + id + " from database");
+					logger.error("Can't remove publication for primary ID {} from database", id);
 				}
 				if (removedPublicationIds == null || removedPublication == null) {
 					return false;
@@ -281,23 +284,23 @@ public class Database implements Closeable {
 					return true;
 				}
 			} else {
-				System.err.println("Can't find publication with primary ID " + id + " for removal from database");
+				logger.error("Can't find publication with primary ID {} for removal from database", id);
 				return false;
 			}
 		} else {
 			if (!alreadyRemoved) {
-				System.err.println("Can't find publication with ID " + publicationId + " for removal from database");
+				logger.warn("Can't find publication with ID {} for removal from database", publicationId);
 			}
 			return false;
 		}
 	}
 	public boolean removePublication(PublicationIds publicationIds) {
 		if (publicationIds == null) {
-			System.err.println("No IDs given for publication removal from database");
+			logger.error("No IDs given for publication removal from database");
 			return false;
 		}
 		if (publicationIds.isEmpty()) {
-			System.err.println("Given IDs are empty for publication removal from database");
+			logger.error("Given IDs are empty for publication removal from database");
 			return false;
 		}
 		boolean removedPmid = !publicationIds.getPmid().isEmpty() && removePublication(publicationIds.getPmid(), false);
@@ -307,11 +310,11 @@ public class Database implements Closeable {
 	}
 	public boolean removePublication(Publication publication) {
 		if (publication == null) {
-			System.err.println("null publication given for publication removal from database");
+			logger.error("null publication given for publication removal from database");
 			return false;
 		}
 		if (publication.getIdCount() < 1) {
-			System.err.println("publication with no IDs given for publication removal from database");
+			logger.error("publication with no IDs given for publication removal from database");
 			return false;
 		}
 		boolean removedPmid = !publication.getPmid().isEmpty() && removePublication(publication.getPmid().getContent(), false);
@@ -322,24 +325,24 @@ public class Database implements Closeable {
 
 	public boolean removeWebpage(String webpageUrl) {
 		if (webpageUrl == null) {
-			System.err.println("null start URL given for webpage removal from database");
+			logger.error("null start URL given for webpage removal from database");
 			return false;
 		}
 		Webpage removed = webpages.remove(webpageUrl);
 		if (removed == null) {
-			System.err.println("Can't find webpage with start URL " + webpageUrl + " for removal from database");
+			logger.warn("Can't find webpage with start URL {} for removal from database", webpageUrl);
 			return false;
 		}
 		else return true;
 	}
 	public boolean removeDoc(String docUrl) {
 		if (docUrl == null) {
-			System.err.println("null start URL given for doc removal from database");
+			logger.error("null start URL given for doc removal from database");
 			return false;
 		}
 		Webpage removed = docs.remove(docUrl);
 		if (removed == null) {
-			System.err.println("Can't find doc with start URL " + docUrl + " for removal from database");
+			logger.warn("Can't find doc with start URL {} for removal from database", docUrl);
 			return false;
 		}
 		else return true;
@@ -347,14 +350,14 @@ public class Database implements Closeable {
 
 	public boolean removeWebpage(Webpage webpage) {
 		if (webpage == null) {
-			System.err.println("null webpage given for webpage removal from database");
+			logger.error("null webpage given for webpage removal from database");
 			return false;
 		}
 		return removeWebpage(webpage.getStartUrl());
 	}
 	public boolean removeDoc(Webpage doc) {
 		if (doc == null) {
-			System.err.println("null doc given for doc removal from database");
+			logger.error("null doc given for doc removal from database");
 			return false;
 		}
 		return removeDoc(doc.getStartUrl());
@@ -362,18 +365,18 @@ public class Database implements Closeable {
 
 	public boolean containsPublication(String publicationId) {
 		if (publicationId == null) {
-			System.err.println("No publication ID given for availability checking in database");
+			logger.error("No publication ID given for availability checking in database");
 			return false;
 		}
 		return publicationsMap.containsKey(publicationId);
 	}
 	public boolean containsPublication(PublicationIds publicationIds) {
 		if (publicationIds == null) {
-			System.err.println("No publication IDs given for availability checking in database");
+			logger.error("No publication IDs given for availability checking in database");
 			return false;
 		}
 		if (publicationIds.isEmpty()) {
-			System.err.println("Empty publication IDs given for availability checking in database");
+			logger.error("Empty publication IDs given for availability checking in database");
 			return false;
 		}
 		return ((publicationIds.getPmid().isEmpty() || publicationsMap.containsKey(publicationIds.getPmid()))
@@ -383,14 +386,14 @@ public class Database implements Closeable {
 
 	public boolean containsWebpage(String webpageUrl) {
 		if (webpageUrl == null) {
-			System.err.println("No webpage start URL given for availability checking in database");
+			logger.error("No webpage start URL given for availability checking in database");
 			return false;
 		}
 		return webpages.containsKey(webpageUrl);
 	}
 	public boolean containsDoc(String docUrl) {
 		if (docUrl == null) {
-			System.err.println("No doc start URL given for availability checking in database");
+			logger.error("No doc start URL given for availability checking in database");
 			return false;
 		}
 		return docs.containsKey(docUrl);
@@ -439,7 +442,7 @@ public class Database implements Closeable {
 
 	public Publication getPublication(String publicationId, boolean logMissing) {
 		if (publicationId == null) {
-			System.err.println("No ID given for getting publication from database");
+			logger.error("No ID given for getting publication from database");
 			return null;
 		}
 		String id = publicationsMap.get(publicationId);
@@ -448,28 +451,28 @@ public class Database implements Closeable {
 			if (publication != null) {
 				return publication;
 			} else {
-				System.err.println("No publication found for primary ID " + id + " in database");
+				logger.error("No publication found for primary ID {} in database", id);
 				return null;
 			}
 		} else {
 			if (logMissing) {
-				System.err.println("No publication found for ID " + publicationId + " in database");
+				logger.warn("No publication found for ID {} in database", publicationId);
 			}
 			return null;
 		}
 	}
 	private void checkGetPublicationMismatch(String given, String present, String query) {
 		if (!given.isEmpty() && !present.isEmpty() && !given.equals(present)) {
-			System.err.println("Mismatch between ID given (" + given +") and ID present (" + present + ") in publication got using ID " + query);
+			logger.warn("Mismatch between ID given ({}) and ID present ({}) in publication got using ID {}", given, present, query);
 		}
 	}
 	public Publication getPublication(PublicationIds publicationIds) {
 		if (publicationIds == null) {
-			System.err.println("No IDs given for getting publication from database");
+			logger.error("No IDs given for getting publication from database");
 			return null;
 		}
 		if (publicationIds.isEmpty()) {
-			System.err.println("Empty IDs given for getting publication from database");
+			logger.error("Empty IDs given for getting publication from database");
 			return null;
 		}
 		if (!publicationIds.getPmid().isEmpty()) {
@@ -496,20 +499,20 @@ public class Database implements Closeable {
 				return publication;
 			}
 		}
-		System.err.println("No publication found for IDs " + publicationIds + " in database");
+		logger.warn("No publication found for IDs {} in database", publicationIds);
 		return null;
 	}
 
 	public Webpage getWebpage(String webpageUrl) {
 		if (webpageUrl == null) {
-			System.err.println("No start URL given for getting webpage from database");
+			logger.error("No start URL given for getting webpage from database");
 			return null;
 		}
 		return webpages.get(webpageUrl);
 	}
 	public Webpage getDoc(String docUrl) {
 		if (docUrl == null) {
-			System.err.println("No start URL given for getting doc from database");
+			logger.error("No start URL given for getting doc from database");
 			return null;
 		}
 		return docs.get(docUrl);

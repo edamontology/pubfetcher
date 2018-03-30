@@ -26,51 +26,51 @@ import com.beust.jcommander.validators.PositiveInteger;
 public class FetcherArgs {
 
 	public static final String EMPTY_COOLDOWN = "empty-cooldown";
-	@Parameter(names = { "--" + EMPTY_COOLDOWN }, validateWith = PositiveInteger.class, description = "TODO in minutes")
+	@Parameter(names = { "--" + EMPTY_COOLDOWN }, validateWith = PositiveInteger.class, description = "If that many minutes have passed since last fetching attempt of an empty database entry, then fetching can be attempted again, resetting the retry limit")
 	private int emptyCooldown = 720; // 12 h
 
 	public static final String NON_FINAL_COOLDOWN = "non-final-cooldown";
-	@Parameter(names = { "--" + NON_FINAL_COOLDOWN }, validateWith = PositiveInteger.class, description = "TODO in minutes")
+	@Parameter(names = { "--" + NON_FINAL_COOLDOWN }, validateWith = PositiveInteger.class, description = "If that many minutes have passed since last fetching attempt of a non-final database entry, then fetching can be attempted again, resetting the retry limit")
 	private int nonFinalCooldown = 10080; // a week
 
 	public static final String FETCH_EXCEPTION_COOLDOWN = "fetch-exception-cooldown";
-	@Parameter(names = { "--" + FETCH_EXCEPTION_COOLDOWN }, validateWith = PositiveInteger.class, description = "TODO in minutes")
+	@Parameter(names = { "--" + FETCH_EXCEPTION_COOLDOWN }, validateWith = PositiveInteger.class, description = "If that many minutes have passed since last fetching attempt of a database entry with fetching error, then fetching can be attempted again, resetting the retry limit")
 	private int fetchExceptionCooldown = 1440; // a day
 
 	public static final String RETRY_LIMIT = "retry-limit";
-	@Parameter(names = { "--" + RETRY_LIMIT }, description = "TODO")
+	@Parameter(names = { "--" + RETRY_LIMIT }, description = "How many times can fetching of a still non-final database entry be retried after initial attempt. Setting to 0 will disable retrying, setting to a negative value will disable limit.")
 	private int retryLimit = 3;
 
 	public static final String TITLE_MIN_LENGTH = "title-min-length";
-	@Parameter(names = { "--" + TITLE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + TITLE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid publication title")
 	private int titleMinLength = 4;
 
 	public static final String KEYWORDS_MIN_SIZE = "keywords-min-size";
-	@Parameter(names = { "--" + KEYWORDS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + KEYWORDS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "Minimum size of a valid publication keywords/MeSH list")
 	private int keywordsMinSize = 2;
 
 	public static final String MINED_TERMS_MIN_SIZE = "mined-terms-min-size";
-	@Parameter(names = { "--" + MINED_TERMS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + MINED_TERMS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "Minimum size of a valid publication EFO/GO terms list")
 	private int minedTermsMinSize = 1;
 
 	public static final String ABSTRACT_MIN_LENGTH = "abstract-min-length";
-	@Parameter(names = { "--" + ABSTRACT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + ABSTRACT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid publication abstract")
 	private int abstractMinLength = 200;
 
 	public static final String FULLTEXT_MIN_LENGTH = "fulltext-min-length";
-	@Parameter(names = { "--" + FULLTEXT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + FULLTEXT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid publication full text")
 	private int fulltextMinLength = 2000;
 
 	public static final String WEBPAGE_MIN_LENGTH = "webpage-min-length";
-	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid web page content")
 	private int webpageMinLength = 100; // TODO test default value
 
 	public static final String WEBPAGE_MIN_LENGTH_JAVASCRIPT = "webpage-min-length-javascript";
-	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "If length of web page content is below this, then refetching using JavaScript support will be attempted")
 	private int webpageMinLengthJavascript = 200;
 
 	public static final String TIMEOUT = "timeout";
-	@Parameter(names = { "--" + TIMEOUT }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--" + TIMEOUT }, validateWith = PositiveInteger.class, description = "Connect and read timeout of connections")
 	private int timeout = 15000; // ms
 
 	@ParametersDelegate

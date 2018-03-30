@@ -61,7 +61,7 @@ public final class FetcherUtil {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	static final String EXTERNAL_ID_URL = "http://localhost/";
+	static String PUB_ID_SOURCE = "PubFetcher"; // TODO
 
 	private static String timeHuman(Long time) {
 		return Instant.ofEpochMilli(time).toString();
@@ -116,9 +116,9 @@ public final class FetcherUtil {
 		}
 	}
 
-	private static void printWebpageSelector(String webpageUrl, String title, String content, boolean javascript, boolean html, Fetcher fetcher) {
+	private static void printWebpageSelector(String webpageUrl, String title, String content, boolean javascript, boolean html, Fetcher fetcher, FetcherArgs fetcherArgs) {
 		Webpage webpage = fetcher.initWebpage(webpageUrl);
-		fetcher.getWebpage(webpage, title, content, javascript);
+		fetcher.getWebpage(webpage, title, content, javascript, fetcherArgs);
 		if (html) System.out.println(webpage.toStringHtml(""));
 		else System.out.println(webpage.toString());
 	}
@@ -272,14 +272,14 @@ public final class FetcherUtil {
 		return mismatch;
 	}
 
-	private static void test(List<String[]> tests, String fetchMethod, String testMethod, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws ReflectiveOperationException {
+	private static void test(List<String[]> tests, String fetchMethod, String testMethod, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws ReflectiveOperationException {
 		int mismatch = 0;
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
 			logger.info("{} {}", test[0], progress(i, tests.size()));
-			Publication publication = (Publication) FetcherUtil.class.getDeclaredMethod(fetchMethod, test[0].getClass(), fetcher.getClass(), EnumMap.class)
-				.invoke(null, test[0], fetcher, parts);
+			Publication publication = (Publication) FetcherUtil.class.getDeclaredMethod(fetchMethod, test[0].getClass(), fetcher.getClass(), EnumMap.class, fetcherArgs.getClass())
+				.invoke(null, test[0], fetcher, parts, fetcherArgs);
 			if (publication != null) {
 				mismatch += (Integer) FetcherUtil.class.getDeclaredMethod(testMethod, test.getClass(), publication.getClass())
 					.invoke(null, test, publication);
@@ -289,129 +289,129 @@ public final class FetcherUtil {
 		else logger.error("There were {} mismatches!", mismatch);
 	}
 
-	private static Publication fetchEuropepmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", EXTERNAL_ID_URL, ""));
+	private static Publication fetchEuropepmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", PUB_ID_SOURCE, ""), fetcherArgs);
 		if (publication != null) {
 			FetcherPublicationState state = new FetcherPublicationState();
 			state.europepmcHasFulltextXML = true;
-			fetcher.fetchEuropepmcFulltextXml(publication, state, parts);
+			fetcher.fetchEuropepmcFulltextXml(publication, state, parts, fetcherArgs);
 		}
 		return publication;
 	}
 
-	private static void printEuropepmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchEuropepmcXml(pmcid, fetcher, parts));
+	private static void printEuropepmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchEuropepmcXml(pmcid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testEuropepmcXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("europepmc-xml.csv", "test", 10), "fetchEuropepmcXml", "testPmcXml", fetcher, parts);
+	private static void testEuropepmcXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("europepmc-xml.csv", "test", 10), "fetchEuropepmcXml", "testPmcXml", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchEuropepmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", EXTERNAL_ID_URL, ""));
+	private static Publication fetchEuropepmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", PUB_ID_SOURCE, ""), fetcherArgs);
 		if (publication != null) {
 			FetcherPublicationState state = new FetcherPublicationState();
 			state.europepmcHasFulltextHTML = true;
 			Links links = new Links();
-			fetcher.fetchEuropepmcFulltextHtml(publication, links, state, parts, false);
+			fetcher.fetchEuropepmcFulltextHtml(publication, links, state, parts, false, fetcherArgs);
 			for (Link link : links.getLinks()) publication.addVisitedSite(link);
 		}
 		return publication;
 	}
 
-	private static void printEuropepmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchEuropepmcHtml(pmcid, fetcher, parts));
+	private static void printEuropepmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchEuropepmcHtml(pmcid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testEuropepmcHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("europepmc-html.csv", "test", 10), "fetchEuropepmcHtml", "testPmcHtml", fetcher, parts);
+	private static void testEuropepmcHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("europepmc-html.csv", "test", 10), "fetchEuropepmcHtml", "testPmcHtml", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchPmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", EXTERNAL_ID_URL, ""));
+	private static Publication fetchPmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", PUB_ID_SOURCE, ""), fetcherArgs);
 		if (publication != null) {
-			fetcher.fetchPmcXml(publication, new FetcherPublicationState(), parts);
+			fetcher.fetchPmcXml(publication, new FetcherPublicationState(), parts, fetcherArgs);
 		}
 		return publication;
 	}
 
-	private static void printPmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchPmcXml(pmcid, fetcher, parts));
+	private static void printPmcXml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchPmcXml(pmcid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testPmcXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pmc-xml.csv", "test", 10), "fetchPmcXml", "testPmcXml", fetcher, parts);
+	private static void testPmcXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("pmc-xml.csv", "test", 10), "fetchPmcXml", "testPmcXml", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchPmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", EXTERNAL_ID_URL, ""));
+	private static Publication fetchPmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds("", pmcid, "", "", PUB_ID_SOURCE, ""), fetcherArgs);
 		if (publication != null) {
 			Links links = new Links();
-			fetcher.fetchPmcHtml(publication, links, new FetcherPublicationState(), parts, false);
+			fetcher.fetchPmcHtml(publication, links, new FetcherPublicationState(), parts, false, fetcherArgs);
 			for (Link link : links.getLinks()) publication.addVisitedSite(link);
 		}
 		return publication;
 	}
 
-	private static void printPmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchPmcHtml(pmcid, fetcher, parts));
+	private static void printPmcHtml(String pmcid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchPmcHtml(pmcid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testPmcHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pmc-html.csv", "test", 10), "fetchPmcHtml", "testPmcHtml", fetcher, parts);
+	private static void testPmcHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("pmc-html.csv", "test", 10), "fetchPmcHtml", "testPmcHtml", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchPubmedXml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", EXTERNAL_ID_URL, "", ""));
+	private static Publication fetchPubmedXml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", PUB_ID_SOURCE, "", ""), fetcherArgs);
 		if (publication != null) {
-			fetcher.fetchPubmedXml(publication, new FetcherPublicationState(), parts);
+			fetcher.fetchPubmedXml(publication, new FetcherPublicationState(), parts, fetcherArgs);
 		}
 		return publication;
 	}
 
-	private static void printPubmedXml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchPubmedXml(pmid, fetcher, parts));
+	private static void printPubmedXml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchPubmedXml(pmid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testPubmedXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pubmed-xml.csv", "test", 10), "fetchPubmedXml", "testPubmedXml", fetcher, parts);
+	private static void testPubmedXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("pubmed-xml.csv", "test", 10), "fetchPubmedXml", "testPubmedXml", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchPubmedHtml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", EXTERNAL_ID_URL, "", ""));
+	private static Publication fetchPubmedHtml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", PUB_ID_SOURCE, "", ""), fetcherArgs);
 		if (publication != null) {
-			fetcher.fetchPubmedHtml(publication, new FetcherPublicationState(), parts);
+			fetcher.fetchPubmedHtml(publication, new FetcherPublicationState(), parts, fetcherArgs);
 		}
 		return publication;
 	}
 
-	private static void printPubmedHtml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchPubmedHtml(pmid, fetcher, parts));
+	private static void printPubmedHtml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchPubmedHtml(pmid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testPubmedHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("pubmed-html.csv", "test", 8), "fetchPubmedHtml", "testPubmedHtml", fetcher, parts);
+	private static void testPubmedHtml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("pubmed-html.csv", "test", 8), "fetchPubmedHtml", "testPubmedHtml", fetcher, parts, fetcherArgs);
 	}
 
-	private static void printEuropepmc(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", EXTERNAL_ID_URL, "", ""));
+	private static void printEuropepmc(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", PUB_ID_SOURCE, "", ""), fetcherArgs);
 		if (publication != null) {
-			fetcher.fetchEuropepmc(publication, new FetcherPublicationState(), parts);
+			fetcher.fetchEuropepmc(publication, new FetcherPublicationState(), parts, fetcherArgs);
 		}
 		System.out.println(publication);
 	}
 
-	private static void testEuropepmc(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
+	private static void testEuropepmc(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
 		int mismatch = 0;
 		List<String[]> tests = getTest("europepmc.csv", "test", 14);
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
 			logger.info("{} {}", test[0], progress(i, tests.size()));
-			Publication publication = fetcher.initPublication(new PublicationIds(test[0], "", "", EXTERNAL_ID_URL, "", ""));
+			Publication publication = fetcher.initPublication(new PublicationIds(test[0], "", "", PUB_ID_SOURCE, "", ""), fetcherArgs);
 			if (publication != null) {
 				FetcherPublicationState state = new FetcherPublicationState();
-				fetcher.fetchEuropepmc(publication, state, parts);
+				fetcher.fetchEuropepmc(publication, state, parts, fetcherArgs);
 				mismatch += testEuropepmc(test, publication, state);
 			} else ++mismatch;
 		}
@@ -419,87 +419,87 @@ public final class FetcherUtil {
 		else logger.error("There were {} mismatches!", mismatch);
 	}
 
-	private static Publication fetchEuropepmcMined(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", EXTERNAL_ID_URL, "", ""));
+	private static Publication fetchEuropepmcMined(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds(pmid, "", "", PUB_ID_SOURCE, "", ""), fetcherArgs);
 		if (publication != null) {
 			FetcherPublicationState state = new FetcherPublicationState();
 			state.europepmcHasMinedTerms = true;
-			fetcher.fetchEuropepmcMinedTermsEfo(publication, state, parts);
-			fetcher.fetchEuropepmcMinedTermsGo(publication, state, parts);
+			fetcher.fetchEuropepmcMinedTermsEfo(publication, state, parts, fetcherArgs);
+			fetcher.fetchEuropepmcMinedTermsGo(publication, state, parts, fetcherArgs);
 		}
 		return publication;
 	}
 
-	private static void printEuropepmcMined(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchEuropepmcMined(pmid, fetcher, parts));
+	private static void printEuropepmcMined(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchEuropepmcMined(pmid, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testEuropepmcMined(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("europepmc-mined.csv", "test", 3), "fetchEuropepmcMined", "testEuropepmcMined", fetcher, parts);
+	private static void testEuropepmcMined(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("europepmc-mined.csv", "test", 3), "fetchEuropepmcMined", "testEuropepmcMined", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchOaDoi(String doi, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		Publication publication = fetcher.initPublication(new PublicationIds("", "", doi, "", "", EXTERNAL_ID_URL));
+	private static Publication fetchOaDoi(String doi, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		Publication publication = fetcher.initPublication(new PublicationIds("", "", doi, "", "", PUB_ID_SOURCE), fetcherArgs);
 		if (publication != null) {
 			Links links = new Links();
-			fetcher.fetchOaDoi(publication, links, new FetcherPublicationState(), parts);
+			fetcher.fetchOaDoi(publication, links, new FetcherPublicationState(), parts, fetcherArgs);
 			for (Link link : links.getLinks()) publication.addVisitedSite(link);
 		}
 		return publication;
 	}
 
-	private static void printOaDoi(String doi, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchOaDoi(doi, fetcher, parts));
+	private static void printOaDoi(String doi, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchOaDoi(doi, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testOaDoi(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
-		test(getTest("oadoi.csv", "test", 5), "fetchOaDoi", "testOaDoi", fetcher, parts);
+	private static void testOaDoi(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+		test(getTest("oadoi.csv", "test", 5), "fetchOaDoi", "testOaDoi", fetcher, parts, fetcherArgs);
 	}
 
-	private static Publication fetchSite(String url, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
+	private static Publication fetchSite(String url, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		Publication publication = new Publication();
 		Links links = new Links();
-		fetcher.fetchSite(publication, url, PublicationPartType.doi, EXTERNAL_ID_URL, links, parts, false, true);
+		fetcher.fetchSite(publication, url, PublicationPartType.doi, PUB_ID_SOURCE, links, parts, false, true, fetcherArgs);
 		for (Link link : links.getLinks()) publication.addVisitedSite(link);
 		return publication;
 	}
 
-	private static void printSite(String url, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
-		System.out.println(fetchSite(url, fetcher, parts));
+	private static void printSite(String url, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		System.out.println(fetchSite(url, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testSite(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException, ReflectiveOperationException {
+	private static void testSite(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
 		int mismatch = 0;
 		List<String[]> tests = getTest("journal.csv", "scrape", 9);
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
 			logger.info("{} {}", test[8], progress(i, tests.size()));
-			Publication publication = fetchSite(test[8], fetcher, parts);
+			Publication publication = fetchSite(test[8], fetcher, parts, fetcherArgs);
 			mismatch += testSite(test, publication);
 		}
 		if (mismatch == 0) logger.info("OK");
 		else logger.error("There were {} mismatches!", mismatch);
 	}
 
-	private static Webpage fetchWebpage(String url, Fetcher fetcher) {
+	private static Webpage fetchWebpage(String url, Fetcher fetcher, FetcherArgs fetcherArgs) {
 		Webpage webpage = fetcher.initWebpage(url);
-		fetcher.getWebpage(webpage);
+		fetcher.getWebpage(webpage, fetcherArgs);
 		return webpage;
 	}
 
-	private static void printWebpage(String url, Fetcher fetcher) {
-		System.out.println(fetchWebpage(url, fetcher));
+	private static void printWebpage(String url, Fetcher fetcher, FetcherArgs fetcherArgs) {
+		System.out.println(fetchWebpage(url, fetcher, fetcherArgs));
 	}
 
-	private static void testWebpage(Fetcher fetcher) throws IOException {
+	private static void testWebpage(Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		int mismatch = 0;
 		List<String[]> tests = getTest("webpages.csv", "scrape", 3);
 		int i = 0;
 		for (String[] test : tests) {
 			++i;
 			logger.info("{} {}", test[2], progress(i, tests.size()));
-			Webpage webpage = fetchWebpage(test[2], fetcher);
+			Webpage webpage = fetchWebpage(test[2], fetcher, fetcherArgs);
 			mismatch += equal(test[0], webpage.getTitle().length(), "title length");
 			mismatch += equal(test[1], webpage.getContent().length(), "content length");
 		}
@@ -517,7 +517,7 @@ public final class FetcherUtil {
 						if (l.length != 3) logger.error("Invalid line in {}: starting with {}", file, l[0]);
 						return l.length == 3;
 					})
-					.map(l -> new PublicationIds(l[0], l[1], l[2], FetcherUtil.EXTERNAL_ID_URL, FetcherUtil.EXTERNAL_ID_URL, FetcherUtil.EXTERNAL_ID_URL))
+					.map(l -> new PublicationIds(l[0], l[1], l[2], PUB_ID_SOURCE, PUB_ID_SOURCE, PUB_ID_SOURCE))
 					.collect(Collectors.toList()));
 			}
 		}
@@ -538,24 +538,15 @@ public final class FetcherUtil {
 	}
 
 	private static List<PublicationIds> pub(List<String> pubIds) {
-		List<PublicationIds> publicationIds = new ArrayList<>();
 		if (pubIds.isEmpty()) {
 			logger.error("Check publication IDs: no publication IDs given");
-			return publicationIds;
+			return Collections.emptyList();
 		}
 		logger.info("Check publication IDs: {} publication IDs given", pubIds.size());
-		for (String pubId : pubIds) {
-			PublicationIds onePublicationIds =
-				FetcherCommon.isPmid(pubId) ? new PublicationIds(pubId, "", "", EXTERNAL_ID_URL, "", "") : (
-				FetcherCommon.isPmcid(pubId) ? new PublicationIds("", pubId, "", "", EXTERNAL_ID_URL, "") : (
-				FetcherCommon.isDoi(pubId) ? new PublicationIds("", "", pubId, "", "", EXTERNAL_ID_URL) : (
-				null)));
-			if (onePublicationIds == null) {
-				logger.error("Unknown publication ID: {}", pubId);
-			} else {
-				publicationIds.add(onePublicationIds);
-			}
-		}
+		List<PublicationIds> publicationIds = pubIds.stream()
+			.map(s -> FetcherCommon.getPublicationIds(s, PUB_ID_SOURCE, false))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 		if (publicationIds.size() < pubIds.size()) {
 			logger.warn("{} publication IDs OK, {} not OK", publicationIds.size(), pubIds.size() - publicationIds.size());
 		} else {
@@ -565,34 +556,15 @@ public final class FetcherUtil {
 	}
 
 	private static List<PublicationIds> pubCheck(List<PublicationIds> pubIds) {
-		List<PublicationIds> publicationIds = new ArrayList<>();
 		if (pubIds.isEmpty()) {
 			logger.error("Check publication IDs: no publication IDs given");
-			return publicationIds;
+			return Collections.emptyList();
 		}
 		logger.info("Check publication IDs: {} publication IDs given", pubIds.size());
-		for (PublicationIds pubId : pubIds) {
-			String pmid = pubId.getPmid();
-			if (!pmid.isEmpty() && !FetcherCommon.isPmid(pmid)) {
-				logger.error("Unknown PMID: {}", pubId);
-				pmid = "";
-			}
-			String pmcid = pubId.getPmcid();
-			if (!pmcid.isEmpty() && !FetcherCommon.isPmcid(pmcid)) {
-				logger.error("Unknown PMCID: {}", pubId);
-				pmcid = "";
-			}
-			String doi = pubId.getDoi();
-			if (!doi.isEmpty() && !FetcherCommon.isDoi(doi)) {
-				logger.error("Unknown DOI: {}", pubId);
-				doi = "";
-			}
-			if (pmid.isEmpty() && pmcid.isEmpty() && doi.isEmpty()) {
-				logger.warn("Not adding empty publication ID");
-			} else {
-				publicationIds.add(new PublicationIds(pmid, pmcid, doi, pubId.getPmidUrl(), pubId.getPmcidUrl(), pubId.getDoiUrl()));
-			}
-		}
+		List<PublicationIds> publicationIds = pubIds.stream()
+			.map(pubId -> FetcherCommon.getPublicationIds(pubId.getPmid(), pubId.getPmcid(), pubId.getDoi(), PUB_ID_SOURCE, true))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 		if (publicationIds.size() < pubIds.size()) {
 			logger.warn("{} publication IDs OK, {} not OK", publicationIds.size(), pubIds.size() - publicationIds.size());
 		} else {
@@ -602,21 +574,15 @@ public final class FetcherUtil {
 	}
 
 	private static List<String> web(List<String> webUrls) {
-		List<String> webpageUrls = new ArrayList<>();
 		if (webUrls.isEmpty()) {
 			logger.error("Check webpage URLs: no webpage URLs given");
-			return webpageUrls;
+			return Collections.emptyList();
 		}
 		logger.info("Check webpage URLs: {} webpage URLs given", webUrls.size());
-		for (String webUrl : webUrls) {
-			try {
-				new URL(webUrl);
-			} catch (MalformedURLException e) {
-				logger.error("Malformed URL: {}", webUrl);
-				continue;
-			}
-			webpageUrls.add(webUrl);
-		}
+		List<String> webpageUrls = webUrls.stream()
+			.map(s -> FetcherCommon.getUrl(s, false))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 		if (webpageUrls.size() < webUrls.size()) {
 			logger.warn("{} webpage URLs OK, {} not OK", webpageUrls.size(), webUrls.size() - webpageUrls.size());
 		} else {
@@ -959,7 +925,7 @@ public final class FetcherUtil {
 		return docs;
 	}
 
-	private static List<Publication> fetchPub(Set<PublicationIds> pubIds, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException {
+	private static List<Publication> fetchPub(Set<PublicationIds> pubIds, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException {
 		List<Publication> publications = new ArrayList<>();
 		List<PublicationIds> publicationsException = new ArrayList<>();
 		int pubIdsSize = pubIds.size();
@@ -968,8 +934,8 @@ public final class FetcherUtil {
 		for (PublicationIds pubId : pubIds) {
 			++i;
 			logger.info("Fetch publication {}", progress(i, pubIdsSize));
-			Publication publication = fetcher.initPublication(pubId);
-			if (publication != null && fetcher.getPublication(publication, parts)) {
+			Publication publication = fetcher.initPublication(pubId, fetcherArgs);
+			if (publication != null && fetcher.getPublication(publication, parts, fetcherArgs)) {
 				if (publication.isFetchException()) {
 					publicationsException.add(pubId);
 				} else {
@@ -984,8 +950,8 @@ public final class FetcherUtil {
 			for (PublicationIds pubId : publicationsException) {
 				++i;
 				logger.info("Refetch publication {}", progress(i, publicationsExceptionSize));
-				Publication publication = fetcher.initPublication(pubId);
-				if (publication != null && fetcher.getPublication(publication, parts)) {
+				Publication publication = fetcher.initPublication(pubId, fetcherArgs);
+				if (publication != null && fetcher.getPublication(publication, parts, fetcherArgs)) {
 					publications.add(publication);
 				}
 			}
@@ -993,7 +959,7 @@ public final class FetcherUtil {
 		fetchedLog("publications", pubIdsSize, publications.size());
 		return publications;
 	}
-	private static List<Webpage> fetchWeb(Set<String> webUrls, Fetcher fetcher) throws IOException {
+	private static List<Webpage> fetchWeb(Set<String> webUrls, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		List<Webpage> webpages = new ArrayList<>();
 		List<String> webpagesException = new ArrayList<>();
 		int webUrlsSize = webUrls.size();
@@ -1003,7 +969,7 @@ public final class FetcherUtil {
 			++i;
 			logger.info("Fetch webpage {}", progress(i, webUrlsSize));
 			Webpage webpage = fetcher.initWebpage(webUrl);
-			if (webpage != null && fetcher.getWebpage(webpage)) {
+			if (webpage != null && fetcher.getWebpage(webpage, fetcherArgs)) {
 				if (webpage.isFetchException()) {
 					webpagesException.add(webUrl);
 				} else {
@@ -1019,8 +985,8 @@ public final class FetcherUtil {
 				++i;
 				logger.info("Refetch webpage {}", progress(i, webpagesExceptionSize));
 				Webpage webpage = fetcher.initWebpage(webUrl);
-				if (webpage != null && fetcher.getWebpage(webpage)) {
-					fetcher.getWebpage(webpage);
+				if (webpage != null && fetcher.getWebpage(webpage, fetcherArgs)) {
+					fetcher.getWebpage(webpage, fetcherArgs);
 				}
 			}
 		}
@@ -1028,7 +994,7 @@ public final class FetcherUtil {
 		return webpages;
 	}
 
-	private static List<Publication> dbFetchPub(Set<PublicationIds> pubIds, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException {
+	private static List<Publication> dbFetchPub(Set<PublicationIds> pubIds, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException {
 		List<Publication> publications = new ArrayList<>();
 		List<PublicationIds> pubIdsException = new ArrayList<>();
 		int pubIdsSize = pubIds.size();
@@ -1038,7 +1004,7 @@ public final class FetcherUtil {
 			for (PublicationIds pubId : pubIds) {
 				++i;
 				logger.info("Fetch publication {}", progress(i, pubIdsSize));
-				Publication publication = FetcherCommon.getPublication(pubId, db, fetcher, parts);
+				Publication publication = FetcherCommon.getPublication(pubId, db, fetcher, parts, fetcherArgs);
 				if (publication != null) {
 					if (publication.isFetchException()) {
 						pubIdsException.add(pubId);
@@ -1054,7 +1020,7 @@ public final class FetcherUtil {
 				for (PublicationIds pubId : pubIdsException) {
 					++i;
 					logger.info("Refetch publication {}", progress(i, pubIdsExceptionSize));
-					Publication publication = FetcherCommon.getPublication(pubId, db, fetcher, parts);
+					Publication publication = FetcherCommon.getPublication(pubId, db, fetcher, parts, fetcherArgs);
 					if (publication != null) {
 						publications.add(publication);
 					}
@@ -1064,7 +1030,7 @@ public final class FetcherUtil {
 		gotLog("publications", pubIdsSize, publications.size());
 		return publications;
 	}
-	private static List<Webpage> dbFetchWeb(Set<String> webUrls, String database, Fetcher fetcher) throws IOException {
+	private static List<Webpage> dbFetchWeb(Set<String> webUrls, String database, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		List<Webpage> webpages = new ArrayList<>();
 		List<String> webUrlsException = new ArrayList<>();
 		int webUrlsSize = webUrls.size();
@@ -1074,7 +1040,7 @@ public final class FetcherUtil {
 			for (String webUrl : webUrls) {
 				++i;
 				logger.info("Fetch webpage {}", progress(i, webUrlsSize));
-				Webpage webpage = FetcherCommon.getWebpage(webUrl, db, fetcher);
+				Webpage webpage = FetcherCommon.getWebpage(webUrl, db, fetcher, fetcherArgs);
 				if (webpage != null) {
 					if (webpage.isFetchException()) {
 						webUrlsException.add(webUrl);
@@ -1090,7 +1056,7 @@ public final class FetcherUtil {
 				for (String webUrl : webUrlsException) {
 					++i;
 					logger.info("Refetch webpage {}", progress(i, webUrlsExceptionSize));
-					Webpage webpage = FetcherCommon.getWebpage(webUrl, db, fetcher);
+					Webpage webpage = FetcherCommon.getWebpage(webUrl, db, fetcher, fetcherArgs);
 					if (webpage != null) {
 						webpages.add(webpage);
 					}
@@ -1100,7 +1066,7 @@ public final class FetcherUtil {
 		gotLog("webpages", webUrlsSize, webpages.size());
 		return webpages;
 	}
-	private static List<Webpage> dbFetchDoc(Set<String> docUrls, String database, Fetcher fetcher) throws IOException {
+	private static List<Webpage> dbFetchDoc(Set<String> docUrls, String database, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		List<Webpage> docs = new ArrayList<>();
 		List<String> docUrlsException = new ArrayList<>();
 		int docUrlsSize = docUrls.size();
@@ -1110,7 +1076,7 @@ public final class FetcherUtil {
 			for (String docUrl : docUrls) {
 				++i;
 				logger.info("Fetch doc {}", progress(i, docUrlsSize));
-				Webpage doc = FetcherCommon.getDoc(docUrl, db, fetcher);
+				Webpage doc = FetcherCommon.getDoc(docUrl, db, fetcher, fetcherArgs);
 				if (doc != null) {
 					if (doc.isFetchException()) {
 						docUrlsException.add(docUrl);
@@ -1126,7 +1092,7 @@ public final class FetcherUtil {
 				for (String docUrl : docUrlsException) {
 					++i;
 					logger.info("Refetch doc {}", progress(i, docUrlsExceptionSize));
-					Webpage doc = FetcherCommon.getDoc(docUrl, db, fetcher);
+					Webpage doc = FetcherCommon.getDoc(docUrl, db, fetcher, fetcherArgs);
 					if (doc != null) {
 						docs.add(doc);
 					}
@@ -1137,7 +1103,7 @@ public final class FetcherUtil {
 		return docs;
 	}
 
-	private static List<Publication> fetchPutPub(Set<PublicationIds> pubIds, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) throws IOException {
+	private static List<Publication> fetchPutPub(Set<PublicationIds> pubIds, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException {
 		List<Publication> publications = new ArrayList<>();
 		List<PublicationIds> publicationsException = new ArrayList<>();
 		int pubIdsSize = pubIds.size();
@@ -1147,8 +1113,8 @@ public final class FetcherUtil {
 			for (PublicationIds pubId : pubIds) {
 				++i;
 				logger.info("Fetch publication {}", progress(i, pubIdsSize));
-				Publication publication = fetcher.initPublication(pubId);
-				if (publication != null && fetcher.getPublication(publication, parts)) {
+				Publication publication = fetcher.initPublication(pubId, fetcherArgs);
+				if (publication != null && fetcher.getPublication(publication, parts, fetcherArgs)) {
 					if (publication.isFetchException()) {
 						publicationsException.add(pubId);
 					} else {
@@ -1165,8 +1131,8 @@ public final class FetcherUtil {
 				for (PublicationIds pubId : publicationsException) {
 					++i;
 					logger.info("Refetch publication {}", progress(i, publicationsExceptionSize));
-					Publication publication = fetcher.initPublication(pubId);
-					if (publication != null && fetcher.getPublication(publication, parts)) {
+					Publication publication = fetcher.initPublication(pubId, fetcherArgs);
+					if (publication != null && fetcher.getPublication(publication, parts, fetcherArgs)) {
 						db.putPublication(publication);
 						db.commit();
 						publications.add(publication);
@@ -1177,7 +1143,7 @@ public final class FetcherUtil {
 		fetchedLog("publications", pubIdsSize, publications.size());
 		return publications;
 	}
-	private static List<Webpage> fetchPutWeb(Set<String> webUrls, String database, Fetcher fetcher) throws IOException {
+	private static List<Webpage> fetchPutWeb(Set<String> webUrls, String database, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		List<Webpage> webpages = new ArrayList<>();
 		List<String> webpagesException = new ArrayList<>();
 		int webUrlsSize = webUrls.size();
@@ -1188,7 +1154,7 @@ public final class FetcherUtil {
 				++i;
 				logger.info("Fetch webpage {}", progress(i, webUrlsSize));
 				Webpage webpage = fetcher.initWebpage(webUrl);
-				if (webpage != null && fetcher.getWebpage(webpage)) {
+				if (webpage != null && fetcher.getWebpage(webpage, fetcherArgs)) {
 					if (webpage.isFetchException()) {
 						webpagesException.add(webUrl);
 					} else {
@@ -1206,7 +1172,7 @@ public final class FetcherUtil {
 					++i;
 					logger.info("Refetch webpage {}", progress(i, webpagesExceptionSize));
 					Webpage webpage = fetcher.initWebpage(webUrl);
-					if (webpage != null && fetcher.getWebpage(webpage)) {
+					if (webpage != null && fetcher.getWebpage(webpage, fetcherArgs)) {
 						db.putWebpage(webpage);
 						db.commit();
 						webpages.add(webpage);
@@ -1217,7 +1183,7 @@ public final class FetcherUtil {
 		fetchedLog("webpages", webUrlsSize, webpages.size());
 		return webpages;
 	}
-	private static List<Webpage> fetchPutDoc(Set<String> docUrls, String database, Fetcher fetcher) throws IOException {
+	private static List<Webpage> fetchPutDoc(Set<String> docUrls, String database, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		List<Webpage> docs = new ArrayList<>();
 		List<String> docsException = new ArrayList<>();
 		int docUrlsSize = docUrls.size();
@@ -1228,7 +1194,7 @@ public final class FetcherUtil {
 				++i;
 				logger.info("Fetch doc {}", progress(i, docUrlsSize));
 				Webpage doc = fetcher.initWebpage(docUrl);
-				if (doc != null && fetcher.getWebpage(doc)) {
+				if (doc != null && fetcher.getWebpage(doc, fetcherArgs)) {
 					if (doc.isFetchException()) {
 						docsException.add(docUrl);
 					} else {
@@ -1246,7 +1212,7 @@ public final class FetcherUtil {
 					++i;
 					logger.info("Refetch doc {}", progress(i, docsExceptionSize));
 					Webpage doc = fetcher.initWebpage(docUrl);
-					if (doc != null && fetcher.getWebpage(doc)) {
+					if (doc != null && fetcher.getWebpage(doc, fetcherArgs)) {
 						db.putDoc(doc);
 						db.commit();
 						docs.add(doc);
@@ -2258,8 +2224,8 @@ public final class FetcherUtil {
 		}
 	}
 
-	public static void run(FetcherUtilArgs args, Fetcher fetcher, List<PublicationIds> externalPublicationIds,
-			List<String> externalWebpageUrls, List<String> externalDocUrls) throws IOException, ReflectiveOperationException {
+	public static void run(FetcherUtilArgs args, Fetcher fetcher, FetcherArgs fetcherArgs, List<PublicationIds> externalPublicationIds,
+			List<String> externalWebpageUrls, List<String> externalDocUrls, Version version) throws IOException, ReflectiveOperationException {
 		if (args == null) {
 			throw new IllegalArgumentException("FetcherUtilArgs required!");
 		}
@@ -2290,7 +2256,9 @@ public final class FetcherUtil {
 			throw new ParameterException("Parameters " + fetchPart + " and " + notFetchPart + " can't be specified at the same time");
 		}
 
-		FetcherArgs fetcherArgs = fetcher.getFetcherArgs();
+		if (version != null) {
+			PUB_ID_SOURCE = version.getName() + " " + version.getVersion();
+		}
 
 		if (args.initDb != null) initDb(args.initDb);
 		if (args.commitDb != null) commitDb(args.commitDb);
@@ -2305,11 +2273,11 @@ public final class FetcherUtil {
 
 		if (args.printWebpageSelector != null) {
 			printWebpageSelector(args.printWebpageSelector.get(0), args.printWebpageSelector.get(1), args.printWebpageSelector.get(2),
-				Boolean.valueOf(args.printWebpageSelector.get(3)), false, fetcher);
+				Boolean.valueOf(args.printWebpageSelector.get(3)), false, fetcher, fetcherArgs);
 		}
 		if (args.printWebpageSelectorHtml != null) {
 			printWebpageSelector(args.printWebpageSelectorHtml.get(0), args.printWebpageSelectorHtml.get(1), args.printWebpageSelectorHtml.get(2),
-				Boolean.valueOf(args.printWebpageSelectorHtml.get(3)), true, fetcher);
+				Boolean.valueOf(args.printWebpageSelectorHtml.get(3)), true, fetcher, fetcherArgs);
 		}
 
 		if (args.getSite != null) getSite(args.getSite, fetcher);
@@ -2343,38 +2311,38 @@ public final class FetcherUtil {
 
 		// test
 
-		if (args.printEuropepmcXml != null) printEuropepmcXml(args.printEuropepmcXml, fetcher, parts);
-		if (args.testEuropepmcXml) testEuropepmcXml(fetcher, parts);
+		if (args.printEuropepmcXml != null) printEuropepmcXml(args.printEuropepmcXml, fetcher, parts, fetcherArgs);
+		if (args.testEuropepmcXml) testEuropepmcXml(fetcher, parts, fetcherArgs);
 
-		if (args.printEuropepmcHtml != null) printEuropepmcHtml(args.printEuropepmcHtml, fetcher, parts);
-		if (args.testEuropepmcHtml) testEuropepmcHtml(fetcher, parts);
+		if (args.printEuropepmcHtml != null) printEuropepmcHtml(args.printEuropepmcHtml, fetcher, parts, fetcherArgs);
+		if (args.testEuropepmcHtml) testEuropepmcHtml(fetcher, parts, fetcherArgs);
 
-		if (args.printPmcXml != null) printPmcXml(args.printPmcXml, fetcher, parts);
-		if (args.testPmcXml) testPmcXml(fetcher, parts);
+		if (args.printPmcXml != null) printPmcXml(args.printPmcXml, fetcher, parts, fetcherArgs);
+		if (args.testPmcXml) testPmcXml(fetcher, parts, fetcherArgs);
 
-		if (args.printPmcHtml != null) printPmcHtml(args.printPmcHtml, fetcher, parts);
-		if (args.testPmcHtml) testPmcHtml(fetcher, parts);
+		if (args.printPmcHtml != null) printPmcHtml(args.printPmcHtml, fetcher, parts, fetcherArgs);
+		if (args.testPmcHtml) testPmcHtml(fetcher, parts, fetcherArgs);
 
-		if (args.printPubmedXml != null) printPubmedXml(args.printPubmedXml, fetcher, parts);
-		if (args.testPubmedXml) testPubmedXml(fetcher, parts);
+		if (args.printPubmedXml != null) printPubmedXml(args.printPubmedXml, fetcher, parts, fetcherArgs);
+		if (args.testPubmedXml) testPubmedXml(fetcher, parts, fetcherArgs);
 
-		if (args.printPubmedHtml != null) printPubmedHtml(args.printPubmedHtml, fetcher, parts);
-		if (args.testPubmedHtml) testPubmedHtml(fetcher, parts);
+		if (args.printPubmedHtml != null) printPubmedHtml(args.printPubmedHtml, fetcher, parts, fetcherArgs);
+		if (args.testPubmedHtml) testPubmedHtml(fetcher, parts, fetcherArgs);
 
-		if (args.printEuropepmc != null) printEuropepmc(args.printEuropepmc, fetcher, parts);
-		if (args.testEuropepmc) testEuropepmc(fetcher, parts);
+		if (args.printEuropepmc != null) printEuropepmc(args.printEuropepmc, fetcher, parts, fetcherArgs);
+		if (args.testEuropepmc) testEuropepmc(fetcher, parts, fetcherArgs);
 
-		if (args.printEuropepmcMined != null) printEuropepmcMined(args.printEuropepmcMined, fetcher, parts);
-		if (args.testEuropepmcMined) testEuropepmcMined(fetcher, parts);
+		if (args.printEuropepmcMined != null) printEuropepmcMined(args.printEuropepmcMined, fetcher, parts, fetcherArgs);
+		if (args.testEuropepmcMined) testEuropepmcMined(fetcher, parts, fetcherArgs);
 
-		if (args.printOaDoi != null) printOaDoi(args.printOaDoi, fetcher, parts);
-		if (args.testOaDoi) testOaDoi(fetcher, parts);
+		if (args.printOaDoi != null) printOaDoi(args.printOaDoi, fetcher, parts, fetcherArgs);
+		if (args.testOaDoi) testOaDoi(fetcher, parts, fetcherArgs);
 
-		if (args.printSite != null) printSite(args.printSite, fetcher, parts);
-		if (args.testSite) testSite(fetcher, parts);
+		if (args.printSite != null) printSite(args.printSite, fetcher, parts, fetcherArgs);
+		if (args.testSite) testSite(fetcher, parts, fetcherArgs);
 
-		if (args.printWebpage != null) printWebpage(args.printWebpage, fetcher);
-		if (args.testWebpage) testWebpage(fetcher);
+		if (args.printWebpage != null) printWebpage(args.printWebpage, fetcher, fetcherArgs);
+		if (args.testWebpage) testWebpage(fetcher, fetcherArgs);
 
 		// add IDs
 
@@ -2561,21 +2529,21 @@ public final class FetcherUtil {
 		}
 
 		if (args.fetch) {
-			publications.addAll(fetchPub(publicationIds, fetcher, parts));
-			webpages.addAll(fetchWeb(webpageUrls, fetcher));
-			docs.addAll(fetchWeb(docUrls, fetcher));
+			publications.addAll(fetchPub(publicationIds, fetcher, parts, fetcherArgs));
+			webpages.addAll(fetchWeb(webpageUrls, fetcher, fetcherArgs));
+			docs.addAll(fetchWeb(docUrls, fetcher, fetcherArgs));
 		}
 
 		if (args.dbFetch != null) {
-			publications.addAll(dbFetchPub(publicationIds, args.dbFetch, fetcher, parts));
-			webpages.addAll(dbFetchWeb(webpageUrls, args.dbFetch, fetcher));
-			docs.addAll(dbFetchDoc(docUrls, args.dbFetch, fetcher));
+			publications.addAll(dbFetchPub(publicationIds, args.dbFetch, fetcher, parts, fetcherArgs));
+			webpages.addAll(dbFetchWeb(webpageUrls, args.dbFetch, fetcher, fetcherArgs));
+			docs.addAll(dbFetchDoc(docUrls, args.dbFetch, fetcher, fetcherArgs));
 		}
 
 		if (args.fetchPut != null) {
-			publications.addAll(fetchPutPub(publicationIds, args.fetchPut, fetcher, parts));
-			webpages.addAll(fetchPutWeb(webpageUrls, args.fetchPut, fetcher));
-			docs.addAll(fetchPutDoc(docUrls, args.fetchPut, fetcher));
+			publications.addAll(fetchPutPub(publicationIds, args.fetchPut, fetcher, parts, fetcherArgs));
+			webpages.addAll(fetchPutWeb(webpageUrls, args.fetchPut, fetcher, fetcherArgs));
+			docs.addAll(fetchPutDoc(docUrls, args.fetchPut, fetcher, fetcherArgs));
 		}
 
 		// filter content

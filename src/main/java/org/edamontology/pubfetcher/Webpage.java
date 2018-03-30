@@ -75,6 +75,14 @@ public class Webpage extends DatabaseEntry<Webpage> {
 		return !isBroken() && !isEmpty() && isFinal(fetcherArgs);
 	}
 
+	@Override
+	public String getStatusString(FetcherArgs fetcherArgs) {
+		if (isBroken()) return "broken";
+		if (isEmpty()) return "empty";
+		if (!isFinal(fetcherArgs)) return "non-final";
+		return "final";
+	}
+
 	public String getStartUrl() {
 		return startUrl;
 	}

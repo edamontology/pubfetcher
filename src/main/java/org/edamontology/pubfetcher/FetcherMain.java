@@ -20,7 +20,6 @@
 package org.edamontology.pubfetcher;
 
 import java.io.IOException;
-import java.text.ParseException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +28,7 @@ public final class FetcherMain {
 
 	private static Logger logger;
 
-	public static void main(String[] argv) throws IOException, ParseException, ReflectiveOperationException {
+	public static void main(String[] argv) throws IOException, ReflectiveOperationException {
 		Version version = new Version(FetcherMain.class);
 
 		FetcherMainArgs args = BasicArgs.parseArgs(argv, FetcherMainArgs.class, version);
@@ -41,7 +40,7 @@ public final class FetcherMain {
 		logger.info("This is {} {}", version.getName(), version.getVersion());
 
 		try {
-			FetcherUtil.run(args.fetcherUtilArgs, new Fetcher(args.fetcherArgs), null, null, null);
+			FetcherUtil.run(args.fetcherUtilArgs, new Fetcher(), args.fetcherArgs, null, null, null, version);
 		} catch (Throwable e) {
 			logger.error("Exception!", e);
 		}

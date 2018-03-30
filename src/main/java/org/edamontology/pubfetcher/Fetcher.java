@@ -105,22 +105,12 @@ public class Fetcher {
 
 	private final Scrape scrape;
 
-	private final FetcherArgs fetcherArgs;
-
-	public Fetcher(FetcherArgs fetcherArgs) throws IOException, ParseException {
-		if (fetcherArgs == null) {
-			throw new IllegalArgumentException("fetcherArgs is null");
-		}
+	public Fetcher() throws IOException, ParseException {
 		scrape = new Scrape();
-		this.fetcherArgs = fetcherArgs;
 	}
 
 	public Scrape getScrape() {
 		return scrape;
-	}
-
-	public FetcherArgs getFetcherArgs() {
-		return fetcherArgs;
 	}
 
 	private void setFetchException(Webpage webpage, Publication publication, String exceptionUrl) {
@@ -138,19 +128,19 @@ public class Fetcher {
 		}
 	}
 
-	public Document getDoc(String url, Publication publication) {
-		return getDoc(url, null, publication, null, null, null, null, false, false);
+	public Document getDoc(String url, Publication publication, FetcherArgs fetcherArgs) {
+		return getDoc(url, null, publication, null, null, null, null, false, false, fetcherArgs);
 	}
 
-	private Document getDoc(Webpage webpage, boolean javascript) {
-		return getDoc(webpage.getStartUrl(), webpage, null, null, null, null, null, javascript, false);
+	private Document getDoc(Webpage webpage, boolean javascript, FetcherArgs fetcherArgs) {
+		return getDoc(webpage.getStartUrl(), webpage, null, null, null, null, null, javascript, false, fetcherArgs);
 	}
 
-	private Document getDoc(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript) {
-		return getDoc(url, null, publication, type, from, links, parts, javascript, false);
+	private Document getDoc(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, FetcherArgs fetcherArgs) {
+		return getDoc(url, null, publication, type, from, links, parts, javascript, false, fetcherArgs);
 	}
 
-	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout) {
+	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout, FetcherArgs fetcherArgs) {
 		Document doc = null;
 
 		logger.info("    GET {}{}", url, javascript ? " (with JavaScript)" : "");
@@ -203,7 +193,7 @@ public class Fetcher {
 				URL u = new URL(url);
 
 				Response res = Jsoup.connect(url)
-					.userAgent(fetcherArgs.getUserAgent())
+					.userAgent(fetcherArgs.getPrivateArgs().getUserAgent())
 					.referrer(u.getProtocol() + "://" + u.getAuthority())
 					.timeout(fetcherArgs.getTimeout())
 					// .validateTLSCertificates(false) // TODO deprecated
@@ -240,7 +230,7 @@ public class Fetcher {
 			// if the request URL is not a HTTP or HTTPS URL, or is otherwise malformed
 			logger.warn(e);
 			if (webpage != null || publication != null) {
-				fetchPdf(url, webpage, publication, type, from, links, parts);
+				fetchPdf(url, webpage, publication, type, from, links, parts, fetcherArgs);
 			}
 		} catch (HttpStatusException e) {
 			// if the response is not OK and HTTP response errors are not ignored
@@ -277,7 +267,7 @@ public class Fetcher {
 			if (e.getMimeType() != null && (APPLICATION_PDF.matcher(e.getMimeType()).matches() || e.getMimeType().startsWith("PB"))) {
 				// webpage/doc urls and doi links can point directly to PDF files
 				if (webpage != null || publication != null) {
-					fetchPdf(e.getUrl(), webpage, publication, type, from, links, parts);
+					fetchPdf(e.getUrl(), webpage, publication, type, from, links, parts, fetcherArgs);
 				} else {
 					logger.warn(e);
 				}
@@ -288,14 +278,14 @@ public class Fetcher {
 			// if the connection times out
 			logger.warn(e);
 			if (!timeout) {
-				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true);
+				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true, fetcherArgs);
 			} else {
 				setFetchException(webpage, publication, null);
 			}
 		} catch (javax.net.ssl.SSLHandshakeException | javax.net.ssl.SSLProtocolException e) {
 			logger.warn(e);
 			if (!javascript) {
-				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout);
+				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout, fetcherArgs);
 			}
 		} catch (IOException e) {
 			// if a connection or read error occurs
@@ -308,22 +298,22 @@ public class Fetcher {
 		return doc;
 	}
 
-	private void fetchPdf(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts) {
-		fetchPdf(url, null, publication, type, from, links, parts);
+	private void fetchPdf(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+		fetchPdf(url, null, publication, type, from, links, parts, fetcherArgs);
 	}
 
-	private void fetchPdf(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts) {
+	private void fetchPdf(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		// Don't fetch PDF if only keywords are missing
 		if (webpage == null && (publication == null
 			|| isFinal(publication, new PublicationPartName[] {
 					PublicationPartName.title, PublicationPartName.theAbstract, PublicationPartName.fulltext
-				}, parts, false))) return;
+				}, parts, false, fetcherArgs))) return;
 
 		logger.info("    GET PDF {}", url);
 
 		URLConnection con;
 		try {
-			con = FetcherCommon.newConnection(url, fetcherArgs);
+			con = FetcherCommon.newConnection(url, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
 		} catch (IOException e) {
 			logger.warn(e);
 			return;
@@ -538,7 +528,7 @@ public class Fetcher {
 		return text;
 	}
 
-	private void setIds(Publication publication, Document doc, PublicationPartType type, String pmid, String pmcid, String doi, boolean prependPMC) {
+	private void setIds(Publication publication, Document doc, PublicationPartType type, String pmid, String pmcid, String doi, boolean prependPMC, FetcherArgs fetcherArgs) {
 		if (pmid != null && !pmid.trim().isEmpty()) {
 			String pmidText = getFirstTrimmed(doc, pmid, false);
 			if (FetcherCommon.isPmid(pmidText)) {
@@ -607,7 +597,7 @@ public class Fetcher {
 		return titleText;
 	}
 
-	private void setTitle(Publication publication, Document doc, PublicationPartType type, String title, String subtitle, EnumMap<PublicationPartName, Boolean> parts) {
+	private void setTitle(Publication publication, Document doc, PublicationPartType type, String title, String subtitle, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {
 			if (!publication.isTitleFinal(fetcherArgs) && title != null && !title.trim().isEmpty()) {
 				publication.setTitle(getTitleText(doc, title, subtitle), type, doc.location(), fetcherArgs, false);
@@ -615,7 +605,7 @@ public class Fetcher {
 		}
 	}
 
-	private void setKeywords(Publication publication, Document doc, PublicationPartType type, String keywords, boolean split, EnumMap<PublicationPartName, Boolean> parts) {
+	private void setKeywords(Publication publication, Document doc, PublicationPartType type, String keywords, boolean split, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.keywords) != null && parts.get(PublicationPartName.keywords))) {
 			if (!publication.isKeywordsFinal(fetcherArgs) && keywords != null && !keywords.trim().isEmpty()) {
 				Elements keywordsElements = getAll(doc, keywords, false); // false - don't complain about missing keywords
@@ -637,7 +627,7 @@ public class Fetcher {
 		}
 	}
 
-	private void setAbstract(Publication publication, Document doc, PublicationPartType type, String theAbstract, EnumMap<PublicationPartName, Boolean> parts) {
+	private void setAbstract(Publication publication, Document doc, PublicationPartType type, String theAbstract, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.theAbstract) != null && parts.get(PublicationPartName.theAbstract))) {
 			if (!publication.isAbstractFinal(fetcherArgs) && theAbstract != null && !theAbstract.trim().isEmpty()) {
 				publication.setAbstract(text(doc, theAbstract, true), type, doc.location(), fetcherArgs, false);
@@ -645,7 +635,7 @@ public class Fetcher {
 		}
 	}
 
-	private void setFulltext(Publication publication, Document doc, PublicationPartType type, String title, String subtitle, String theAbstract, String fulltext, EnumMap<PublicationPartName, Boolean> parts) {
+	private void setFulltext(Publication publication, Document doc, PublicationPartType type, String title, String subtitle, String theAbstract, String fulltext, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext))) {
 			if (!publication.isFulltextFinal(fetcherArgs) && fulltext != null && !fulltext.trim().isEmpty()) {
 				String fulltextText = text(doc, fulltext, true);
@@ -932,7 +922,7 @@ public class Fetcher {
 		}
 	}
 
-	private boolean isFinal(Publication publication, PublicationPartName[] names, EnumMap<PublicationPartName, Boolean> parts, boolean oa) {
+	private boolean isFinal(Publication publication, PublicationPartName[] names, EnumMap<PublicationPartName, Boolean> parts, boolean oa, FetcherArgs fetcherArgs) {
 		for (PublicationPartName name : names) {
 			if (!publication.isPartFinal(name, fetcherArgs) && (parts == null || (parts.get(name) != null && parts.get(name)))) {
 				return false;
@@ -960,7 +950,7 @@ public class Fetcher {
 	}
 
 	// https://europepmc.org/docs/EBI_Europe_PMC_Web_Service_Reference.pdf
-	void fetchEuropepmc(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchEuropepmc(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.europepmc) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
@@ -968,7 +958,7 @@ public class Fetcher {
 				PublicationPartName.title,
 				PublicationPartName.keywords, PublicationPartName.mesh, PublicationPartName.efo, PublicationPartName.go,
 				PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, true)) return;
+			}, parts, true, fetcherArgs)) return;
 
 		if (publication.getIdCount() < 1) {
 			logger.error("Can't fetch publication with no IDs");
@@ -989,8 +979,8 @@ public class Fetcher {
 			return;
 		}
 
-		if (fetcherArgs.getEuropepmcEmail() != null && !fetcherArgs.getEuropepmcEmail().isEmpty()) {
-			europepmcQuery += "&email=" + fetcherArgs.getEuropepmcEmail();
+		if (fetcherArgs.getPrivateArgs().getEuropepmcEmail() != null && !fetcherArgs.getPrivateArgs().getEuropepmcEmail().isEmpty()) {
+			europepmcQuery += "&email=" + fetcherArgs.getPrivateArgs().getEuropepmcEmail();
 		}
 
 		String europepmc;
@@ -1003,7 +993,7 @@ public class Fetcher {
 
 		PublicationPartType type = PublicationPartType.europepmc;
 
-		Document doc = getDoc(europepmc, publication);
+		Document doc = getDoc(europepmc, publication, fetcherArgs);
 		if (doc != null) {
 			int count = 0;
 
@@ -1026,12 +1016,12 @@ public class Fetcher {
 			if (realCount == 1) {
 				state.europepmc = true;
 
-				setIds(publication, doc, type, "pmid", "pmcid", "doi", false);
+				setIds(publication, doc, type, "pmid", "pmcid", "doi", false, fetcherArgs);
 
 				// subtitle is already embedded in title
-				setTitle(publication, doc, type, "result > title", null, parts);
+				setTitle(publication, doc, type, "result > title", null, parts, fetcherArgs);
 
-				setKeywords(publication, doc, type, "keyword", false, parts);
+				setKeywords(publication, doc, type, "keyword", false, parts, fetcherArgs);
 
 				if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
 					if (!publication.isMeshTermsFinal(fetcherArgs)) {
@@ -1063,7 +1053,7 @@ public class Fetcher {
 					}
 				}
 
-				setAbstract(publication, doc, type, "abstractText", parts);
+				setAbstract(publication, doc, type, "abstractText", parts, fetcherArgs);
 
 				Element isOpen = doc.getElementsByTag("isOpenAccess").first();
 				if (isOpen != null && isOpen.text().equalsIgnoreCase("Y")) {
@@ -1102,7 +1092,7 @@ public class Fetcher {
 	// https://www.ncbi.nlm.nih.gov/pmc/pmcdoc/tagging-guidelines/article/style.html
 	// https://dtd.nlm.nih.gov/publishing/tag-library/2.3/
 	// https://jats.nlm.nih.gov/publishing/tag-library/1.1/
-	private boolean fillWithPubMedCentralXml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts) {
+	private boolean fillWithPubMedCentralXml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (doc.getElementsByTag("article").first() == null) {
 			logger.warn("No article found in {}", doc.location());
 			return false;
@@ -1113,16 +1103,16 @@ public class Fetcher {
 		setIds(publication, doc, type,
 			"article > front article-id[pub-id-type=pmid]",
 			"article > front article-id[pub-id-type=pmcid], article > front article-id[pub-id-type=pmc]",
-			"article > front article-id[pub-id-type=doi]", true);
+			"article > front article-id[pub-id-type=doi]", true, fetcherArgs);
 
 		String titleSelector = "article > front title-group:first-of-type article-title";
 		String subtitleSelector = "article > front title-group:first-of-type subtitle";
-		setTitle(publication, doc, type, titleSelector, subtitleSelector, parts);
+		setTitle(publication, doc, type, titleSelector, subtitleSelector, parts, fetcherArgs);
 
-		setKeywords(publication, doc, type, "article > front kwd", false, parts);
+		setKeywords(publication, doc, type, "article > front kwd", false, parts, fetcherArgs);
 
 		String abstractSelector = "article > front abstract > :not(sec), article > front abstract sec > :not(sec)";
-		setAbstract(publication, doc, type, abstractSelector, parts);
+		setAbstract(publication, doc, type, abstractSelector, parts, fetcherArgs);
 
 		// includes supplementary-material and floats and also back matter glossary, notes and misc sections
 		// but not signature block, acknowledgments, appendices, biography, footnotes and references
@@ -1131,7 +1121,7 @@ public class Fetcher {
 			"article > body > :not(sec):not(sig-block), article > body sec > :not(sec), " + // body
 			"article > back > glossary term-head, article > back > glossary def-head, article > back > glossary term, article > back > glossary def, article > back > glossary td, " + // glossary
 			"article > back > notes > :not(ref-list):not(:has(ref-list)), article > back > sec > :not(ref-list):not(:has(ref-list)), " + // notes, misc sections
-			"article > floats-wrap > :not(ref-list):not(:has(ref-list)), article > floats-group > :not(ref-list):not(:has(ref-list))", parts); // floats
+			"article > floats-wrap > :not(ref-list):not(:has(ref-list)), article > floats-group > :not(ref-list):not(:has(ref-list))", parts, fetcherArgs); // floats
 
 		setJournalTitle(publication, doc, "journal-title");
 
@@ -1140,24 +1130,24 @@ public class Fetcher {
 		return true;
 	}
 
-	private void fillWithPubMedCentralHtml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta) {
+	private void fillWithPubMedCentralHtml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, FetcherArgs fetcherArgs) {
 		setIds(publication, doc, type,
 			".epmc_citationName .abs_nonlink_metadata", // only in europepmc
 			".article .fm-sec:first-of-type .fm-citation-pmcid .fm-citation-ids-label + span",
-			".article .fm-sec:first-of-type .doi a", false);
+			".article .fm-sec:first-of-type .doi a", false, fetcherArgs);
 
 		String titleSelector = ".article .fm-sec:first-of-type > .content-title";
 		String subtitleSelector = ".article .fm-sec:first-of-type > .fm-subtitle";
-		setTitle(publication, doc, type, titleSelector, subtitleSelector, parts);
+		setTitle(publication, doc, type, titleSelector, subtitleSelector, parts, fetcherArgs);
 
-		setKeywords(publication, doc, type, ".article .kwd-text", true, parts);
+		setKeywords(publication, doc, type, ".article .kwd-text", true, parts, fetcherArgs);
 
 		String abstractSelector =
 			".article h2[id^=__abstractid] ~ :not(div), " +
 			".article h2[id^=__abstractid] ~ div > :not(.kwd-title):not(.kwd-text), " +
 			".article h2[id^=Abs] ~ :not(div), " +
 			".article h2[id^=Abs] ~ div > :not(.kwd-title):not(.kwd-text)";
-		setAbstract(publication, doc, type, abstractSelector, parts);
+		setAbstract(publication, doc, type, abstractSelector, parts, fetcherArgs);
 
 		setCorrespAuthor(publication, doc, false);
 
@@ -1184,7 +1174,7 @@ public class Fetcher {
 							".article [id].sec:not([id^=__abstractid]):not([id^=Abs]) .table-wrap > a")) {
 						String figTableHref = figTable.attr("abs:href");
 						if (!figTableHref.isEmpty()) {
-							Document docFigTable = getDoc(figTableHref, publication);
+							Document docFigTable = getDoc(figTableHref, publication, fetcherArgs);
 							if (docFigTable != null) {
 								for (Element displayNone : docFigTable.select(displayNoneSelector)) displayNone.remove();
 								String figTableText = getFirstTrimmed(docFigTable, ".article > .fig, .article > .table-wrap", true);
@@ -1208,35 +1198,35 @@ public class Fetcher {
 		}
 	}
 
-	void fetchEuropepmcFulltextXml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchEuropepmcFulltextXml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.europepmcFulltextXmlPmcid) return;
 		if (!state.europepmcHasFulltextXML) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
 				PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, false)) return;
+			}, parts, false, fetcherArgs)) return;
 
 		String pmcid = publication.getPmcid().getContent();
 		if (pmcid.isEmpty()) return;
 		state.europepmcFulltextXmlPmcid = true;
 
-		Document doc = getDoc(EUROPEPMC + pmcid + "/fullTextXML", publication);
+		Document doc = getDoc(EUROPEPMC + pmcid + "/fullTextXML", publication, fetcherArgs);
 		if (doc != null) {
-			state.europepmcFulltextXml = fillWithPubMedCentralXml(publication, doc, PublicationPartType.europepmc_xml, parts);
+			state.europepmcFulltextXml = fillWithPubMedCentralXml(publication, doc, PublicationPartType.europepmc_xml, parts, fetcherArgs);
 		}
 	}
 
-	void fetchEuropepmcFulltextHtml(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta) {
+	void fetchEuropepmcFulltextHtml(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, FetcherArgs fetcherArgs) {
 		if (state.europepmcFulltextHtmlPmcid) return;
 		if (!state.europepmcHasFulltextHTML) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.title, PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, false)
+			}, parts, false, fetcherArgs)
 			&& (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi, PublicationPartName.keywords
-			}, parts, false) || state.europepmcFulltextXml)) return;
+			}, parts, false, fetcherArgs) || state.europepmcFulltextXml)) return;
 
 		String pmcid = publication.getPmcid().getContent();
 		if (pmcid.isEmpty()) return;
@@ -1246,9 +1236,9 @@ public class Fetcher {
 
 		boolean pdfAdded = false;
 
-		Document doc = getDoc(FetcherCommon.EUROPEPMClink + pmcid, publication);
+		Document doc = getDoc(FetcherCommon.EUROPEPMClink + pmcid, publication, fetcherArgs);
 		if (doc != null) {
-			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta);
+			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta, fetcherArgs);
 
 			Element a = doc.select(".list_article_link a:containsOwn(PDF)").first();
 			if (a != null) {
@@ -1269,10 +1259,10 @@ public class Fetcher {
 		}
 	}
 
-	private List<MinedTerm> getEuropepmcMinedTerms(String url, Publication publication) {
+	private List<MinedTerm> getEuropepmcMinedTerms(String url, Publication publication, FetcherArgs fetcherArgs) {
 		List<MinedTerm> minedTerms = new ArrayList<>();
 
-		Document doc = getDoc(url, publication);
+		Document doc = getDoc(url, publication, fetcherArgs);
 
 		if (doc != null) {
 			Elements elements = doc.getElementsByTag("tmSummary");
@@ -1338,11 +1328,11 @@ public class Fetcher {
 		return minedTerms;
 	}
 
-	void fetchEuropepmcMinedTermsEfo(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchEuropepmcMinedTermsEfo(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.europepmcMinedTermsEfo) return;
 		if (!state.europepmcHasMinedTerms) return;
 
-		if (isFinal(publication, new PublicationPartName[] { PublicationPartName.efo }, parts, false)) return;
+		if (isFinal(publication, new PublicationPartName[] { PublicationPartName.efo }, parts, false, fetcherArgs)) return;
 
 		// src/ext_id/textMinedTerms/[semantic_type]/[page]/[pageSize]/[format]
 		String ext_id = null;
@@ -1357,18 +1347,18 @@ public class Fetcher {
 		}
 
 		String efo = EUROPEPMC + ext_id + "/EFO" + "/1/100";
-		List<MinedTerm> efoTerms = getEuropepmcMinedTerms(efo, publication);
+		List<MinedTerm> efoTerms = getEuropepmcMinedTerms(efo, publication, fetcherArgs);
 		if (!efoTerms.isEmpty()) {
 			state.europepmcMinedTermsEfo = true;
 			publication.setEfoTerms(efoTerms, PublicationPartType.europepmc, efo, fetcherArgs);
 		}
 	}
 
-	void fetchEuropepmcMinedTermsGo(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchEuropepmcMinedTermsGo(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.europepmcMinedTermsGo) return;
 		if (!state.europepmcHasMinedTerms) return;
 
-		if (isFinal(publication, new PublicationPartName[] { PublicationPartName.go }, parts, false)) return;
+		if (isFinal(publication, new PublicationPartName[] { PublicationPartName.go }, parts, false, fetcherArgs)) return;
 
 		// src/ext_id/textMinedTerms/[semantic_type]/[page]/[pageSize]/[format]
 		String ext_id = null;
@@ -1383,21 +1373,21 @@ public class Fetcher {
 		}
 
 		String go = EUROPEPMC + ext_id + "/GO_TERM" + "/1/100";
-		List<MinedTerm> goTerms = getEuropepmcMinedTerms(go, publication);
+		List<MinedTerm> goTerms = getEuropepmcMinedTerms(go, publication, fetcherArgs);
 		if (!goTerms.isEmpty()) {
 			state.europepmcMinedTermsGo = true;
 			publication.setGoTerms(goTerms, PublicationPartType.europepmc, go, fetcherArgs);
 		}
 	}
 
-	void fetchPubmedXml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchPubmedXml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.pubmedXmlPmid) return;
 
 		// keywords are usually missing (and if present, fetched from PMC)
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
 				PublicationPartName.title, PublicationPartName.mesh, PublicationPartName.theAbstract
-			}, parts, false)) return;
+			}, parts, false, fetcherArgs)) return;
 
 		String pmid = publication.getPmid().getContent();
 		if (pmid.isEmpty()) return;
@@ -1405,7 +1395,7 @@ public class Fetcher {
 
 		PublicationPartType type = PublicationPartType.pubmed_xml;
 
-		Document doc = getDoc(EUTILS + "efetch.fcgi?retmode=xml&db=pubmed&id=" + pmid, publication);
+		Document doc = getDoc(EUTILS + "efetch.fcgi?retmode=xml&db=pubmed&id=" + pmid, publication, fetcherArgs);
 		if (doc != null) {
 			if (doc.getElementsByTag("PubmedArticle").first() == null) {
 				logger.warn("No article found in {}", doc.location());
@@ -1414,12 +1404,12 @@ public class Fetcher {
 
 			state.pubmedXml = true;
 
-			setIds(publication, doc, type, "ArticleId[IdType=pubmed]", "ArticleId[IdType=pmc]", "ArticleId[IdType=doi]", false);
+			setIds(publication, doc, type, "ArticleId[IdType=pubmed]", "ArticleId[IdType=pmc]", "ArticleId[IdType=doi]", false, fetcherArgs);
 
 			// subtitle is already embedded in title
-			setTitle(publication, doc, type, "ArticleTitle", null, parts);
+			setTitle(publication, doc, type, "ArticleTitle", null, parts, fetcherArgs);
 
-			setKeywords(publication, doc, type, "Keyword", false, parts);
+			setKeywords(publication, doc, type, "Keyword", false, parts, fetcherArgs);
 
 			if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
 				if (!publication.isMeshTermsFinal(fetcherArgs)) {
@@ -1451,7 +1441,7 @@ public class Fetcher {
 				}
 			}
 
-			setAbstract(publication, doc, type, "AbstractText", parts);
+			setAbstract(publication, doc, type, "AbstractText", parts, fetcherArgs);
 
 			setJournalTitle(publication, doc, "Journal > Title");
 
@@ -1459,16 +1449,16 @@ public class Fetcher {
 		}
 	}
 
-	void fetchPubmedHtml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchPubmedHtml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.pubmedHtmlPmid) return;
 
 		// keywords are usually missing (and if present, fetched from PMC)
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.title, PublicationPartName.theAbstract
-			}, parts, false)
+			}, parts, false, fetcherArgs)
 			&& (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi, PublicationPartName.mesh
-			}, parts, false) || state.pubmedXml)) return;
+			}, parts, false, fetcherArgs) || state.pubmedXml)) return;
 
 		String pmid = publication.getPmid().getContent();
 		if (pmid.isEmpty()) return;
@@ -1476,7 +1466,7 @@ public class Fetcher {
 
 		PublicationPartType type = PublicationPartType.pubmed_html;
 
-		Document doc = getDoc(FetcherCommon.PMIDlink + pmid, publication);
+		Document doc = getDoc(FetcherCommon.PMIDlink + pmid, publication, fetcherArgs);
 		if (doc != null) {
 			if (doc.getElementsByClass("rprt").first() == null) {
 				logger.warn("No article found in {}", doc.location());
@@ -1486,12 +1476,12 @@ public class Fetcher {
 			setIds(publication, doc, type,
 				".rprt .rprtid dt:containsOwn(PMID:) + dd",
 				".rprt .rprtid dt:containsOwn(PMCID:) + dd",
-				".rprt .rprtid dt:containsOwn(DOI:) + dd", false);
+				".rprt .rprtid dt:containsOwn(DOI:) + dd", false, fetcherArgs);
 
 			// subtitle is already embedded in title
-			setTitle(publication, doc, type, ".rprt > h1", null, parts);
+			setTitle(publication, doc, type, ".rprt > h1", null, parts, fetcherArgs);
 
-			setKeywords(publication, doc, type, ".rprt .keywords p", true, parts);
+			setKeywords(publication, doc, type, ".rprt .keywords p", true, parts, fetcherArgs);
 
 			if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
 				if (!publication.isMeshTermsFinal(fetcherArgs)) {
@@ -1521,37 +1511,37 @@ public class Fetcher {
 				}
 			}
 
-			setAbstract(publication, doc, type, ".rprt abstracttext", parts);
+			setAbstract(publication, doc, type, ".rprt abstracttext", parts, fetcherArgs);
 		}
 	}
 
-	void fetchPmcXml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchPmcXml(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.pmcXmlPmcid) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
 				PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, false)) return;
+			}, parts, false, fetcherArgs)) return;
 
 		String pmcid = publication.getPmcid().getContent();
 		if (pmcid.isEmpty()) return;
 		state.pmcXmlPmcid = true;
 
-		Document doc = getDoc(EUTILS + "efetch.fcgi?retmode=xml&db=pmc&id=" + FetcherCommon.extractPmcid(pmcid), publication);
+		Document doc = getDoc(EUTILS + "efetch.fcgi?retmode=xml&db=pmc&id=" + FetcherCommon.extractPmcid(pmcid), publication, fetcherArgs);
 		if (doc != null) {
-			state.pmcXml = fillWithPubMedCentralXml(publication, doc, PublicationPartType.pmc_xml, parts);
+			state.pmcXml = fillWithPubMedCentralXml(publication, doc, PublicationPartType.pmc_xml, parts, fetcherArgs);
 		}
 	}
 
-	void fetchPmcHtml(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta) {
+	void fetchPmcHtml(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, FetcherArgs fetcherArgs) {
 		if (state.pmcHtmlPmcid) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.title, PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, false)
+			}, parts, false, fetcherArgs)
 			&& (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmcid, PublicationPartName.doi, PublicationPartName.keywords
-			}, parts, false) || state.pmcXml)) return;
+			}, parts, false, fetcherArgs) || state.pmcXml)) return;
 
 		String pmcid = publication.getPmcid().getContent();
 		if (pmcid.isEmpty()) return;
@@ -1561,9 +1551,9 @@ public class Fetcher {
 
 		boolean pdfAdded = false;
 
-		Document doc = getDoc(FetcherCommon.PMCIDlink + pmcid + "/", publication);
+		Document doc = getDoc(FetcherCommon.PMCIDlink + pmcid + "/", publication, fetcherArgs);
 		if (doc != null) {
-			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta);
+			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta, fetcherArgs);
 
 			Element a = doc.select(".format-menu a:containsOwn(PDF)").first();
 			if (a != null) {
@@ -1631,17 +1621,17 @@ public class Fetcher {
 		return hrefs;
 	}
 
-	void fetchSite(Publication publication, String url, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, boolean keywords) {
+	void fetchSite(Publication publication, String url, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, boolean keywords, FetcherArgs fetcherArgs) {
 		if (keywords) {
 			if (isFinal(publication, new PublicationPartName[] {
 					PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
 					PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
-				}, parts, false)) return;
+				}, parts, false, fetcherArgs)) return;
 		} else {
 			if (isFinal(publication, new PublicationPartName[] {
 					PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
 					PublicationPartName.title, PublicationPartName.theAbstract, PublicationPartName.fulltext
-				}, parts, false)) return;
+				}, parts, false, fetcherArgs)) return;
 		}
 
 		boolean javascript = scrape.getJavascript(FetcherCommon.getDoiRegistrant(url));
@@ -1649,7 +1639,7 @@ public class Fetcher {
 			javascript = Boolean.valueOf(scrape.getSelector(scrape.getSite(url), ScrapeSiteKey.javascript));
 		}
 
-		Document doc = getDoc(url, publication, type, from, links, parts, javascript);
+		Document doc = getDoc(url, publication, type, from, links, parts, javascript, fetcherArgs);
 
 		// Elsevier uses JavaScript for redirecting, assuming it goes to ScienceDirect
 		// better use API https://www.elsevier.com/solutions/sciencedirect/support/api
@@ -1657,7 +1647,7 @@ public class Fetcher {
 			Matcher elsevier_id = ELSEVIER_REDIRECT.matcher(doc.location());
 			if (elsevier_id.matches()) {
 				// using JavaScript does not help get the fulltext
-				doc = getDoc(SCIENCEDIRECT_LINK + elsevier_id.group(1), publication, type, from, links, parts, false);
+				doc = getDoc(SCIENCEDIRECT_LINK + elsevier_id.group(1), publication, type, from, links, parts, false, fetcherArgs);
 			}
 		}
 
@@ -1667,20 +1657,20 @@ public class Fetcher {
 			String site = scrape.getSite(finalUrl);
 			if (site != null) {
 				if (!javascript && Boolean.valueOf(scrape.getSelector(site, ScrapeSiteKey.javascript))) {
-					doc = getDoc(finalUrl, publication, type, from, links, parts, true);
+					doc = getDoc(finalUrl, publication, type, from, links, parts, true, fetcherArgs);
 				}
 
-				setIds(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.pmid), scrape.getSelector(site, ScrapeSiteKey.pmcid), scrape.getSelector(site, ScrapeSiteKey.doi), false);
+				setIds(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.pmid), scrape.getSelector(site, ScrapeSiteKey.pmcid), scrape.getSelector(site, ScrapeSiteKey.doi), false, fetcherArgs);
 
-				setTitle(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.title), scrape.getSelector(site, ScrapeSiteKey.subtitle), parts);
+				setTitle(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.title), scrape.getSelector(site, ScrapeSiteKey.subtitle), parts, fetcherArgs);
 
-				setKeywords(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.keywords), false, parts);
+				setKeywords(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.keywords), false, parts, fetcherArgs);
 
-				setKeywords(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.keywords_split), true, parts);
+				setKeywords(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.keywords_split), true, parts, fetcherArgs);
 
-				setAbstract(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.theAbstract), parts);
+				setAbstract(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.theAbstract), parts, fetcherArgs);
 
-				setFulltext(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.title), scrape.getSelector(site, ScrapeSiteKey.subtitle), scrape.getSelector(site, ScrapeSiteKey.theAbstract), scrape.getSelector(site, ScrapeSiteKey.fulltext), parts);
+				setFulltext(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.title), scrape.getSelector(site, ScrapeSiteKey.subtitle), scrape.getSelector(site, ScrapeSiteKey.theAbstract), scrape.getSelector(site, ScrapeSiteKey.fulltext), parts, fetcherArgs);
 
 				String fulltextHrefSrcDst = getHrefSrcDst(doc, scrape.getSelector(site, ScrapeSiteKey.fulltext_src), scrape.getSelector(site, ScrapeSiteKey.fulltext_dst));
 				if (fulltextHrefSrcDst != null) {
@@ -1721,13 +1711,13 @@ public class Fetcher {
 		}
 	}
 
-	private void fetchDoi(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	private void fetchDoi(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.doi) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
 				PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, false)) return;
+			}, parts, false, fetcherArgs)) return;
 
 		String doi = publication.getDoi().getContent();
 		if (doi.isEmpty()) return;
@@ -1741,18 +1731,18 @@ public class Fetcher {
 			return;
 		}
 
-		fetchSite(publication, doiLink, PublicationPartType.doi, FetcherCommon.DOIlink + doi, links, parts, true, true);
+		fetchSite(publication, doiLink, PublicationPartType.doi, FetcherCommon.DOIlink + doi, links, parts, true, true, fetcherArgs);
 	}
 
-	void fetchOaDoi(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	void fetchOaDoi(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.oadoi) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.title, PublicationPartName.theAbstract, PublicationPartName.fulltext
-			}, parts, true)
+			}, parts, true, fetcherArgs)
 			&& (isFinal(publication, new PublicationPartName[] {
 				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
-			}, parts, true) || !idOnly(parts))) return;
+			}, parts, true, fetcherArgs) || !idOnly(parts))) return;
 
 		String doi = publication.getDoi().getContent();
 		if (doi.isEmpty()) return;
@@ -1760,9 +1750,9 @@ public class Fetcher {
 
 		URLConnection con;
 		try {
-			String oaDOI = new URI("https", "api.oadoi.org", "/v2/" + doi, "email=" + fetcherArgs.getOadoiEmail(), null).toASCIIString();
+			String oaDOI = new URI("https", "api.oadoi.org", "/v2/" + doi, "email=" + fetcherArgs.getPrivateArgs().getOadoiEmail(), null).toASCIIString();
 			logger.info("    GET oaDOI {}", oaDOI);
-			con = FetcherCommon.newConnection(oaDOI, fetcherArgs);
+			con = FetcherCommon.newConnection(oaDOI, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
 		} catch (URISyntaxException | IOException e) {
 			logger.error(e);
 			return;
@@ -1848,7 +1838,7 @@ public class Fetcher {
 		}
 	}
 
-	private boolean fetchAll(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+	private boolean fetchAll(Publication publication, Links links, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		logger.info("Fetch sources {}", publication.toStringId());
 
 		String pmid = publication.getPmid().getContent();
@@ -1856,21 +1846,21 @@ public class Fetcher {
 		String doi = publication.getDoi().getContent();
 
 		// order and multiplicity is important
-		fetchEuropepmc(publication, state, parts);
-		fetchEuropepmc(publication, state, parts);
-		fetchEuropepmc(publication, state, parts);
-		fetchEuropepmcFulltextXml(publication, state, parts);
-		fetchEuropepmcFulltextHtml(publication, links, state, parts, true);
-		fetchEuropepmcMinedTermsEfo(publication, state, parts);
-		fetchEuropepmcMinedTermsEfo(publication, state, parts);
-		fetchEuropepmcMinedTermsGo(publication, state, parts);
-		fetchEuropepmcMinedTermsGo(publication, state, parts);
-		fetchPubmedXml(publication, state, parts);
-		fetchPubmedHtml(publication, state, parts);
-		fetchPmcXml(publication, state, parts);
-		fetchPmcHtml(publication, links, state, parts, true);
-		fetchDoi(publication, links, state, parts);
-		fetchOaDoi(publication, links, state, parts);
+		fetchEuropepmc(publication, state, parts, fetcherArgs);
+		fetchEuropepmc(publication, state, parts, fetcherArgs);
+		fetchEuropepmc(publication, state, parts, fetcherArgs);
+		fetchEuropepmcFulltextXml(publication, state, parts, fetcherArgs);
+		fetchEuropepmcFulltextHtml(publication, links, state, parts, true, fetcherArgs);
+		fetchEuropepmcMinedTermsEfo(publication, state, parts, fetcherArgs);
+		fetchEuropepmcMinedTermsEfo(publication, state, parts, fetcherArgs);
+		fetchEuropepmcMinedTermsGo(publication, state, parts, fetcherArgs);
+		fetchEuropepmcMinedTermsGo(publication, state, parts, fetcherArgs);
+		fetchPubmedXml(publication, state, parts, fetcherArgs);
+		fetchPubmedHtml(publication, state, parts, fetcherArgs);
+		fetchPmcXml(publication, state, parts, fetcherArgs);
+		fetchPmcHtml(publication, links, state, parts, true, fetcherArgs);
+		fetchDoi(publication, links, state, parts, fetcherArgs);
+		fetchOaDoi(publication, links, state, parts, fetcherArgs);
 
 		if (!pmid.isEmpty() && !publication.getPmid().isEmpty() && !pmid.equals(publication.getPmid().getContent())) {
 			logger.error("PMID changed from {} to {}", pmid, publication.getPmid().getContent());
@@ -1888,7 +1878,7 @@ public class Fetcher {
 		return true;
 	}
 
-	private void fetchPublication(Publication publication, EnumMap<PublicationPartName, Boolean> parts, boolean reset) {
+	private void fetchPublication(Publication publication, EnumMap<PublicationPartName, Boolean> parts, boolean reset, FetcherArgs fetcherArgs) {
 		publication.setFetchException(false);
 
 		if (reset) {
@@ -1904,7 +1894,7 @@ public class Fetcher {
 		int idCount = 0;
 		while (publication.getIdCount() > idCount && goon) {
 			idCount = publication.getIdCount();
-			goon = fetchAll(publication, links, state, parts);
+			goon = fetchAll(publication, links, state, parts, fetcherArgs);
 		}
 
 		if (goon) {
@@ -1913,10 +1903,10 @@ public class Fetcher {
 		for (int linksFetched = 0; linksFetched < LINKS_LIMIT && goon; ++linksFetched) {
 			if (isFinal(publication, new PublicationPartName[] {
 					PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
-				}, parts, false)
+				}, parts, false, fetcherArgs)
 				&& (isFinal(publication, new PublicationPartName[] {
 					PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi
-				}, parts, false) || !idOnly(parts))) break;
+				}, parts, false, fetcherArgs) || !idOnly(parts))) break;
 
 			Link link = links.pop();
 			if (link == null) break;
@@ -1927,28 +1917,28 @@ public class Fetcher {
 
 			if (!link.getType().isPdf()) {
 				if (link.getType() != PublicationPartType.link_oadoi) {
-					fetchSite(publication, link.getUrl().toString(), link.getType(), link.getFrom(), links, parts, true, true);
+					fetchSite(publication, link.getUrl().toString(), link.getType(), link.getFrom(), links, parts, true, true, fetcherArgs);
 				} else {
-					fetchSite(publication, link.getUrl().toString(), link.getType(), link.getFrom(), links, parts, true, false);
+					fetchSite(publication, link.getUrl().toString(), link.getType(), link.getFrom(), links, parts, true, false, fetcherArgs);
 				}
 			} else if (SCIENCEDIRECT.matcher(link.getUrl().toString()).matches()) {
-				getDoc(link.getUrl().toString(), publication, link.getType(), link.getFrom(), links, parts, true);
+				getDoc(link.getUrl().toString(), publication, link.getType(), link.getFrom(), links, parts, true, fetcherArgs);
 			} else {
-				fetchPdf(link.getUrl().toString(), publication, link.getType(), link.getFrom(), links, parts);
+				fetchPdf(link.getUrl().toString(), publication, link.getType(), link.getFrom(), links, parts, fetcherArgs);
 			}
 
 			while (publication.getIdCount() > idCount && goon) {
 				idCount = publication.getIdCount();
-				goon = fetchAll(publication, links, state, parts);
+				goon = fetchAll(publication, links, state, parts, fetcherArgs);
 			}
 		}
 
 		if (!goon) {
-			fetchPublication(publication, parts, true);
+			fetchPublication(publication, parts, true, fetcherArgs);
 		}
 	}
 
-	public Publication initPublication(PublicationIds publicationIds) {
+	public Publication initPublication(PublicationIds publicationIds, FetcherArgs fetcherArgs) {
 		if (publicationIds == null) {
 			logger.error("null IDs given for publication init");
 			return null;
@@ -1992,11 +1982,11 @@ public class Fetcher {
 		return publication;
 	}
 
-	public boolean getPublication(Publication publication) {
-		return getPublication(publication, null);
+	public boolean getPublication(Publication publication, FetcherArgs fetcherArgs) {
+		return getPublication(publication, null, fetcherArgs);
 	}
 
-	public boolean getPublication(Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
+	public boolean getPublication(Publication publication, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (publication == null) {
 			logger.error("null publication given for getting publication");
 			return false;
@@ -2010,7 +2000,7 @@ public class Fetcher {
 		if (publication.canFetch(fetcherArgs)) {
 			publication.updateCounters(fetcherArgs);
 
-			fetchPublication(publication, parts, false);
+			fetchPublication(publication, parts, false, fetcherArgs);
 
 			if (publication.isEmpty()) {
 				logger.error("Empty publication returned for {}", publication.toStringId());
@@ -2042,11 +2032,11 @@ public class Fetcher {
 		return webpage;
 	}
 
-	public boolean getWebpage(Webpage webpage) {
-		return getWebpage(webpage, null, null, false);
+	public boolean getWebpage(Webpage webpage, FetcherArgs fetcherArgs) {
+		return getWebpage(webpage, null, null, false, fetcherArgs);
 	}
 
-	public boolean getWebpage(Webpage webpage, String title, String content, boolean javascript) {
+	public boolean getWebpage(Webpage webpage, String title, String content, boolean javascript, FetcherArgs fetcherArgs) {
 		if (webpage == null) {
 			logger.error("null webpage given for getting webpage");
 			return false;
@@ -2084,7 +2074,7 @@ public class Fetcher {
 				logger.warn("No scrape rules for start webpage {}", newWebpage.getStartUrl());
 			}
 
-			Document doc = getDoc(newWebpage, javascript || (webpageJavascript != null && webpageJavascript.equals(Boolean.valueOf(true))));
+			Document doc = getDoc(newWebpage, javascript || (webpageJavascript != null && webpageJavascript.equals(Boolean.valueOf(true))), fetcherArgs);
 
 			if (doc != null && (!javascript && webpageJavascript == null) && scrape.getWebpage(newWebpage.getFinalUrl()) == null) {
 				int textLength = doc.text().length();
@@ -2092,7 +2082,7 @@ public class Fetcher {
 					logger.info("Refetching {} with JavaScript enabled", newWebpage.getStartUrl());
 					Webpage newWebpageJavascript = new Webpage();
 					newWebpageJavascript.setStartUrl(newWebpage.getStartUrl());
-					Document docJavascript = getDoc(newWebpageJavascript, true);
+					Document docJavascript = getDoc(newWebpageJavascript, true, fetcherArgs);
 					if (docJavascript != null) {
 						doc = docJavascript;
 						newWebpage = newWebpageJavascript;

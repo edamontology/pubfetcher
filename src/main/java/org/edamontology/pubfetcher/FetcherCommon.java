@@ -34,6 +34,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +45,7 @@ public final class FetcherCommon {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	private static int REDIRECT_LIMIT = 10;
+	private static final int REDIRECT_LIMIT = 10;
 
 	static final Pattern PMID = Pattern.compile("[1-9][0-9]*");
 	private static final Pattern PMID_ONLY = Pattern.compile("^" + PMID.pattern() + "$");
@@ -68,6 +70,10 @@ public final class FetcherCommon {
 
 	private static final Pattern NEWPARAGRAPH = Pattern.compile("\n\n");
 	private static final Pattern NEWLINE = Pattern.compile("\n");
+
+	private static Set<PublicationIds> activePubIds = new HashSet<>();
+	private static Set<String> activeWebUrls = new HashSet<>();
+	private static Set<String> activeDocUrls = new HashSet<>();
 
 	private FetcherCommon() {}
 
@@ -200,92 +206,240 @@ public final class FetcherCommon {
 		return getLinkHtml(getIdLink(publicationIds), text);
 	}
 
-	public static Publication getPublication(PublicationIds publicationIds, Database database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts) {
+	public static PublicationIds getPublicationIds(String publicationId, String url, boolean throwException) {
+		if (publicationId == null || publicationId.trim().isEmpty()) return null;
+		PublicationIds publicationIds =
+			isPmid(publicationId) ? new PublicationIds(publicationId, null, null, url, null, null) : (
+			isPmcid(publicationId) ? new PublicationIds(null, publicationId, null, null, url, null) : (
+			isDoi(publicationId) ? new PublicationIds(null, null, publicationId, null, null, url) : (
+			null)));
+		if (publicationIds == null) {
+			if (throwException) {
+				throw new IllegalArgumentException("Invalid publication ID: " + publicationId);
+			} else {
+				logger.error("Invalid publication ID: {}", publicationId);
+			}
+		}
+		return publicationIds;
+	}
+
+	public static PublicationIds getPublicationIds(String pmid, String pmcid, String doi, String url, boolean logEmpty) {
+		if (pmid == null || pmid.trim().isEmpty()) pmid = null;
+		else if (!isPmid(pmid)) {
+			logger.error("Invalid PMID: {}", pmid);
+			pmid = null;
+		}
+		if (pmcid == null || pmcid.trim().isEmpty()) pmcid = null;
+		else if (!isPmcid(pmcid)) {
+			logger.error("Invalid PMCID: {}", pmcid);
+			pmcid = null;
+		}
+		if (doi == null || doi.trim().isEmpty()) doi = null;
+		else if (!isDoi(doi)) {
+			logger.error("Invalid DOI: {}", doi);
+			doi = null;
+		}
+		if (pmid == null && pmcid == null && doi == null) {
+			if (logEmpty) {
+				logger.error("Publication ID is empty");
+			}
+			return null;
+		}
+		return new PublicationIds(pmid, pmcid, doi,
+			pmid == null ? null : url, pmcid == null ? null : url, doi == null ? null : url);
+	}
+
+	public static String getUrl(String url, boolean throwException) {
+		if (url == null || url.trim().isEmpty()) return null;
+		try {
+			String newUrl = new URL(url).toString();
+			if (!newUrl.equals(url)) {
+				logger.warn("URL changed from {} to {}", url, newUrl);
+			}
+			return newUrl;
+		} catch (MalformedURLException e) {
+			if (throwException) {
+				throw new IllegalArgumentException("Malformed URL: " + url);
+			} else {
+				logger.error("Malformed URL: {}", url);
+			}
+			return null;
+		}
+	}
+
+	private static boolean isActivePubId(PublicationIds pubId) {
+		if (pubId == null) return false;
+		for (PublicationIds activePubId : activePubIds) {
+			if (pubId.getPmid() != null && pubId.getPmid().equals(activePubId.getPmid())
+				|| pubId.getPmcid() != null && pubId.getPmcid().equals(activePubId.getPmcid())
+				|| pubId.getDoi() != null && pubId.getDoi().equals(activePubId.getDoi())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static Publication getPublication(PublicationIds publicationIds, Database database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (publicationIds == null) {
 			logger.error("null IDs given for getting publication");
 			return null;
 		}
-		Publication publication = null;
-		if (database != null) {
-			publication = database.getPublication(publicationIds);
-		}
-		if (fetcher != null) {
-			if (publication == null) {
-				publication = fetcher.initPublication(publicationIds);
+		synchronized(activePubIds) {
+			boolean waited = false;
+			while (isActivePubId(publicationIds)) {
+				waited = true;
+				logger.info("Waiting behind Publication ID {}", publicationIds);
+				try {
+					activePubIds.wait();
+				} catch (InterruptedException e) {
+					logger.error("Interrupt!", e);
+					Thread.currentThread().interrupt();
+					return null;
+				}
 			}
-			if (publication != null) {
-				if (fetcher.getPublication(publication, parts)) {
-					if (database != null) {
-						database.putPublication(publication);
-						database.commit();
+			if (waited) {
+				logger.info("Resuming for Publication ID {}", publicationIds);
+			}
+			activePubIds.add(publicationIds);
+		}
+		try {
+			Publication publication = null;
+			if (database != null) {
+				publication = database.getPublication(publicationIds);
+			}
+			if (fetcher != null) {
+				if (publication == null) {
+					publication = fetcher.initPublication(publicationIds, fetcherArgs);
+				}
+				if (publication != null) {
+					if (fetcher.getPublication(publication, parts, fetcherArgs)) {
+						if (database != null) {
+							database.putPublication(publication);
+							database.commit();
+						}
 					}
 				}
 			}
+			return publication;
+		} finally {
+			synchronized(activePubIds) {
+				activePubIds.remove(publicationIds);
+				activePubIds.notifyAll();
+			}
 		}
-		return publication;
 	}
 
-	public static Webpage getWebpage(String webpageUrl, Database database, Fetcher fetcher) {
+	public static Webpage getWebpage(String webpageUrl, Database database, Fetcher fetcher, FetcherArgs fetcherArgs) {
 		if (webpageUrl == null) {
 			logger.error("null start URL given for getting webpage");
 			return null;
 		}
-		Webpage webpage = null;
-		if (database != null) {
-			webpage = database.getWebpage(webpageUrl);
-		}
-		if (fetcher != null) {
-			if (webpage == null) {
-				webpage = fetcher.initWebpage(webpageUrl);
+		synchronized(activeWebUrls) {
+			boolean waited = false;
+			while (activeWebUrls.contains(webpageUrl)) {
+				waited = true;
+				logger.info("Waiting behind Webpage URL {}", webpageUrl);
+				try {
+					activeWebUrls.wait();
+				} catch (InterruptedException e) {
+					logger.error("Interrupt!", e);
+					Thread.currentThread().interrupt();
+					return null;
+				}
 			}
-			if (webpage != null) {
-				if (fetcher.getWebpage(webpage)) {
-					if (database != null) {
-						database.putWebpage(webpage);
-						database.commit();
+			if (waited) {
+				logger.info("Resuming for Webpage URL {}", webpageUrl);
+			}
+			activeWebUrls.add(webpageUrl);
+		}
+		try {
+			Webpage webpage = null;
+			if (database != null) {
+				webpage = database.getWebpage(webpageUrl);
+			}
+			if (fetcher != null) {
+				if (webpage == null) {
+					webpage = fetcher.initWebpage(webpageUrl);
+				}
+				if (webpage != null) {
+					if (fetcher.getWebpage(webpage, fetcherArgs)) {
+						if (database != null) {
+							database.putWebpage(webpage);
+							database.commit();
+						}
 					}
 				}
 			}
+			return webpage;
+		} finally {
+			synchronized(activeWebUrls) {
+				activeWebUrls.remove(webpageUrl);
+				activeWebUrls.notifyAll();
+			}
 		}
-		return webpage;
 	}
 
-	public static Webpage getDoc(String docUrl, Database database, Fetcher fetcher) {
+	public static Webpage getDoc(String docUrl, Database database, Fetcher fetcher, FetcherArgs fetcherArgs) {
 		if (docUrl == null) {
 			logger.error("null start URL given for getting doc");
 			return null;
 		}
-		Webpage doc = null;
-		if (database != null) {
-			doc = database.getDoc(docUrl);
-		}
-		if (fetcher != null) {
-			if (doc == null) {
-				doc = fetcher.initWebpage(docUrl);
+		synchronized(activeDocUrls) {
+			boolean waited = false;
+			while (activeDocUrls.contains(docUrl)) {
+				waited = true;
+				logger.info("Waiting behind Doc URL {}", docUrl);
+				try {
+					activeDocUrls.wait();
+				} catch (InterruptedException e) {
+					logger.error("Interrupt!", e);
+					Thread.currentThread().interrupt();
+					return null;
+				}
 			}
-			if (doc != null) {
-				if (fetcher.getWebpage(doc)) {
-					if (database != null) {
-						database.putDoc(doc);
-						database.commit();
+			if (waited) {
+				logger.info("Resuming for Doc URL {}", docUrl);
+			}
+			activeDocUrls.add(docUrl);
+		}
+		try {
+			Webpage doc = null;
+			if (database != null) {
+				doc = database.getDoc(docUrl);
+			}
+			if (fetcher != null) {
+				if (doc == null) {
+					doc = fetcher.initWebpage(docUrl);
+				}
+				if (doc != null) {
+					if (fetcher.getWebpage(doc, fetcherArgs)) {
+						if (database != null) {
+							database.putDoc(doc);
+							database.commit();
+						}
 					}
 				}
 			}
+			return doc;
+		} finally {
+			synchronized(activeDocUrls) {
+				activeDocUrls.remove(docUrl);
+				activeDocUrls.notifyAll();
+			}
 		}
-		return doc;
 	}
 
-	public static URLConnection newConnection(String path, FetcherArgs fetcherArgs) throws MalformedURLException, IOException {
+	public static URLConnection newConnection(String path, int timeout, String userAgent) throws MalformedURLException, IOException {
 		URL url = new URL(path);
 		URLConnection con = url.openConnection();
-		con.setConnectTimeout(fetcherArgs.getTimeout());
-		con.setReadTimeout(fetcherArgs.getTimeout());
+		con.setConnectTimeout(timeout);
+		con.setReadTimeout(timeout);
 		if (con instanceof HttpURLConnection) {
 			CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
 			int i = 0;
 			while (con instanceof HttpURLConnection) {
 				HttpURLConnection httpCon = (HttpURLConnection) con;
-				httpCon.setRequestProperty("User-Agent", fetcherArgs.getUserAgent());
+				httpCon.setRequestProperty("User-Agent", userAgent);
 				httpCon.setRequestProperty("Referer", url.getProtocol() + "://" + url.getAuthority());
 				// Java doesn't automatically redirect from http to https
 				if (httpCon.getResponseCode() >= 300 && httpCon.getResponseCode() < 400) {
@@ -296,8 +450,8 @@ public final class FetcherCommon {
 					}
 					URL next = new URL(url, httpCon.getHeaderField("Location"));
 					con = next.openConnection();
-					con.setConnectTimeout(fetcherArgs.getTimeout());
-					con.setReadTimeout(fetcherArgs.getTimeout());
+					con.setConnectTimeout(timeout);
+					con.setReadTimeout(timeout);
 				} else {
 					break;
 				}
@@ -307,10 +461,10 @@ public final class FetcherCommon {
 	}
 
 	public static Path outputPath(String file) throws IOException {
-		return outputPath(file, false);
+		return outputPath(file, false, false);
 	}
 
-	public static Path outputPath(String file, boolean directory) throws IOException {
+	public static Path outputPath(String file, boolean directory, boolean existingDirectory) throws IOException {
 		if (file == null || file.isEmpty()) {
 			throw new FileNotFoundException("Empty path given!");
 		}
@@ -320,14 +474,23 @@ public final class FetcherCommon {
 		if (!Files.isDirectory(parent) || !Files.isWritable(parent)) {
 			throw new AccessDeniedException(parent.toAbsolutePath().normalize() + " is not a writeable directory!"); // TODO don't use absolute in server
 		}
-		if (Files.isDirectory(path)) {
-			throw new FileAlreadyExistsException(path.toAbsolutePath().normalize() + " is an existing directory!");
-		}
-		if (!directory && Files.exists(path) && !Files.isWritable(path)) {
-			throw new AccessDeniedException(path.toAbsolutePath().normalize() + " is not a writeable file!");
-		}
-		if (directory && Files.exists(path)) {
-			throw new FileAlreadyExistsException(path.toAbsolutePath().normalize() + " is an existing file!");
+		if (directory && existingDirectory) {
+			if (!Files.isDirectory(path) || !Files.isWritable(path)) {
+				throw new AccessDeniedException(path.toAbsolutePath().normalize() + " is not a writeable directory!");
+			}
+		} else {
+			if (Files.isDirectory(path)) {
+				throw new FileAlreadyExistsException(path.toAbsolutePath().normalize() + " is an existing directory!");
+			}
+			if (directory) {
+				if (Files.exists(path)) {
+					throw new FileAlreadyExistsException(path.toAbsolutePath().normalize() + " is an existing file!");
+				}
+			} else {
+				if (Files.exists(path) && !Files.isWritable(path)) {
+					throw new AccessDeniedException(path.toAbsolutePath().normalize() + " is not a writeable file!");
+				}
+			}
 		}
 		return path;
 	}

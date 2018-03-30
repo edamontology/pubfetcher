@@ -43,6 +43,8 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 
 	public abstract boolean isUsable(FetcherArgs fetcherArgs);
 
+	public abstract String getStatusString(FetcherArgs fetcherArgs);
+
 	protected boolean canFetch(FetcherArgs fetcherArgs) {
 		long currentTime = System.currentTimeMillis();
 		String finality = (isEmpty() ? "empty" : (!isFinal(fetcherArgs) ? "non-final" : "final"));

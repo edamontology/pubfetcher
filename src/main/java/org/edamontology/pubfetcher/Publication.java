@@ -121,6 +121,15 @@ public class Publication extends DatabaseEntry<Publication> {
 			isAbstractUsable(fetcherArgs) || isFulltextUsable(fetcherArgs);
 	}
 
+	@Override
+	public String getStatusString(FetcherArgs fetcherArgs) {
+		if (isEmpty()) return "empty";
+		if (!isUsable(fetcherArgs)) return "non-usable";
+		if (!isFinal(fetcherArgs)) return "non-final";
+		if (!isTotallyFinal(fetcherArgs)) return "final";
+		return "totally final";
+	}
+
 	public int getIdCount() {
 		int idCount = 0;
 		if (!pmid.isEmpty()) ++idCount;

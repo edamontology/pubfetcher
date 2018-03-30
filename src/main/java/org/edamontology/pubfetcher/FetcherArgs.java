@@ -19,55 +19,62 @@
 
 package org.edamontology.pubfetcher;
 
-import org.jsoup.helper.HttpConnection;
-
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
+import com.beust.jcommander.validators.PositiveInteger;
 
 public class FetcherArgs {
-	@Parameter(names = { "--empty-cooldown" }, description = "TODO in minutes")
+
+	public static final String EMPTY_COOLDOWN = "empty-cooldown";
+	@Parameter(names = { "--" + EMPTY_COOLDOWN }, validateWith = PositiveInteger.class, description = "TODO in minutes")
 	private int emptyCooldown = 720; // 12 h
 
-	@Parameter(names = { "--non-final-cooldown" }, description = "TODO in minutes")
+	public static final String NON_FINAL_COOLDOWN = "non-final-cooldown";
+	@Parameter(names = { "--" + NON_FINAL_COOLDOWN }, validateWith = PositiveInteger.class, description = "TODO in minutes")
 	private int nonFinalCooldown = 10080; // a week
 
-	@Parameter(names = { "--fetch-exception-cooldown" }, description = "TODO in minutes")
+	public static final String FETCH_EXCEPTION_COOLDOWN = "fetch-exception-cooldown";
+	@Parameter(names = { "--" + FETCH_EXCEPTION_COOLDOWN }, validateWith = PositiveInteger.class, description = "TODO in minutes")
 	private int fetchExceptionCooldown = 1440; // a day
 
-	@Parameter(names = { "--retry-limit" }, description = "TODO")
+	public static final String RETRY_LIMIT = "retry-limit";
+	@Parameter(names = { "--" + RETRY_LIMIT }, description = "TODO")
 	private int retryLimit = 3;
 
-	@Parameter(names = { "--title-min-length" }, description = "TODO")
+	public static final String TITLE_MIN_LENGTH = "title-min-length";
+	@Parameter(names = { "--" + TITLE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
 	private int titleMinLength = 4;
 
-	@Parameter(names = { "--keywords-min-size" }, description = "TODO")
+	public static final String KEYWORDS_MIN_SIZE = "keywords-min-size";
+	@Parameter(names = { "--" + KEYWORDS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "TODO")
 	private int keywordsMinSize = 2;
 
-	@Parameter(names = { "--mined-terms-min-size" }, description = "TODO")
+	public static final String MINED_TERMS_MIN_SIZE = "mined-terms-min-size";
+	@Parameter(names = { "--" + MINED_TERMS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "TODO")
 	private int minedTermsMinSize = 1;
 
-	@Parameter(names = { "--abstract-min-length" }, description = "TODO")
+	public static final String ABSTRACT_MIN_LENGTH = "abstract-min-length";
+	@Parameter(names = { "--" + ABSTRACT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
 	private int abstractMinLength = 200;
 
-	@Parameter(names = { "--fulltext-min-length" }, description = "TODO")
+	public static final String FULLTEXT_MIN_LENGTH = "fulltext-min-length";
+	@Parameter(names = { "--" + FULLTEXT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
 	private int fulltextMinLength = 2000;
 
-	@Parameter(names = { "--webpage-min-length" }, description = "TODO")
+	public static final String WEBPAGE_MIN_LENGTH = "webpage-min-length";
+	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "TODO")
 	private int webpageMinLength = 100; // TODO test default value
 
-	@Parameter(names = { "--webpage-min-length-javascript" }, description = "TODO")
+	public static final String WEBPAGE_MIN_LENGTH_JAVASCRIPT = "webpage-min-length-javascript";
+	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "TODO")
 	private int webpageMinLengthJavascript = 200;
 
-	@Parameter(names = { "--europepmc-email" }, description = "TODO")
-	private String europepmcEmail = "";
-
-	@Parameter(names = { "--oadoi-email" }, description = "TODO")
-	private String oadoiEmail = "test@example.com";
-
-	@Parameter(names = { "--user-agent" }, description = "TODO")
-	private String userAgent = HttpConnection.DEFAULT_UA;
-
-	@Parameter(names = { "--timeout" }, description = "TODO")
+	public static final String TIMEOUT = "timeout";
+	@Parameter(names = { "--" + TIMEOUT }, validateWith = PositiveInteger.class, description = "TODO")
 	private int timeout = 15000; // ms
+
+	@ParametersDelegate
+	private FetcherPrivateArgs privateArgs = new FetcherPrivateArgs();
 
 	public int getEmptyCooldown() {
 		return emptyCooldown;
@@ -146,31 +153,17 @@ public class FetcherArgs {
 		this.webpageMinLengthJavascript = webpageMinLengthJavascript;
 	}
 
-	public String getEuropepmcEmail() {
-		return europepmcEmail;
-	}
-	public void setEuropepmcEmail(String europepmcEmail) {
-		this.europepmcEmail = europepmcEmail;
-	}
-
-	public String getOadoiEmail() {
-		return oadoiEmail;
-	}
-	public void setOadoiEmail(String oadoiEmail) {
-		this.oadoiEmail = oadoiEmail;
-	}
-
-	public String getUserAgent() {
-		return userAgent;
-	}
-	public void setUserAgent(String userAgent) {
-		this.userAgent = userAgent;
-	}
-
 	public int getTimeout() {
 		return timeout;
 	}
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
+	}
+
+	public FetcherPrivateArgs getPrivateArgs() {
+		return privateArgs;
+	}
+	public void setPrivateArgs(FetcherPrivateArgs privateArgs) {
+		this.privateArgs = privateArgs;
 	}
 }

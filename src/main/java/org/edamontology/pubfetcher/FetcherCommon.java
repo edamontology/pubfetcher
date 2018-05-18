@@ -215,7 +215,7 @@ public final class FetcherCommon {
 			null)));
 		if (publicationIds == null) {
 			if (throwException) {
-				throw new IllegalArgumentException("Invalid publication ID: " + publicationId);
+				throw new IllegalRequestException("Invalid publication ID: " + publicationId);
 			} else {
 				logger.error("Invalid publication ID: {}", publicationId);
 			}
@@ -223,25 +223,37 @@ public final class FetcherCommon {
 		return publicationIds;
 	}
 
-	public static PublicationIds getPublicationIds(String pmid, String pmcid, String doi, String url, boolean logEmpty) {
+	public static PublicationIds getPublicationIds(String pmid, String pmcid, String doi, String url, boolean throwException, boolean logEmpty) throws IllegalRequestException {
 		if (pmid == null || pmid.trim().isEmpty()) pmid = null;
 		else if (!isPmid(pmid)) {
 			logger.error("Invalid PMID: {}", pmid);
+			if (throwException) {
+				throw new IllegalRequestException("Invalid PMID: " + pmid);
+			}
 			pmid = null;
 		}
 		if (pmcid == null || pmcid.trim().isEmpty()) pmcid = null;
 		else if (!isPmcid(pmcid)) {
 			logger.error("Invalid PMCID: {}", pmcid);
+			if (throwException) {
+				throw new IllegalRequestException("Invalid PMCID: " + pmcid);
+			}
 			pmcid = null;
 		}
 		if (doi == null || doi.trim().isEmpty()) doi = null;
 		else if (!isDoi(doi)) {
 			logger.error("Invalid DOI: {}", doi);
+			if (throwException) {
+				throw new IllegalRequestException("Invalid DOI: " + doi);
+			}
 			doi = null;
 		}
 		if (pmid == null && pmcid == null && doi == null) {
 			if (logEmpty) {
 				logger.error("Publication ID is empty");
+			}
+			if (throwException) {
+				throw new IllegalRequestException("Publication ID is empty");
 			}
 			return null;
 		}
@@ -249,7 +261,7 @@ public final class FetcherCommon {
 			pmid == null ? null : url, pmcid == null ? null : url, doi == null ? null : url);
 	}
 
-	public static String getUrl(String url, boolean throwException) {
+	public static String getUrl(String url, boolean throwException) throws IllegalRequestException {
 		if (url == null || url.trim().isEmpty()) return null;
 		try {
 			String newUrl = new URL(url).toString();
@@ -259,7 +271,7 @@ public final class FetcherCommon {
 			return newUrl;
 		} catch (MalformedURLException e) {
 			if (throwException) {
-				throw new IllegalArgumentException("Malformed URL: " + url);
+				throw new IllegalRequestException("Malformed URL: " + url);
 			} else {
 				logger.error("Malformed URL: {}", url);
 			}

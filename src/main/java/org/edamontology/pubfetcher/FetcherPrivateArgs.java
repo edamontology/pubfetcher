@@ -25,15 +25,15 @@ import com.beust.jcommander.Parameter;
 
 public class FetcherPrivateArgs {
 
-	public static final String EUROPEPMC_EMAIL = "europepmc-email";
+	public static final String EUROPEPMC_EMAIL = "europepmcEmail";
 	@Parameter(names = { "--" + EUROPEPMC_EMAIL }, description = "E-mail to send to the Europe PMC API")
 	private String europepmcEmail = "";
 
-	public static final String OADOI_EMAIL = "oadoi-email";
+	public static final String OADOI_EMAIL = "oadoiEmail";
 	@Parameter(names = { "--" + OADOI_EMAIL }, description = "E-mail to send to the oaDOI API")
 	private String oadoiEmail = "test@example.com";
 
-	public static final String USER_AGENT = "user-agent";
+	public static final String USER_AGENT = "userAgent";
 	@Parameter(names = { "--" + USER_AGENT }, description = "HTTP User-Agent")
 	private String userAgent = HttpConnection.DEFAULT_UA;
 

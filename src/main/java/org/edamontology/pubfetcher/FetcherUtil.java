@@ -562,7 +562,7 @@ public final class FetcherUtil {
 		}
 		logger.info("Check publication IDs: {} publication IDs given", pubIds.size());
 		List<PublicationIds> publicationIds = pubIds.stream()
-			.map(pubId -> FetcherCommon.getPublicationIds(pubId.getPmid(), pubId.getPmcid(), pubId.getDoi(), PUB_ID_SOURCE, true))
+			.map(pubId -> FetcherCommon.getPublicationIds(pubId.getPmid(), pubId.getPmcid(), pubId.getDoi(), PUB_ID_SOURCE, false, true))
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
 		if (publicationIds.size() < pubIds.size()) {

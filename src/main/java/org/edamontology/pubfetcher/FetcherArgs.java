@@ -70,7 +70,7 @@ public class FetcherArgs {
 	private int webpageMinLengthJavascript = 200;
 
 	public static final String TIMEOUT = "timeout";
-	@Parameter(names = { "--" + TIMEOUT }, validateWith = PositiveInteger.class, description = "Connect and read timeout of connections")
+	@Parameter(names = { "--" + TIMEOUT }, validateWith = PositiveInteger.class, description = "Connect and read timeout of connections, in milliseconds")
 	private int timeout = 15000; // ms
 
 	@ParametersDelegate

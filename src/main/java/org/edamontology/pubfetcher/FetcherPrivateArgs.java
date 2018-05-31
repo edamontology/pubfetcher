@@ -31,7 +31,7 @@ public class FetcherPrivateArgs {
 
 	public static final String OADOI_EMAIL = "oadoiEmail";
 	@Parameter(names = { "--" + OADOI_EMAIL }, description = "E-mail to send to the oaDOI API")
-	private String oadoiEmail = "test@example.com";
+	private String oadoiEmail = "test";
 
 	public static final String USER_AGENT = "userAgent";
 	@Parameter(names = { "--" + USER_AGENT }, description = "HTTP User-Agent")

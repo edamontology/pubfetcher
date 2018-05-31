@@ -123,7 +123,7 @@ oup:
   title: h1
   keywords: .kwd-group > .kwd-part
   abstract: section.abstract > p
-  fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content))
+  fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content)):not(.table-modal)
   pdf_a: .article-pdfLink
 
 citeseerx:
@@ -204,7 +204,7 @@ nature:
   title: 'article header h1, #article #content > .article > h2.article-title'
   keywords: .subject-tag-link, .reading-companion a[href^=/subjects]
   abstract: 'article .article-body > section > #abstract-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section) > *, article .article-body > div'
+  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section) > *, article .article-body > div'
   pdf_a: a[data-article-pdf]
 
 plos:
@@ -275,14 +275,14 @@ ieee_full:
 liebertpub:
   doi: .epub-section__doi__text
   title: h1.citation__title
-  abstract: .abstractSection > *
+  abstract: .abstractSection
   fulltext_a: .coolBar--download a:matches(Full Text$)
   pdf_a: .coolBar--download a:matches(PDF$)
 
 liebertpub_full:
   doi: .epub-section__doi__text
   title: h1.citation__title
-  abstract: .abstractSection > *
+  abstract: .abstractSection
   fulltext: .hlFld-Fulltext > *
   fulltext_a: .coolBar--download a:matches(Full Text$)
   pdf_a: .coolBar--download a:matches(PDF$)
@@ -479,7 +479,7 @@ iospress:
 
 researchgate:
   doi: .publication-header .publication-meta-secondary:matchText, .publication-header .publication-meta-secondary > :first-child
-  title: .publication-header > .publication-title
+  title: .publication-header > h1
   abstract: .publication-abstract > :not(:first-child)
   pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text
 

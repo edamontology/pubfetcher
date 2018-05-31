@@ -8,8 +8,8 @@ title,content,webpage
 10,247,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,53897,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,64764,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54383,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,29699,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # github.com
 7,942,https://github.com/sgoodswe/vacceed
@@ -26,7 +26,7 @@ title,content,webpage
 6,842,https://github.com/KorfLab/DupHMM/wiki
 6,1897,https://github.com/ollyburren/vseams/wiki
 11,1617,https://github.com/PALMsiever/palm-siever/wiki
-6,8891,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,8924,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -105,7 +105,7 @@ title,content,webpage
 6,444,https://bitbucket.org/andrea/svd-phy/src/09c2ad16b082ea0775467a4d3de6d576cca52272/DESCRIPTION?at=default&fileviewer=file-view-default
 
 # sanger.ac.uk
-7,598,http://www.sanger.ac.uk/science/tools/artemis
+7,233,http://www.sanger.ac.uk/science/tools/artemis
 8,886,http://www.sanger.ac.uk/science/tools/ssahasnp
 
 # dna.leeds.ac.uk
@@ -122,10 +122,11 @@ title,content,webpage
 # genome.sph.umich.edu
 3,3949,https://genome.sph.umich.edu/wiki/Arf
 5,968,https://genome.sph.umich.edu/wiki/METAL_Program
+# getting timeout
 
 # zhanglab.ccmb.med.umich.edu
 47,769,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3458,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+79,3511,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
 13,3718,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
@@ -137,7 +138,7 @@ title,content,webpage
 
 # compomics.github.io
 13,12864,https://compomics.github.io/projects/peptide-shaker.html
-8,487,http://compomics.github.io/projects/reporter.html
+8,577,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
 7,8015,https://rostlab.org/owiki/index.php/CHOPPER

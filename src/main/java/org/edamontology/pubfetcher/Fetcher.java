@@ -857,7 +857,10 @@ public class Fetcher {
 
 			Elements notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)cor[0-9]+], .fm-authors-info div[id~=(?i)caf[0-9]+], .fm-authors-info div[id~=(?i)^c[0-9]+], .fm-authors-info div[id~=(?i)^cr[0-9]+], .fm-authors-info div[id~=(?i)^cor$]");
 			if (notesCorrespAll.isEmpty()) {
-				notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)fn[0-9]+], .fm-authors-info div[id~=(?i)^N[0-9a-fx.]+$]");
+				notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)fn[0-9]+]");
+				if (notesCorrespAll.isEmpty()) {
+					notesCorrespAll = doc.select(".fm-authors-info div[id~=(?i)^N[0-9a-fx.]+$]");
+				}
 			}
 			for (Element notesCorresp : notesCorrespAll) {
 				for (Element emailTag : notesCorresp.select(".oemail")) {
@@ -1130,9 +1133,9 @@ public class Fetcher {
 		return true;
 	}
 
-	private void fillWithPubMedCentralHtml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, FetcherArgs fetcherArgs) {
+	private void fillWithPubMedCentralHtml(Publication publication, Document doc, PublicationPartType type, EnumMap<PublicationPartName, Boolean> parts, boolean htmlMeta, FetcherArgs fetcherArgs, boolean europepmc) {
 		setIds(publication, doc, type,
-			".epmc_citationName .abs_nonlink_metadata", // only in europepmc
+			europepmc ? ".epmc_citationName .abs_nonlink_metadata" : null,
 			".article .fm-sec:first-of-type .fm-citation-pmcid .fm-citation-ids-label + span",
 			".article .fm-sec:first-of-type .doi a", false, fetcherArgs);
 
@@ -1144,9 +1147,12 @@ public class Fetcher {
 
 		String abstractSelector =
 			".article h2[id^=__abstractid] ~ :not(div), " +
-			".article h2[id^=__abstractid] ~ div > :not(.kwd-title):not(.kwd-text), " +
+			".article h2[id^=__abstractid] ~ div > :not(.kwd-title):not(.kwd-text):not(.fig):not(.largeobj-link), " +
 			".article h2[id^=Abs] ~ :not(div), " +
-			".article h2[id^=Abs] ~ div > :not(.kwd-title):not(.kwd-text)";
+			".article h2[id^=Abs] ~ div > :not(.kwd-title):not(.kwd-text):not(.fig):not(.largeobj-link)" +
+			(europepmc ? "" : (", " +
+			".article h2[id^=idm]:matchesOwn((?i)^(Abstract|Significance|Synopsis|Author Summary)$) ~ :not(div), " +
+			".article h2[id^=idm]:matchesOwn((?i)^(Abstract|Significance|Synopsis|Author Summary)$) ~ div > :not(.kwd-title):not(.kwd-text):not(.fig):not(.largeobj-link)"));
 		setAbstract(publication, doc, type, abstractSelector, parts, fetcherArgs);
 
 		setCorrespAuthor(publication, doc, false);
@@ -1156,13 +1162,19 @@ public class Fetcher {
 
 		if (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext))) {
 			if (!publication.isFulltextFinal(fetcherArgs)) {
+				String notFigTable = europepmc ? ":not(.fig):not(.table-wrap)" : "";
 				String fulltext = text(doc,
-					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]) > :not(.sec):not(.goto):not(.fig):not(.table-wrap), " +
-					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]) .sec > :not(.sec):not(.goto):not(.fig):not(.table-wrap), " +
-					".article > div > [id].bk-sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]) > :not(.goto), " +
-					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].sec > :not(.sec):not(.goto):not(.fig):not(.table-wrap), " +
-					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].sec .sec > :not(.sec):not(.goto):not(.fig):not(.table-wrap), " +
-					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].bk-sec > :not(.goto)", true);
+					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id].bk-sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) > :not(.goto), " +
+					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].sec > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].sec .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].bk-sec > :not(.goto)" +
+					(europepmc ? "" : (", " +
+					".article > div > [id^=idm].sec.headless > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id^=idm].sec.headless .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id^=idm].sec:has(h2:matchesOwn((?i)^(Glossary|Abbreviations|Notes|Supplementary Materials?))) > :not(.sec):not(.goto), " +
+					".article > div > [id^=idm].sec:has(h2:matchesOwn((?i)^(Glossary|Abbreviations|Notes|Supplementary Materials?))) .sec > :not(.sec):not(.goto)")), true);
 				if (!fulltext.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					sb.append(getTitleText(doc, titleSelector, subtitleSelector));
@@ -1170,21 +1182,23 @@ public class Fetcher {
 					sb.append(text(doc, abstractSelector, true));
 					sb.append("\n\n");
 					sb.append(fulltext);
-					for (Element figTable : doc.select(".article [id].sec:not([id^=__abstractid]):not([id^=Abs]) .fig > a, " +
-							".article [id].sec:not([id^=__abstractid]):not([id^=Abs]) .table-wrap > a")) {
-						String figTableHref = figTable.attr("abs:href");
-						if (!figTableHref.isEmpty()) {
-							Document docFigTable = getDoc(figTableHref, publication, fetcherArgs);
-							if (docFigTable != null) {
-								for (Element displayNone : docFigTable.select(displayNoneSelector)) displayNone.remove();
-								String figTableText = getFirstTrimmed(docFigTable, ".article > .fig, .article > .table-wrap", true);
-								if (!figTableText.isEmpty()) {
-									sb.append("\n\n");
-									sb.append(figTableText);
+					if (europepmc) {
+						for (Element figTable : doc.select(".article [id].sec:not([id^=__abstractid]):not([id^=Abs]):not([id^=idm]:matchesOwn((?i)^(Abstract|Significance|Synopsis|Author Summary)$)) .fig > a, " +
+								".article [id].sec:not([id^=__abstractid]):not([id^=Abs]):not([id^=idm]:matchesOwn((?i)^(Abstract|Significance|Synopsis|Author Summary)$)) .table-wrap > a")) {
+							String figTableHref = figTable.attr("abs:href");
+							if (!figTableHref.isEmpty()) {
+								Document docFigTable = getDoc(figTableHref, publication, fetcherArgs);
+								if (docFigTable != null) {
+									for (Element displayNone : docFigTable.select(displayNoneSelector)) displayNone.remove();
+									String figTableText = getFirstTrimmed(docFigTable, ".article > .fig, .article > .table-wrap, .table-wrap", true);
+									if (!figTableText.isEmpty()) {
+										sb.append("\n\n");
+										sb.append(figTableText);
+									}
 								}
+							} else {
+								logger.warn("Missing href for .fig or .table-wrap link in {}", doc.location());
 							}
-						} else {
-							logger.warn("Missing href for .fig or .table-wrap link in {}", doc.location());
 						}
 					}
 					publication.setFulltext(sb.toString(), type, doc.location(), fetcherArgs);
@@ -1238,7 +1252,7 @@ public class Fetcher {
 
 		Document doc = getDoc(FetcherCommon.EUROPEPMClink + pmcid, publication, fetcherArgs);
 		if (doc != null) {
-			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta, fetcherArgs);
+			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta, fetcherArgs, true);
 
 			Element a = doc.select(".list_article_link a:containsOwn(PDF)").first();
 			if (a != null) {
@@ -1511,7 +1525,7 @@ public class Fetcher {
 				}
 			}
 
-			setAbstract(publication, doc, type, ".rprt abstracttext", parts, fetcherArgs);
+			setAbstract(publication, doc, type, ".rprt .abstr p", parts, fetcherArgs);
 		}
 	}
 
@@ -1553,7 +1567,7 @@ public class Fetcher {
 
 		Document doc = getDoc(FetcherCommon.PMCIDlink + pmcid + "/", publication, fetcherArgs);
 		if (doc != null) {
-			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta, fetcherArgs);
+			fillWithPubMedCentralHtml(publication, doc, type, parts, htmlMeta, fetcherArgs, false);
 
 			Element a = doc.select(".format-menu a:containsOwn(PDF)").first();
 			if (a != null) {
@@ -1750,7 +1764,7 @@ public class Fetcher {
 
 		URLConnection con;
 		try {
-			String oaDOI = new URI("https", "api.oadoi.org", "/v2/" + doi, "email=" + fetcherArgs.getPrivateArgs().getOadoiEmail(), null).toASCIIString();
+			String oaDOI = new URI("https", "api.unpaywall.org", "/v2/" + doi, "email=" + fetcherArgs.getPrivateArgs().getOadoiEmail(), null).toASCIIString();
 			logger.info("    GET oaDOI {}", oaDOI);
 			con = FetcherCommon.newConnection(oaDOI, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
 		} catch (URISyntaxException | IOException e) {

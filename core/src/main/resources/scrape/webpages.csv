@@ -1,0 +1,160 @@
+title,content,license,language,webpage
+
+# bioconductor.org
+9,642,5,8,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
+7,937,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
+9,264,12,8,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
+8,624,5,8,http://bioconductor.org/packages/release/bioc/html/synapter.html
+10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
+
+# bioconductor.org vignettes
+23,54383,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,29699,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+
+# github.com
+7,942,0,4,https://github.com/sgoodswe/vacceed
+9,15148,0,6,https://github.com/quwubin/MFEprimer
+4,5874,0,16,https://github.com/SciLifeLab/facs/
+10,10673,7,6,https://github.com/petmri/ROCKETSHIP
+4,1849,3,1,https://github.com/pschorderet/NEAT
+
+# github.com user
+7,1242,0,0,https://github.com/SeqWare
+28,1239,0,0,https://github.com/BeatsonLab-MicrobialGenomics
+37,2179,0,0,https://github.com/brisskit-uol/
+
+# github.com wiki
+4,3245,0,0,https://github.com/synergy-zju/gips/wiki
+6,842,0,0,https://github.com/KorfLab/DupHMM/wiki
+6,1897,0,0,https://github.com/ollyburren/vseams/wiki
+11,1617,0,0,https://github.com/PALMsiever/palm-siever/wiki
+6,8924,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+
+# github.com tree
+9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
+6,69,0,0,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
+5,20852,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
+5,718,0,0,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
+14,0,0,0,https://github.com/NCIP/cagrid-general/tree/master/demos/06annual/workflow/JRProteomicsGridSkeletonValue-1.0/src/org/globus/cagrid/RProteomics
+
+# github.com issues
+9,0,0,0,https://github.com/BioConductor/BiocCheck/issues
+6,0,0,0,https://github.com/RGLab/ggcyto/issues
+
+# github.com blob
+10,40342,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
+4,489,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
+
+# galaxy.pasteur.fr
+83,1058,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
+119,1796,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
+85,1401,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
+50,183,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
+88,2338,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
+94,1160,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr/repos/khillion/salmonella_crispr_typing/salmonella_crispr_typing/1.0.0
+75,766,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
+0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=CONVERTER_genbank_to_fasta
+
+# emboss.open-bio.org
+# begins wrongly with "The master copies of EMBOSS documentation are available at on the EMBOSS Wiki."
+13,18650,0,0,http://emboss.open-bio.org/rel/rel6/apps/backtranambig.html
+6,82999,0,0,http://emboss.open-bio.org/rel/rel6/apps/banana.html
+8,15424,0,0,http://emboss.open-bio.org/rel/rel6/apps/btwisted.html
+4,14083,0,0,http://emboss.open-bio.org/rel/rel6/apps/yank.html
+
+# sourceforge.net
+7,1036,0,6,https://sourceforge.net/projects/ambient-bio/?source=navbar
+7,182,0,4,https://sourceforge.net/projects/asm2ace/
+4,315,11,0,https://sourceforge.net/projects/bait/
+8,420,46,6,https://sourceforge.net/projects/basilisk-dbn/
+
+# sourceforge.net files
+10,0,0,0,https://sourceforge.net/projects/protms/files/mres2x/
+10,0,0,0,https://sourceforge.net/projects/pathoscope/files/pathoscope2.0_v0.02_tutorial.pdf/download
+
+# sourceforge.net wiki
+32,5602,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
+4,5258,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
+4,972,0,0,https://sourceforge.net/p/treq/home/Home/
+6,14121,0,0,https://sourceforge.net/p/virmid/wiki/Home/
+
+# code.google.com
+6,1984,10,0,https://code.google.com/archive/p/acpype
+5,429,14,0,https://code.google.com/archive/p/aquad/
+6,2580,18,0,https://code.google.com/archive/p/tag-db
+24,2910,0,0,https://code.google.com/archive/p/ehu-bio/wikis/PAnalyzer.wiki
+
+# cran.r-project.org
+87,412,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
+54,373,5,0,https://cran.r-project.org/web/packages/lme4/index.html
+39,163,5,0,https://cran.r-project.org/web/packages/GUniFrac/index.html
+0,4421,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
+
+# cran.r-project.org vignettes
+25,29622,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
+
+# bibiserv.cebitec.uni-bielefeld.de
+4,2682,0,0,https://bibiserv.cebitec.uni-bielefeld.de/acdc/
+6,670,0,0,https://bibiserv.cebitec.uni-bielefeld.de/agenda/
+6,1518,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
+
+# bitbucket.org
+9,1796,0,0,https://bitbucket.org/mckinsel/shortfuse
+9,0,0,0,https://bitbucket.org/pchanda/hapzipper
+5,14447,0,0,https://bitbucket.org/tobiasmarschall/mosdi
+7,5758,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
+12,0,0,0,https://bitbucket.org/account/user/ipk_bit_team/projects/ED_PUB
+6,444,0,0,https://bitbucket.org/andrea/svd-phy/src/09c2ad16b082ea0775467a4d3de6d576cca52272/DESCRIPTION?at=default&fileviewer=file-view-default
+
+# sanger.ac.uk
+7,233,0,0,http://www.sanger.ac.uk/science/tools/artemis
+22,886,0,0,http://www.sanger.ac.uk/science/tools/ssahasnp
+
+# dna.leeds.ac.uk
+21,1465,0,0,http://dna.leeds.ac.uk/AffyErrorRate/
+14,1519,0,0,http://dna.leeds.ac.uk/agile/AgileGenotyper/
+12,1762,0,0,http://dna.leeds.ac.uk/methylviewer/
+
+# tools.proteomecenter.org
+14,999,0,0,http://tools.proteomecenter.org/Libra.php
+0,545,0,0,http://tools.proteomecenter.org/mzStar.php
+0,2567,0,0,http://tools.proteomecenter.org/XLink.php
+18,9985,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
+
+# genome.sph.umich.edu
+3,3949,0,0,https://genome.sph.umich.edu/wiki/Arf
+5,968,0,0,https://genome.sph.umich.edu/wiki/METAL_Program
+# getting timeout
+
+# zhanglab.ccmb.med.umich.edu
+47,769,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
+79,3511,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+
+# bioinformatics.mdanderson.org
+13,3718,0,9,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
+10,1390,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
+
+# bcgsc.ca platform
+6,305,19,0,http://www.bcgsc.ca/platform/bioinfo/software/anchor
+14,2225,4,0,http://www.bcgsc.ca/platform/bioinfo/software/ds
+
+# compomics.github.io
+13,12864,0,0,https://compomics.github.io/projects/peptide-shaker.html
+8,397,0,0,http://compomics.github.io/projects/reporter.html
+
+# rostlab.org wiki
+7,8015,0,0,https://rostlab.org/owiki/index.php/CHOPPER
+10,1450,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
+
+# uea.ac.uk
+5,3023,0,0,https://www.uea.ac.uk/computing/psiko
+10,2287,0,0,http://www.uea.ac.uk/computing/my-closure
+
+# rna.informatik.uni-freiburg.de
+25,2818,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+27,1902,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+
+# pypi.org
+16,779,26,6,https://pypi.python.org/pypi/omics_pipe
+13,1955,35,13,http://pypi.python.org/pypi/plastid
+17,69,48,11,https://pypi.org/project/bio-apricot/

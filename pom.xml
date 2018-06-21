@@ -2,20 +2,20 @@
 <!--
    Copyright © 2018 Erik Jaaniso
 
-   This file is part of pubFetcher.
+   This file is part of PubFetcher.
 
-   pubFetcher is free software: you can redistribute it and/or modify
+   PubFetcher is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   pubFetcher is distributed in the hope that it will be useful,
+   PubFetcher is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with pubFetcher.  If not, see <http://www.gnu.org/licenses/>.
+   along with PubFetcher.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -24,7 +24,7 @@
   <groupId>org.edamontology.pubfetcher</groupId>
   <artifactId>pubfetcher</artifactId>
   <version>0.2-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>PubFetcher</name>
   <url>https://github.com/edamontology/pubfetcher</url>
@@ -34,6 +34,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <pubfetcher.version>0.2-SNAPSHOT</pubfetcher.version>
     <maven.enforcer.version>3.0.0-M1</maven.enforcer.version>
     <maven.compiler.version>3.7.0</maven.compiler.version>
     <maven.jar.version>3.0.2</maven.jar.version>
@@ -54,63 +55,19 @@
     <jackson.version>2.9.4</jackson.version>
     <htmlunit.version>2.29</htmlunit.version>
     <log4j.version>2.11.0</log4j.version>
+    <slf4j.version>1.7.25</slf4j.version>
   </properties>
+
+  <modules>
+    <module>core</module>
+    <module>cli</module>
+  </modules>
 
   <dependencies>
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
       <version>${jcommander.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>${jsoup.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>${snakeyaml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pdfbox</groupId>
-      <artifactId>pdfbox</artifactId>
-      <version>${pdfbox.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pdfbox</groupId>
-      <artifactId>xmpbox</artifactId>
-      <version>${pdfbox.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-      <version>${bouncycastle.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mapdb</groupId>
-      <artifactId>mapdb</artifactId>
-      <version>${mapdb.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.htmlunit</groupId>
-      <artifactId>htmlunit</artifactId>
-      <version>${htmlunit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -121,6 +78,11 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
   </dependencies>
 
@@ -188,74 +150,12 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>${maven.jar.version}</version>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier></classifier>
-              <outputDirectory>target/pubfetcher</outputDirectory>
-              <archive>
-                <manifestEntries>
-                  <Class-Path>./ ./lib/ ../lib/</Class-Path>
-                </manifestEntries>
-                <addMavenDescriptor>false</addMavenDescriptor>
-              </archive>
-              <excludes>
-                <exclude>org/edamontology/pubfetcher/FetcherMain.class</exclude>
-                <exclude>org/edamontology/pubfetcher/FetcherMainArgs.class</exclude>
-                <exclude>log4j2.xml</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>cli-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>cli</classifier>
-              <outputDirectory>target</outputDirectory>
-              <archive>
-                <manifest>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>lib/</classpathPrefix>
-                  <mainClass>org.edamontology.pubfetcher.FetcherMain</mainClass>
-                </manifest>
-                <manifestEntries>
-                  <Class-Path>pubfetcher/pubfetcher-${project.version}.jar</Class-Path>
-                </manifestEntries>
-                <addMavenDescriptor>false</addMavenDescriptor>
-              </archive>
-              <includes>
-                <include>org/edamontology/pubfetcher/FetcherMain.class</include>
-                <include>org/edamontology/pubfetcher/FetcherMainArgs.class</include>
-                <include>log4j2.xml</include>
-              </includes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>${maven.dependency.version}</version>
-        <executions>
-          <execution>
-            <id>copy-dependencies-bin</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>target/lib</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <outputDirectory>${project.parent.basedir}/target</outputDirectory>
+          <archive>
+            <addMavenDescriptor>false</addMavenDescriptor>
+          </archive>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -269,7 +169,7 @@
               <goal>jar</goal>
             </goals>
             <configuration>
-              <outputDirectory>target/pubfetcher</outputDirectory>
+              <outputDirectory>${project.parent.basedir}/target</outputDirectory>
               <archive>
                 <addMavenDescriptor>false</addMavenDescriptor>
               </archive>
@@ -278,6 +178,28 @@
         </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven.dependency.version}</version>
+          <executions>
+            <execution>
+              <id>copy-dependencies</id>
+              <phase>package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.parent.basedir}/target/lib</outputDirectory>
+                <excludeGroupIds>org.edamontology.pubfetcher</excludeGroupIds>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <resources>
       <resource>
         <directory>src/main/resources</directory>

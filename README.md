@@ -8,5 +8,5 @@
 $ git clone https://github.com/edamontology/pubfetcher.git
 $ cd pubfetcher/
 $ mvn clean install
-$ java -jar target/pubfetcher-0.2-SNAPSHOT-bin.jar -h
+$ java -jar target/pubfetcher-cli-0.2-SNAPSHOT.jar -h
 ```

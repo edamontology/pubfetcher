@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.MissingResourceException;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -41,10 +44,11 @@ public final class FetcherTest {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(getResource(resource, prefix), StandardCharsets.UTF_8))) {
 			return br.lines()
 				.skip(1)
+				.map(String::trim)
 				.filter(l -> !l.isEmpty() && l.charAt(0) != '#')
 				.map(l -> l.split(",", columns))
 				.filter(l -> {
-					if (l.length != columns) throw new RuntimeException("Invalid line in " + resource + ": starting with " + l[0]);
+					if (l.length != columns) throw new RuntimeException("Line containing " + l.length + " fields instead of required " + columns + " in " + resource + ": " + Arrays.stream(l).collect(Collectors.joining(",")));
 					return true;
 				})
 				.collect(Collectors.toList());
@@ -66,7 +70,7 @@ public final class FetcherTest {
 			return 0;
 		}
 	}
-	private static int equalString(String test, String actual, String label) {
+	private static int equal(String test, String actual, String label) {
 		if (!test.equals(actual)) {
 			logger.error("{} must be {}, actually is {}", label, test, actual);
 			return 1;
@@ -117,7 +121,7 @@ public final class FetcherTest {
 	private static int testPubmedXml(String[] test, Publication publication) {
 		int mismatch = testPubmedHtml(test, publication);
 		mismatch += equal(test[8], publication.getJournalTitle().length(), "journal title length");
-		mismatch += equalString(test[9], publication.getPubDateHuman(), "publication date");
+		mismatch += equal(test[9], publication.getPubDateHuman(), "publication date");
 		return mismatch;
 	}
 
@@ -131,20 +135,20 @@ public final class FetcherTest {
 	}
 
 	@SuppressWarnings("unused")
+	private static int testEuropepmcMined(String[] test, Publication publication) {
+		int mismatch = 0;
+		mismatch += equal(test[1], publication.getEfoTerms().getList().size(), "EFO terms size");
+		mismatch += equal(test[2], publication.getGoTerms().getList().size(), "GO terms size");
+		return mismatch;
+	}
+
+	@SuppressWarnings("unused")
 	private static int testOaDoi(String[] test, Publication publication) {
 		int mismatch = 0;
 		mismatch += equal(test[1], publication.isOA() ? 1 : 0, "Open Access");
 		mismatch += equal(test[2], publication.getVisitedSites().size(), "visited sites size");
 		mismatch += equal(test[3], publication.getTitle().getContent().length(), "title length");
 		mismatch += equal(test[4], publication.getJournalTitle().length(), "journal title length");
-		return mismatch;
-	}
-
-	@SuppressWarnings("unused")
-	private static int testEuropepmcMined(String[] test, Publication publication) {
-		int mismatch = 0;
-		mismatch += equal(test[1], publication.getEfoTerms().getList().size(), "EFO terms size");
-		mismatch += equal(test[2], publication.getGoTerms().getList().size(), "GO terms size");
 		return mismatch;
 	}
 
@@ -164,9 +168,10 @@ public final class FetcherTest {
 	private static void test(List<String[]> tests, String fetchMethod, String testMethod, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws ReflectiveOperationException {
 		int mismatch = 0;
 		int i = 0;
+		long start = System.currentTimeMillis();
 		for (String[] test : tests) {
 			++i;
-			logger.info("{} {}", test[0], PubFetcher.progress(i, tests.size()));
+			logger.info("Test {} {}", test[0], PubFetcher.progress(i, tests.size(), start));
 			Publication publication = (Publication) FetcherTest.class.getDeclaredMethod(fetchMethod, test[0].getClass(), fetcher.getClass(), EnumMap.class, fetcherArgs.getClass())
 				.invoke(null, test[0], fetcher, parts, fetcherArgs);
 			if (publication != null) {
@@ -294,9 +299,10 @@ public final class FetcherTest {
 		int mismatch = 0;
 		List<String[]> tests = getTest("europepmc.csv", "test", 14);
 		int i = 0;
+		long start = System.currentTimeMillis();
 		for (String[] test : tests) {
 			++i;
-			logger.info("{} {}", test[0], PubFetcher.progress(i, tests.size()));
+			logger.info("Test {} {}", test[0], PubFetcher.progress(i, tests.size(), start));
 			Publication publication = fetcher.initPublication(new PublicationIds(test[0], "", "", PUB_ID_SOURCE, "", ""), fetcherArgs);
 			if (publication != null) {
 				FetcherPublicationState state = new FetcherPublicationState();
@@ -357,13 +363,26 @@ public final class FetcherTest {
 		System.out.println(fetchSite(url, fetcher, parts, fetcherArgs));
 	}
 
-	private static void testSite(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
+	private static void filterTests(List<String[]> tests, String regex, int column) {
+		if (regex != null) {
+			Pattern pattern = Pattern.compile(regex);
+			for (Iterator<String[]> it = tests.iterator(); it.hasNext(); ) {
+				if (!pattern.matcher(it.next()[column]).find()) {
+					it.remove();
+				}
+			}
+		}
+	}
+
+	private static void testSite(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, String regex) throws IOException, ReflectiveOperationException {
 		int mismatch = 0;
-		List<String[]> tests = getTest("journal.csv", "scrape", 9);
+		List<String[]> tests = getTest("journals.csv", "scrape", 9);
+		filterTests(tests, regex, 8);
 		int i = 0;
+		long start = System.currentTimeMillis();
 		for (String[] test : tests) {
 			++i;
-			logger.info("{} {}", test[8], PubFetcher.progress(i, tests.size()));
+			logger.info("Test {} {}", test[8], PubFetcher.progress(i, tests.size(), start));
 			Publication publication = fetchSite(test[8], fetcher, parts, fetcherArgs);
 			mismatch += testSite(test, publication);
 		}
@@ -381,13 +400,15 @@ public final class FetcherTest {
 		System.out.println(fetchWebpage(url, fetcher, fetcherArgs));
 	}
 
-	private static void testWebpage(Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
+	private static void testWebpage(Fetcher fetcher, FetcherArgs fetcherArgs, String regex) throws IOException {
 		int mismatch = 0;
 		List<String[]> tests = getTest("webpages.csv", "scrape", 5);
+		filterTests(tests, regex, 4);
 		int i = 0;
+		long start = System.currentTimeMillis();
 		for (String[] test : tests) {
 			++i;
-			logger.info("{} {}", test[4], PubFetcher.progress(i, tests.size()));
+			logger.info("Test {} {}", test[4], PubFetcher.progress(i, tests.size(), start));
 			Webpage webpage = fetchWebpage(test[4], fetcher, fetcherArgs);
 			mismatch += equal(test[0], webpage.getTitle().length(), "title length");
 			mismatch += equal(test[1], webpage.getContent().length(), "content length");
@@ -429,9 +450,11 @@ public final class FetcherTest {
 		if (args.testOaDoi) testOaDoi(fetcher, parts, fetcherArgs);
 
 		if (args.printSite != null) printSite(args.printSite, fetcher, parts, fetcherArgs);
-		if (args.testSite) testSite(fetcher, parts, fetcherArgs);
+		if (args.testSite) testSite(fetcher, parts, fetcherArgs, null);
+		if (args.testSiteRegex != null) testSite(fetcher, parts, fetcherArgs, args.testSiteRegex);
 
 		if (args.printWebpage != null) printWebpage(args.printWebpage, fetcher, fetcherArgs);
-		if (args.testWebpage) testWebpage(fetcher, fetcherArgs);
+		if (args.testWebpage) testWebpage(fetcher, fetcherArgs, null);
+		if (args.testWebpageRegex != null) testWebpage(fetcher, fetcherArgs, args.testWebpageRegex);
 	}
 }

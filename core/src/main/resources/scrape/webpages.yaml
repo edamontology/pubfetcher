@@ -17,7 +17,7 @@
 #  along with PubFetcher.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# '^https?://(www\.)?' is automatically put in front of regex
+# '(?i)^https?://(www\.)?' is automatically put in front of regex
 # except when regex already begins with '^'
 
 'bio\.tools':

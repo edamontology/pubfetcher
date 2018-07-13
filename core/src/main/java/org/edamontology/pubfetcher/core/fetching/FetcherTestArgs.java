@@ -64,9 +64,15 @@ public class FetcherTestArgs {
 	@Parameter(names = { "--test-site" }, description = "TODO")
 	boolean testSite = false;
 
+	@Parameter(names = { "--test-site-regex" }, description = "TODO")
+	String testSiteRegex = null;
+
 	@Parameter(names = { "--print-webpage" }, description = "TODO")
 	String printWebpage = null;
 
 	@Parameter(names = { "--test-webpage" }, description = "TODO")
 	boolean testWebpage = false;
+
+	@Parameter(names = { "--test-webpage-regex" }, description = "TODO")
+	String testWebpageRegex = null;
 }

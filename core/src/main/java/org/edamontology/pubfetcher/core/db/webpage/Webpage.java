@@ -19,11 +19,14 @@
 
 package org.edamontology.pubfetcher.core.db.webpage;
 
+import java.io.IOException;
 import java.time.Instant;
 
 import org.edamontology.pubfetcher.core.common.FetcherArgs;
 import org.edamontology.pubfetcher.core.common.PubFetcher;
 import org.edamontology.pubfetcher.core.db.DatabaseEntry;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 public class Webpage extends DatabaseEntry<Webpage> {
 
@@ -72,17 +75,17 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	}
 
 	@Override
+	public boolean isUsable(FetcherArgs fetcherArgs) {
+		return !isBroken() && !isEmpty() && isFinal(fetcherArgs);
+	}
+
+	@Override
 	public boolean isFinal(FetcherArgs fetcherArgs) {
 		return content.length() >= fetcherArgs.getWebpageMinLength();
 	}
 
 	public boolean isBroken() {
 		return ((statusCode < 200 || statusCode >= 300) && (statusCode != 0 || finalUrl.isEmpty()));
-	}
-
-	@Override
-	public boolean isUsable(FetcherArgs fetcherArgs) {
-		return !isBroken() && !isEmpty() && isFinal(fetcherArgs);
 	}
 
 	@Override
@@ -182,8 +185,14 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	}
 
 	@Override
+	public void toStringIdJson(JsonGenerator generator) throws IOException {
+		generator.writeString(startUrl);
+	}
+
+	@Override
 	public String toStringPlain() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(toStringId()).append("\n\n");
 		sb.append(title).append("\n\n");
 		sb.append(content);
 		return sb.toString();
@@ -192,9 +201,18 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	@Override
 	public String toStringPlainHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(prepend).append("<h2>").append(PubFetcher.escapeHtml(title)).append("</h2>\n");
+		sb.append(prepend).append("<h2>").append(PubFetcher.getLinkHtml(toStringId(), title)).append("</h2>\n");
 		sb.append(prepend).append(PubFetcher.getParagraphsHtml(content));
 		return sb.toString();
+	}
+
+	@Override
+	public void toStringPlainJson(JsonGenerator generator) throws IOException {
+		generator.writeFieldName(toStringId());
+		generator.writeStartObject();
+		generator.writeStringField("title", title);
+		generator.writeStringField("content", content);
+		generator.writeEndObject();
 	}
 
 	@Override
@@ -225,13 +243,23 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	}
 
 	@Override
-	public String toStringHtml(String prepend) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(prepend).append("<h2>Webpage</h2>\n");
-		sb.append(toStringMetaHtml(prepend)).append("\n");
-		sb.append(prepend).append("<br>\n");
-		sb.append(prepend).append(PubFetcher.getParagraphsHtml(content));
-		return sb.toString();
+	public void toStringMetaJson(JsonGenerator generator, FetcherArgs fetcherArgs) throws IOException {
+		super.toStringJson(generator);
+		generator.writeStringField("startUrl", startUrl);
+		generator.writeStringField("finalUrl", finalUrl);
+		generator.writeStringField("contentType", contentType);
+		generator.writeNumberField("statusCode", statusCode);
+		generator.writeNumberField("contentTime", contentTime);
+		generator.writeStringField("contentTimeHuman", getContentTimeHuman());
+		generator.writeStringField("license", license);
+		generator.writeStringField("language", language);
+		generator.writeNumberField("titleLength", title.length());
+		generator.writeNumberField("contentLength", content.length());
+		generator.writeStringField("title", title);
+		generator.writeBooleanField("empty", isEmpty());
+		generator.writeBooleanField("usable", isUsable(fetcherArgs));
+		generator.writeBooleanField("final", isFinal(fetcherArgs));
+		generator.writeBooleanField("broken", isBroken());
 	}
 
 	@Override
@@ -250,6 +278,25 @@ public class Webpage extends DatabaseEntry<Webpage> {
 		sb.append("TITLE: ").append(title).append("\n\n");
 		sb.append("CONTENT: ").append(content);
 		return sb.toString();
+	}
+
+	@Override
+	public String toStringHtml(String prepend) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(prepend).append("<h2>Webpage</h2>\n");
+		sb.append(toStringMetaHtml(prepend)).append("\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(prepend).append(PubFetcher.getParagraphsHtml(content));
+		return sb.toString();
+	}
+
+	public void toStringJson(JsonGenerator generator, FetcherArgs fetcherArgs, boolean webpageContent) throws IOException {
+		generator.writeStartObject();
+		toStringMetaJson(generator, fetcherArgs);
+		if (webpageContent) {
+			generator.writeStringField("content", content);
+		}
+		generator.writeEndObject();
 	}
 
 	@Override

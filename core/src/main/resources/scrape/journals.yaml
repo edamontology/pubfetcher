@@ -19,7 +19,7 @@
 
 # regex: site
 
-# '^https?://(www\.)?' is automatically put in front of regex
+# '(?i)^https?://(www\.)?' is automatically put in front of regex
 # except when regex already begins with '^'
 
 'academic\.oup\.com': oup
@@ -48,7 +48,7 @@
 'pubs\.rsc\.org.*/(ArticleLanding|articlelanding)/': rsc
 'pubs\.rsc\.org.*/(ArticleHTML|articlehtml)/': rsc_full
 'scripts\.iucr\.org': iucr
-'worldscientific\.com': worldscientific
+'worldscientific\.com': liebertpub
 'f1000research\.com/+articles': f1000research_articles
 'f1000research\.com/+posters': f1000research_posters
 'peerj\.com/+articles': peerj
@@ -58,6 +58,7 @@
 'tandfonline\.com/+doi/+full/+10': tandfonline_full
 '[a-zA-Z0-9.-]*asm\.org/.+[^f][^u][^l][^l]$': highwire
 '[a-zA-Z0-9.-]*asm\.org/.+full$': highwire_full
+'mra\.asm\.org': highwire2
 'dl\.acm\.org': acm
 'degruyter\.com': degruyter
 'hindawi\.com': hindawi
@@ -122,7 +123,7 @@ oup:
   doi: .ww-citation-primary > a
   title: h1
   keywords: .kwd-group > .kwd-part
-  abstract: section.abstract > p
+  abstract: section.abstract > p, section.abstract > .sec > *
   fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content)):not(.table-modal)
   pdf_a: .article-pdfLink
 
@@ -200,11 +201,11 @@ highwire_full:
   pdf_dst: \.pdf
 
 nature:
-  doi: 'li:has(abbr[title=Digital Object Identifier]), dd:has(abbr[title=Digital Object Identifier]), #article #content > .article > #cite > .doi'
+  doi: 'h3:has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi]'
   title: 'article header h1, #article #content > .article > h2.article-title'
-  keywords: .subject-tag-link, .reading-companion a[href^=/subjects]
+  keywords: div[data-component=article-subject-links] a[data-track-action=view subject]
   abstract: 'article .article-body > section > #abstract-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section) > *, article .article-body > div'
+  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section) > *, article .article-body > div:not(:has(#access-options))'
   pdf_a: a[data-article-pdf]
 
 plos:
@@ -275,6 +276,7 @@ ieee_full:
 liebertpub:
   doi: .epub-section__doi__text
   title: h1.citation__title
+  keywords: .article__keyword li
   abstract: .abstractSection
   fulltext_a: .coolBar--download a:matches(Full Text$)
   pdf_a: .coolBar--download a:matches(PDF$)
@@ -282,8 +284,9 @@ liebertpub:
 liebertpub_full:
   doi: .epub-section__doi__text
   title: h1.citation__title
+  keywords: .article__keyword li
   abstract: .abstractSection
-  fulltext: .hlFld-Fulltext > *
+  fulltext: .hlFld-Fulltext > :not(:matches(^References ))
   fulltext_a: .coolBar--download a:matches(Full Text$)
   pdf_a: .coolBar--download a:matches(PDF$)
 
@@ -308,15 +311,8 @@ iucr:
   keywords: .kwdg > a
   abstract: .ica_abstract
 
-worldscientific:
-  doi: .articleMeta a[href^=https://doi.org]
-  title: '#articleContent h1'
-  keywords_split: .abstractKeywords
-  abstract: .abstractSection > *
-  pdf_a: .showPDF > a
-
 f1000research_articles:
-  doi: .article-information > .info-separation:first-child + .info-separation > a[href^=http://dx.doi.org]
+  doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=http://dx.doi.org]
   #title: '#anchor-title'
   abstract: .abstract-text
   fulltext: '#article-context > .generated-article-body > *, #article-context > .generated-article-footer > :has(h2:containsOwn(Supplementary materials))'
@@ -381,6 +377,7 @@ degruyter:
   title: h1.entryTitle
   keywords: .articleBody_keywords > a
   abstract: .articleBody_abstract > p
+  pdf_a: .gs-access-fullcontentlink .pdf-link
 
 hindawi:
   doi: .middle_content pre a[href^=http://dx.doi.org]
@@ -513,12 +510,17 @@ inderscience:
 
 ---
 
-'1126': true
-'1101': true
-'1136': true
-'1534': true
-'1104': true
-'1105': true
-'1182': true
-'1042': true
-'1158': true
+'1126': true # sciencemag
+'1101': true # biorxiv (highwire2) / cshlp
+'1136': true # bmj
+'1534': true # highwire2
+'1104': true # highwire2
+'1105': true # highwire2
+'1182': true # highwire2
+'1042': true # highwire2
+'1158': true # highwire2
+'1109': true # ieee
+'1039': true # rsc
+'7490': true # f1000research_posters
+'1145': true # acm
+'1128': true # asm (highwire2)

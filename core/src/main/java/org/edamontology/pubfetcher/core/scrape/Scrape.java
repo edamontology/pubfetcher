@@ -20,58 +20,98 @@
 package org.edamontology.pubfetcher.core.scrape;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 public class Scrape {
 
-	private final Map<Pattern, String> regex;
+	private final Map<Pattern, String> regex = new LinkedHashMap<>();
 
-	private final Map<String, Map<String, String>> site;
+	private final Map<String, Map<String, String>> site = new LinkedHashMap<>();
 
-	private final Map<String, Boolean> javascript;
+	private final Map<String, Boolean> javascript = new LinkedHashMap<>();
 
-	private final Map<Pattern, Map<String, String>> webpages;
+	private final Map<Pattern, Map<String, String>> webpages = new LinkedHashMap<>();
+
+	public Scrape(String journals, String webpages) throws IOException, ParseException {
+
+		String journalsDefault = "journals.yaml";
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(getResource(journalsDefault), StandardCharsets.UTF_8))) {
+			parseJournals(br, journalsDefault);
+		}
+
+		String webpagesDefault = "webpages.yaml";
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(getResource(webpagesDefault), StandardCharsets.UTF_8))) {
+			parseWebpages(br, webpagesDefault);
+		}
+
+		if (journals != null && !journals.isEmpty()) {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(journals), StandardCharsets.UTF_8))) {
+				parseJournals(br, journals);
+			}
+		}
+
+		if (webpages != null && !webpages.isEmpty()) {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(webpages), StandardCharsets.UTF_8))) {
+				parseWebpages(br, webpages);
+			}
+		}
+	}
 
 	@SuppressWarnings("unchecked")
-	public Scrape() throws IOException, ParseException {
+	private void parseJournals(BufferedReader br, String journals) throws ParseException {
+		Yaml yaml = new Yaml();
+		Iterator<Object> it = yaml.loadAll(br).iterator();
 
-		String journal = "journal.yaml";
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(getResource(journal), StandardCharsets.UTF_8))) {
-			Yaml yaml = new Yaml();
-			Iterable<Object> it = yaml.loadAll(br);
-
-			regex = makeRegex((Map<String, String>) it.iterator().next(), journal);
-
-			site = (Map<String, Map<String, String>>) it.iterator().next();
-
-			javascript = (Map<String, Boolean>) it.iterator().next();
-
-			validateTooManySections(it, journal);
-
-			validateJournal();
+		Map<String, String> regexSection = (Map<String, String>) nextSection(it, journals, 1, 3);
+		if (regexSection != null) {
+			regex.putAll(makeRegex(regexSection, journals));
 		}
 
-		String webpages = "webpages.yaml";
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(getResource(webpages), StandardCharsets.UTF_8))) {
-			Yaml yaml = new Yaml();
-			Iterable<Object> it = yaml.loadAll(br);
-
-			this.webpages = makeWebpages((Map<String, Map<String, String>>) it.iterator().next(), webpages);
-
-			validateTooManySections(it, webpages);
-
-			// TODO validateWebpages: title, content, javascript, license, language
+		Map<String, Map<String, String>> siteSection = (Map<String, Map<String, String>>) nextSection(it, journals, 2, 3);
+		if (siteSection != null) {
+			site.putAll(siteSection);
 		}
+
+		Map<String, Boolean> javascriptSection = (Map<String, Boolean>) nextSection(it, journals, 3, 3);
+		if (javascriptSection != null) {
+			javascript.putAll(javascriptSection);
+		}
+
+		validateTooManySections(it, journals, 3);
+
+		validateJournal();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void parseWebpages(BufferedReader br, String webpages) throws ParseException {
+		Yaml yaml = new Yaml();
+		Iterator<Object> it = yaml.loadAll(br).iterator();
+
+		Map<String, Map<String, String>> webpagesSection = (Map<String, Map<String, String>>) nextSection(it, webpages, 1, 1);
+		if (webpagesSection != null) {
+			this.webpages.putAll(makeWebpages(webpagesSection, webpages));
+		}
+
+		validateTooManySections(it, webpages, 1);
+
+		validateWebpages();
 	}
 
 	private InputStream getResource(String name) {
@@ -83,7 +123,7 @@ public class Scrape {
 	}
 
 	private Map<Pattern, String> makeRegex(Map<String, String> regexString, String name) throws ParseException {
-		Map<Pattern, String> regex = new HashMap<>();
+		Map<Pattern, String> regex = new LinkedHashMap<>();
 		int i = 0;
 		for (Map.Entry<String, String> r : regexString.entrySet()) {
 			++i;
@@ -92,7 +132,7 @@ public class Scrape {
 				throw new ParseException("Regex cannot be empty in scraping rules '" + name + "'! (regex pos " + i + ")", i);
 			}
 			if (k.charAt(0) != '^') {
-				k = "^https?://(www\\.)?" + k;
+				k = "(?i)^https?://(www\\.)?" + k;
 			}
 			regex.put(Pattern.compile(k), r.getValue());
 		}
@@ -100,7 +140,7 @@ public class Scrape {
 	}
 
 	private Map<Pattern, Map<String, String>> makeWebpages(Map<String, Map<String, String>> yaml, String name) throws ParseException {
-		Map<Pattern, Map<String, String>> webpage = new HashMap<>();
+		Map<Pattern, Map<String, String>> webpage = new LinkedHashMap<>();
 		int i = 0;
 		for (Map.Entry<String, Map<String, String>> r : yaml.entrySet()) {
 			++i;
@@ -109,16 +149,30 @@ public class Scrape {
 				throw new ParseException("Regex key cannot be empty in scraping rules '" + name + "'! (pos " + i + ")", i);
 			}
 			if (k.charAt(0) != '^') {
-				k = "^https?://(www\\.)?" + k;
+				k = "(?i)^https?://(www\\.)?" + k;
 			}
 			webpage.put(Pattern.compile(k), r.getValue());
 		}
 		return webpage;
 	}
 
-	private void validateTooManySections(Iterable<Object> it, String name) throws ParseException {
-		if (it.iterator().hasNext()) {
-			throw new ParseException("Scraping rules '" + name + "' contains too many sections! (separated by ---)", 0);
+	@SuppressWarnings("unchecked")
+	private Map<String, ?> nextSection(Iterator<Object> it, String name, int count, int required) throws ParseException {
+		if (!it.hasNext()) {
+			throw new ParseException("Scraping rules '" + name + "' contains " + (count - 1) + " sections instead of required " + required + "! (separated by ---)", count);
+		}
+		Map<String, ?> next = null;
+		try {
+			next = (Map<String, ?>) it.next();
+		} catch (ClassCastException | YAMLException e) {
+			throw new ParseException("Syntax error in section " + count + " of scraping rules '" + name + "'!\n" + e, count);
+		}
+		return next;
+	}
+
+	private void validateTooManySections(Iterator<Object> it, String name, int required) throws ParseException {
+		if (it.hasNext()) {
+			throw new ParseException("Scraping rules '" + name + "' contains more sections than required " + required + "! (separated by ---)", required + 1);
 		}
 	}
 
@@ -149,18 +203,21 @@ public class Scrape {
 		for (Map.Entry<String, Map<String, String>> s : site.entrySet()) {
 			++i;
 
+			Map<String, String> siteMap = null;
+			try {
+				siteMap = s.getValue();
+			} catch (ClassCastException e) {
+				throw new ParseException("Syntax error in site '" + s.getKey() + "'! (site pos " + i + ")\n" + e, i);
+			}
+
 			Map<String, Boolean> siteKeys = new HashMap<>();
 			for (ScrapeSiteKey siteKey : ScrapeSiteKey.values()) {
 				siteKeys.put(siteKey.toString(), false);
 			}
 
-			for (String k : s.getValue().keySet()) {
+			for (String k : siteMap.keySet()) {
 				if (siteKeys.containsKey(k)) {
-					if (siteKeys.get(k)) {
-						throw new ParseException("Key '" + k + "' defined more than once in site '" + s.getKey() + "'! (site pos " + i + ")", i);
-					} else {
-						siteKeys.put(k, true);
-					}
+					siteKeys.put(k, true);
 				} else {
 					throw new ParseException("Unknown key '" + k + "' in site '" + s.getKey() + "'! (site pos " + i + ")", i);
 				}
@@ -175,7 +232,7 @@ public class Scrape {
 				throw new ParseException("If one of { pdf_src, pdf_dst } is present, the other must too, in site '" + s.getKey() + "'! (site pos " + i + ")", i);
 			}
 
-			for (Map.Entry<String, String> v : s.getValue().entrySet()) {
+			for (Map.Entry<String, String> v : siteMap.entrySet()) {
 				if (v.getValue() == null || v.getValue().trim().isEmpty()) {
 					throw new ParseException("Value for key '" + v.getKey() + "' empty in site '" + s.getKey() + "'! (site pos " + i + ")", i);
 				}
@@ -183,14 +240,41 @@ public class Scrape {
 		}
 	}
 
-	public String getSite(String url) {
-		if (url == null || url.isEmpty()) return null;
-		for (Pattern pattern : regex.keySet()) {
-			if (pattern.matcher(url).find()) {
-				return regex.get(pattern);
+	private void validateWebpages() throws ParseException {
+		Set<String> webpageKeys = Arrays.stream(ScrapeWebpageKey.values()).map(k -> k.toString()).collect(Collectors.toSet());
+
+		int i = 0;
+		for (Map.Entry<Pattern, Map<String, String>> w : webpages.entrySet()) {
+			++i;
+
+			Map<String, String> webpageMap = null;
+			try {
+				webpageMap = w.getValue();
+			} catch (ClassCastException e) {
+				throw new ParseException("Syntax error in webpage pattern '" + w.getKey() + "'! (pos " + i + ")\n" + e, i);
+			}
+
+			if (webpageMap == null) {
+				throw new ParseException("Webpage pattern '" + w.getKey() + "' is empty! (pos " + i + ")", i);
+			}
+
+			for (String k : webpageMap.keySet()) {
+				if (!webpageKeys.contains(k)) {
+					throw new ParseException("Unknown key '" + k + "' in webpage pattern '" + w.getKey() + "'! (pos " + i + ")", i);
+				}
 			}
 		}
-		return null;
+	}
+
+	public String getSite(String url) {
+		if (url == null || url.isEmpty()) return null;
+		String site = null;
+		for (Pattern pattern : regex.keySet()) {
+			if (pattern.matcher(url).find()) {
+				site = regex.get(pattern);
+			}
+		}
+		return site;
 	}
 
 	public String getSelector(String site, ScrapeSiteKey siteKey) {
@@ -206,11 +290,12 @@ public class Scrape {
 
 	public Map<String, String> getWebpage(String url) {
 		if (url == null || url.isEmpty()) return null;
+		Map<String, String> webpage = null;
 		for (Pattern pattern : webpages.keySet()) {
 			if (pattern.matcher(url).find()) {
-				return webpages.get(pattern);
+				webpage = webpages.get(pattern);
 			}
 		}
-		return null;
+		return webpage;
 	}
 }

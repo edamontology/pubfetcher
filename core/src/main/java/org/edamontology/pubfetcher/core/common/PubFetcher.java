@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -113,7 +114,7 @@ public final class PubFetcher {
 		return DOI_ONLY.matcher(s).matches();
 	}
 
-	public static String normalizeDoi(String s) {
+	public static String normaliseDoi(String s) {
 		if (s == null) return "";
 
 		// http://www.doi.org/doi_handbook/2_Numbering.html#2.4
@@ -131,7 +132,7 @@ public final class PubFetcher {
 		return new String(c);
 	}
 
-	public static String getDoiRegistrant(String s) {
+	public static String extractDoiRegistrant(String s) {
 		if (!isDoi(s)) return "";
 		String doiRegistrant = "";
 		int begin = s.indexOf("10.");
@@ -194,7 +195,7 @@ public final class PubFetcher {
 		else return null;
 	}
 	public static String getDoiLink(String doi) {
-		if (isDoi(doi)) return DOIlink + normalizeDoi(doi);
+		if (isDoi(doi)) return DOIlink + normaliseDoi(doi);
 		else return null;
 	}
 
@@ -298,9 +299,9 @@ public final class PubFetcher {
 	private static boolean isActivePubId(PublicationIds pubId) {
 		if (pubId == null) return false;
 		for (PublicationIds activePubId : activePubIds) {
-			if (pubId.getPmid() != null && pubId.getPmid().equals(activePubId.getPmid())
-				|| pubId.getPmcid() != null && pubId.getPmcid().equals(activePubId.getPmcid())
-				|| pubId.getDoi() != null && pubId.getDoi().equals(activePubId.getDoi())) {
+			if (pubId.getPmid() != null && !pubId.getPmid().isEmpty() && pubId.getPmid().equals(activePubId.getPmid())
+				|| pubId.getPmcid() != null && !pubId.getPmcid().isEmpty() && pubId.getPmcid().equals(activePubId.getPmcid())
+				|| pubId.getDoi() != null && !pubId.getDoi().isEmpty() && pubId.getDoi().equals(activePubId.getDoi())) {
 				return true;
 			}
 		}
@@ -462,9 +463,9 @@ public final class PubFetcher {
 		logger.info("Load publication IDs from file {}", files);
 		for (String file : files) {
 			try (Stream<String> lines = Files.lines(Paths.get(file), StandardCharsets.UTF_8)) {
-				publicationIds.addAll(lines.map(l -> l.split("\t", 3))
+				publicationIds.addAll(lines.map(l -> l.split("\t", -1))
 					.filter(l -> {
-						if (l.length != 3) logger.error("Invalid line in {}: starting with {}", file, l[0]);
+						if (l.length != 3) logger.error("Line containing {} tabs instead of required 2 in {}: {}", l.length - 1, file, Arrays.stream(l).collect(Collectors.joining(" \\t ")));
 						return l.length == 3;
 					})
 					.map(l -> new PublicationIds(l[0], l[1], l[2], pubIdSource, pubIdSource, pubIdSource))
@@ -490,18 +491,34 @@ public final class PubFetcher {
 
 	public static List<String> webFile(List<String> files) throws IOException {
 		List<String> webpageUrls = new ArrayList<>();
-		logger.info("Load webpage URLs from file {}", files);
+		logger.info("Load webpage/doc URLs from file {}", files);
 		for (String file : files) {
 			try (Stream<String> lines = Files.lines(Paths.get(file), StandardCharsets.UTF_8)) {
 				webpageUrls.addAll(lines.collect(Collectors.toList()));
 			}
 		}
-		logger.info("Loaded {} webpage URLs", webpageUrls.size());
+		logger.info("Loaded {} webpage/doc URLs", webpageUrls.size());
 		return webpageUrls;
 	}
 
-	public static String progress(int i, int size) {
-		return i + "/" + size + " (" + Math.round(i / (double) size * 1000) / 10.0 + "%)";
+	public static String progress(int i, int size, long start) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("|");
+		final int length = 25;
+		int done = (int) (i / (double) size * length);
+		for (int j = 0; j < done; ++j) sb.append("=");
+		if (done < length) sb.append(">");
+		for (int j = 0; j < length - done - 1; ++j) sb.append(" ");
+		sb.append("|");
+		sb.append(" ").append(i).append("/").append(size);
+		sb.append(" (").append(Math.round(i / (double) size * 1000) / 10.0).append("%");
+		if (i > 1) {
+			sb.append(", remaining ");
+			long s = (System.currentTimeMillis() - start) / (i - 1) * (size - i + 1) / 1000;
+			sb.append(String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60));
+		}
+		sb.append(")");
+		return sb.toString();
 	}
 
 	public static URLConnection newConnection(String path, int timeout, String userAgent) throws MalformedURLException, IOException {
@@ -560,7 +577,7 @@ public final class PubFetcher {
 		Path path = Paths.get(file);
 		Path parent = (path.getParent() != null ? path.getParent() : Paths.get("."));
 		if (!Files.isDirectory(parent) || !Files.isWritable(parent)) {
-			throw new AccessDeniedException(parent.toAbsolutePath().normalize() + " is not a writeable directory!"); // TODO don't use absolute in server
+			throw new AccessDeniedException(parent.toAbsolutePath().normalize() + " is not a writeable directory!");
 		}
 		if (directory && existingDirectory) {
 			if (!Files.isDirectory(path) || !Files.isWritable(path)) {

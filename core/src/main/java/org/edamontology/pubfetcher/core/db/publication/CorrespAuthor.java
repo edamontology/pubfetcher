@@ -19,9 +19,12 @@
 
 package org.edamontology.pubfetcher.core.db.publication;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 public class CorrespAuthor implements Serializable {
 
@@ -86,10 +89,6 @@ public class CorrespAuthor implements Serializable {
 		}
 	}
 
-	public static String toString(List<CorrespAuthor> correspAuthor) {
-		return correspAuthor.stream().map(Object::toString).collect(Collectors.joining("; "));
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -121,5 +120,19 @@ public class CorrespAuthor implements Serializable {
 			sb.append(uri);
 		}
 		return sb.toString();
+	}
+
+	public static String toString(List<CorrespAuthor> correspAuthor) {
+		return correspAuthor.stream().map(Object::toString).collect(Collectors.joining("; "));
+	}
+
+	public void toStringJson(JsonGenerator generator) throws IOException {
+		generator.writeStartObject();
+		generator.writeStringField("name", name);
+		generator.writeStringField("orcid",orcid);
+		generator.writeStringField("email", email);
+		generator.writeStringField("phone", phone);
+		generator.writeStringField("uri", uri);
+		generator.writeEndObject();
 	}
 }

@@ -19,7 +19,12 @@
 
 package org.edamontology.pubfetcher.core.db.publication;
 
+import java.io.IOException;
+
+import org.edamontology.pubfetcher.core.common.FetcherArgs;
 import org.edamontology.pubfetcher.core.common.PubFetcher;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 public class PublicationPartString extends PublicationPart {
 
@@ -57,6 +62,17 @@ public class PublicationPartString extends PublicationPart {
 	}
 
 	@Override
+	public boolean isUsable(FetcherArgs fetcherArgs) {
+		switch (getName()) {
+			case pmid: case pmcid: case doi: return !isEmpty();
+			case title: return getSize() >= fetcherArgs.getTitleMinLength();
+			case theAbstract: return getSize() >= fetcherArgs.getAbstractMinLength();
+			case fulltext: return getSize() >= fetcherArgs.getFulltextMinLength() && getType().isBetterThan(PublicationPartType.webpage);
+			default: return true;
+		}
+	}
+
+	@Override
 	public String toStringPlain() {
 		return content;
 	}
@@ -64,5 +80,13 @@ public class PublicationPartString extends PublicationPart {
 	@Override
 	public String toStringPlainHtml() {
 		return PubFetcher.getParagraphsHtml(content);
+	}
+
+	@Override
+	public void toStringPlainJson(JsonGenerator generator, boolean withName) throws IOException {
+		generator.writeStringField(withName ? getName().name() : "content", content);
+	}
+	public void toStringPlainJson(JsonGenerator generator, String name) throws IOException {
+		generator.writeStringField(name, content);
 	}
 }

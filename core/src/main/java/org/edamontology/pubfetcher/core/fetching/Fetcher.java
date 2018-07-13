@@ -34,9 +34,11 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,6 +56,7 @@ import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
 import org.edamontology.pubfetcher.core.common.FetcherArgs;
+import org.edamontology.pubfetcher.core.common.FetcherPrivateArgs;
 import org.edamontology.pubfetcher.core.common.PubFetcher;
 import org.edamontology.pubfetcher.core.db.link.Link;
 import org.edamontology.pubfetcher.core.db.publication.CorrespAuthor;
@@ -118,14 +121,70 @@ public class Fetcher {
 	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
 	private static final String SCIENCEDIRECT_LINK = "https://www.sciencedirect.com/science/article/pii/";
 
+	private static Set<ActiveHost> activeHosts = new HashSet<>();
+
 	private final Scrape scrape;
 
-	public Fetcher() throws IOException, ParseException {
-		scrape = new Scrape();
+	public Fetcher(FetcherPrivateArgs fetcherPrivateArgs) throws IOException, ParseException {
+		scrape = new Scrape(fetcherPrivateArgs.getJournalsYaml(), fetcherPrivateArgs.getWebpagesYaml());
 	}
 
 	public Scrape getScrape() {
 		return scrape;
+	}
+
+	private static ActiveHost findActiveHost(String host) {
+		ActiveHost activeHost = null;
+		for (ActiveHost ah : activeHosts) {
+			if (ah.getHost().equals(host)) {
+				activeHost = ah;
+				break;
+			}
+		}
+		return activeHost;
+	}
+
+	private static String getHost(String url) {
+		try {
+			if (url == null) return null;
+			String host = new URI(url).getHost();
+			if (host == null) return url;
+			host = host.toLowerCase(Locale.ROOT);
+			return host.startsWith("www.") ? host.substring(4) : host;
+		} catch (URISyntaxException e) {
+			return url;
+		}
+	}
+
+	private ActiveHost activateHost(String host) {
+		if (host == null || host.equals("doi.org") || host.equals("dx.doi.org")) {
+			return null;
+		}
+		ActiveHost activeHost = null;
+		synchronized(activeHosts) {
+			boolean waited = false;
+			while ((activeHost = findActiveHost(host)) != null && activeHost.getThreadId() != Thread.currentThread().getId()) {
+				waited = true;
+				logger.info("Waiting behind host {}", host);
+				try {
+					activeHosts.wait();
+				} catch (InterruptedException e) {
+					logger.error("Interrupt!", e);
+					Thread.currentThread().interrupt();
+					return null;
+				}
+			}
+			if (waited) {
+				logger.info("Resuming for host {}", host);
+			}
+			if (activeHost == null) {
+				activeHost = new ActiveHost(host);
+				activeHosts.add(activeHost);
+			} else {
+				activeHost.increment();
+			}
+		}
+		return activeHost;
 	}
 
 	private void setFetchException(Webpage webpage, Publication publication, String exceptionUrl) {
@@ -143,7 +202,11 @@ public class Fetcher {
 		}
 	}
 
-	public Document getDoc(String url, Publication publication, FetcherArgs fetcherArgs) {
+	public Document getDoc(String url, boolean javascript, FetcherArgs fetcherArgs) {
+		return getDoc(url, null, null, null, null, null, null, javascript, false, fetcherArgs);
+	}
+
+	private Document getDoc(String url, Publication publication, FetcherArgs fetcherArgs) {
 		return getDoc(url, null, publication, null, null, null, null, false, false, fetcherArgs);
 	}
 
@@ -159,6 +222,9 @@ public class Fetcher {
 		Document doc = null;
 
 		logger.info("    GET {}{}", url, javascript ? " (with JavaScript)" : "");
+
+		ActiveHost activeHost = activateHost(getHost(url));
+		if (Thread.currentThread().isInterrupted()) return null;
 
 		try {
 			if (webpage != null) {
@@ -211,7 +277,6 @@ public class Fetcher {
 					.userAgent(fetcherArgs.getPrivateArgs().getUserAgent())
 					.referrer(u.getProtocol() + "://" + u.getAuthority())
 					.timeout(fetcherArgs.getTimeout())
-					// .validateTLSCertificates(false) // TODO deprecated
 					.followRedirects(true)
 					.ignoreHttpErrors(false)
 					.ignoreContentType(false)
@@ -222,7 +287,7 @@ public class Fetcher {
 					webpage.setStatusCode(res.statusCode());
 				}
 
-				// bufferUp() because of bug in Jsoup // TODO
+				// TODO bufferUp() because of bug in Jsoup
 				doc = res.bufferUp().parse();
 			}
 
@@ -299,6 +364,8 @@ public class Fetcher {
 			}
 		} catch (javax.net.ssl.SSLHandshakeException | javax.net.ssl.SSLProtocolException e) {
 			logger.warn(e);
+			// jsoup has deprecated validateTLSCertificates(false), so try with htmlunit and setUseInsecureSSL(true)
+			// in jsoup, Connection.sslSocketFactory(SSLSocketFactory sslSocketFactory) provides a path to implement a workaround
 			if (!javascript) {
 				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout, fetcherArgs);
 			}
@@ -308,6 +375,13 @@ public class Fetcher {
 		} catch (Exception | org.jsoup.UncheckedIOException e) {
 			logger.warn("Exception!", e);
 			setFetchException(webpage, publication, null);
+		} finally {
+			if (activeHost != null && !activeHost.decrement()) {
+				synchronized(activeHosts) {
+					activeHosts.remove(activeHost);
+					activeHosts.notifyAll();
+				}
+			}
 		}
 
 		return doc;
@@ -326,170 +400,182 @@ public class Fetcher {
 
 		logger.info("    GET PDF {}", url);
 
-		URLConnection con;
+		ActiveHost activeHost = activateHost(getHost(url));
+		if (Thread.currentThread().isInterrupted()) return;
+
 		try {
-			con = PubFetcher.newConnection(url, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
-		} catch (IOException e) {
-			logger.warn(e);
-			return;
-		}
+			URLConnection con;
+			try {
+				con = PubFetcher.newConnection(url, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
+			} catch (IOException e) {
+				logger.warn(e);
+				return;
+			}
 
-		String finalUrl = con.getURL().toString();
-		if (webpage != null) {
-			webpage.setFinalUrl(finalUrl);
-		}
-
-		try (PDDocument doc = PDDocument.load(con.getInputStream())) {
-			logger.info("    GOT PDF {}", finalUrl);
+			String finalUrl = con.getURL().toString();
 			if (webpage != null) {
-				if (con instanceof HttpURLConnection) {
-					HttpURLConnection httpCon = (HttpURLConnection) con;
-					webpage.setStatusCode(httpCon.getResponseCode());
-				}
+				webpage.setFinalUrl(finalUrl);
 			}
 
-			if (type != null && !type.isPdf()) {
-				type = type.toPdf();
-			}
-
-			if (links != null) {
-				links.addTriedLink(finalUrl, type, from);
-			}
-
-			boolean titlePart = (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title)));
-			boolean keywordsPart = (parts == null || (parts.get(PublicationPartName.keywords) != null && parts.get(PublicationPartName.keywords)));
-			boolean abstractPart = (parts == null || (parts.get(PublicationPartName.theAbstract) != null && parts.get(PublicationPartName.theAbstract)));
-			boolean fulltextPart = (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext)));
-
-			if (webpage != null && webpage.getTitle().isEmpty()
-				|| publication != null && (!publication.isTitleFinal(fetcherArgs) && titlePart || !publication.isKeywordsFinal(fetcherArgs) && keywordsPart || !publication.isAbstractFinal(fetcherArgs) && abstractPart)) {
-				PDDocumentInformation info = doc.getDocumentInformation();
-				if (info != null) {
-					if (webpage != null) {
-						if (webpage.getTitle().isEmpty()) {
-							String title = info.getTitle();
-							if (title != null) {
-								webpage.setTitle(title);
-								if (!webpage.getTitle().isEmpty()) {
-									logger.info("        title: {}", webpage.getTitle());
-								}
-							}
-						}
-					}
-					if (publication != null) {
-						if (!publication.isTitleFinal(fetcherArgs) && titlePart) {
-							String title = info.getTitle();
-							if (title != null) {
-								publication.setTitle(title, type, finalUrl, fetcherArgs, true);
-							}
-						}
-						if (!publication.isKeywordsFinal(fetcherArgs) && keywordsPart) {
-							String keywords = info.getKeywords();
-							if (keywords != null) {
-								publication.setKeywords(Arrays.asList(SEPARATOR.split(keywords)), type, finalUrl, fetcherArgs, true);
-							}
-						}
-						if (!publication.isAbstractFinal(fetcherArgs) && abstractPart) {
-							String theAbstract = info.getSubject();
-							if (theAbstract != null) {
-								publication.setAbstract(theAbstract, type, finalUrl, fetcherArgs, true);
-							}
-						}
+			try (PDDocument doc = PDDocument.load(con.getInputStream())) {
+				logger.info("    GOT PDF {}", finalUrl);
+				if (webpage != null) {
+					if (con instanceof HttpURLConnection) {
+						HttpURLConnection httpCon = (HttpURLConnection) con;
+						webpage.setStatusCode(httpCon.getResponseCode());
 					}
 				}
-			}
 
-			if (webpage != null || publication != null && !publication.isFulltextFinal(fetcherArgs) && fulltextPart) {
-				try {
-					PDFTextStripper stripper = new PDFTextStripper();
-					String pdfText = stripper.getText(doc);
-					if (pdfText != null) {
+				if (type != null && !type.isPdf()) {
+					type = type.toPdf();
+				}
+
+				if (links != null) {
+					links.addTriedLink(finalUrl, type, from);
+				}
+
+				boolean titlePart = (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title)));
+				boolean keywordsPart = (parts == null || (parts.get(PublicationPartName.keywords) != null && parts.get(PublicationPartName.keywords)));
+				boolean abstractPart = (parts == null || (parts.get(PublicationPartName.theAbstract) != null && parts.get(PublicationPartName.theAbstract)));
+				boolean fulltextPart = (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext)));
+
+				if (webpage != null && webpage.getTitle().isEmpty()
+					|| publication != null && (!publication.getTitle().isFinal(fetcherArgs) && titlePart || !publication.getKeywords().isFinal(fetcherArgs) && keywordsPart || !publication.getAbstract().isFinal(fetcherArgs) && abstractPart)) {
+					PDDocumentInformation info = doc.getDocumentInformation();
+					if (info != null) {
 						if (webpage != null) {
-							webpage.setContent(pdfText);
-							logger.info("        content length: {}", webpage.getContent().length());
-						}
-						if (publication != null && !publication.isFulltextFinal(fetcherArgs) && fulltextPart) {
-							publication.setFulltext(pdfText, type, finalUrl, fetcherArgs);
-						}
-					}
-				} catch (IOException e) {
-					logger.warn(e);
-				}
-			}
-
-			if (webpage != null && webpage.getTitle().isEmpty()
-				|| publication != null && (!publication.isTitleFinal(fetcherArgs) && titlePart || !publication.isKeywordsFinal(fetcherArgs) && keywordsPart || !publication.isAbstractFinal(fetcherArgs) && abstractPart)) {
-				PDMetadata meta = doc.getDocumentCatalog().getMetadata();
-				if (meta != null) {
-					try (InputStream xmlInputStream = meta.createInputStream()) {
-						XMPMetadata xmp = new DomXmpParser().parse(xmlInputStream);
-
-						DublinCoreSchema dc = xmp.getDublinCoreSchema();
-						if (dc != null) {
-							if (webpage != null) {
-								if (webpage.getTitle().isEmpty()) {
-									String title = dc.getTitle();
-									if (title != null) {
-										webpage.setTitle(title);
-										if (!webpage.getTitle().isEmpty()) {
-											logger.info("        title: {}", webpage.getTitle());
-										}
-									}
-								}
-							}
-							if (publication != null) {
-								if (!publication.isTitleFinal(fetcherArgs) && titlePart) {
-									String title = dc.getTitle();
-									if (title != null) {
-										publication.setTitle(title, type, finalUrl, fetcherArgs, true);
-									}
-								}
-								if (!publication.isKeywordsFinal(fetcherArgs) && keywordsPart) {
-									List<String> keywords = dc.getSubjects();
-									if (keywords != null) {
-										publication.setKeywords(keywords, type, finalUrl, fetcherArgs, true);
-									}
-								}
-								if (!publication.isAbstractFinal(fetcherArgs) && abstractPart) {
-									String theAbstract = dc.getDescription();
-									if (theAbstract != null) {
-										publication.setAbstract(theAbstract, type, finalUrl, fetcherArgs, true);
+							if (webpage.getTitle().isEmpty()) {
+								String title = info.getTitle();
+								if (title != null) {
+									webpage.setTitle(title);
+									if (!webpage.getTitle().isEmpty()) {
+										logger.info("        title: {}", webpage.getTitle());
 									}
 								}
 							}
 						}
-
-						if (publication != null && !publication.isKeywordsFinal(fetcherArgs) && keywordsPart) {
-							AdobePDFSchema pdf = xmp.getAdobePDFSchema();
-							if (pdf != null) {
-								String keywords = pdf.getKeywords();
+						if (publication != null) {
+							if (!publication.getTitle().isFinal(fetcherArgs) && titlePart) {
+								String title = info.getTitle();
+								if (title != null) {
+									publication.setTitle(title, type, finalUrl, fetcherArgs, true);
+								}
+							}
+							if (!publication.getKeywords().isFinal(fetcherArgs) && keywordsPart) {
+								String keywords = info.getKeywords();
 								if (keywords != null) {
 									publication.setKeywords(Arrays.asList(SEPARATOR.split(keywords)), type, finalUrl, fetcherArgs, true);
 								}
 							}
+							if (!publication.getAbstract().isFinal(fetcherArgs) && abstractPart) {
+								String theAbstract = info.getSubject();
+								if (theAbstract != null) {
+									publication.setAbstract(theAbstract, type, finalUrl, fetcherArgs, true);
+								}
+							}
+						}
+					}
+				}
+
+				if (webpage != null || publication != null && !publication.getFulltext().isFinal(fetcherArgs) && fulltextPart) {
+					try {
+						PDFTextStripper stripper = new PDFTextStripper();
+						String pdfText = stripper.getText(doc);
+						if (pdfText != null) {
+							if (webpage != null) {
+								webpage.setContent(pdfText);
+								logger.info("        content length: {}", webpage.getContent().length());
+							}
+							if (publication != null && !publication.getFulltext().isFinal(fetcherArgs) && fulltextPart) {
+								publication.setFulltext(pdfText, type, finalUrl, fetcherArgs);
+							}
 						}
 					} catch (IOException e) {
 						logger.warn(e);
-					} catch (XmpParsingException e) {
-						logger.warn(e);
-					} catch (IllegalArgumentException e) {
-						logger.warn(e);
 					}
 				}
+
+				if (webpage != null && webpage.getTitle().isEmpty()
+					|| publication != null && (!publication.getTitle().isFinal(fetcherArgs) && titlePart || !publication.getKeywords().isFinal(fetcherArgs) && keywordsPart || !publication.getAbstract().isFinal(fetcherArgs) && abstractPart)) {
+					PDMetadata meta = doc.getDocumentCatalog().getMetadata();
+					if (meta != null) {
+						try (InputStream xmlInputStream = meta.createInputStream()) {
+							XMPMetadata xmp = new DomXmpParser().parse(xmlInputStream);
+
+							DublinCoreSchema dc = xmp.getDublinCoreSchema();
+							if (dc != null) {
+								if (webpage != null) {
+									if (webpage.getTitle().isEmpty()) {
+										String title = dc.getTitle();
+										if (title != null) {
+											webpage.setTitle(title);
+											if (!webpage.getTitle().isEmpty()) {
+												logger.info("        title: {}", webpage.getTitle());
+											}
+										}
+									}
+								}
+								if (publication != null) {
+									if (!publication.getTitle().isFinal(fetcherArgs) && titlePart) {
+										String title = dc.getTitle();
+										if (title != null) {
+											publication.setTitle(title, type, finalUrl, fetcherArgs, true);
+										}
+									}
+									if (!publication.getKeywords().isFinal(fetcherArgs) && keywordsPart) {
+										List<String> keywords = dc.getSubjects();
+										if (keywords != null) {
+											publication.setKeywords(keywords, type, finalUrl, fetcherArgs, true);
+										}
+									}
+									if (!publication.getAbstract().isFinal(fetcherArgs) && abstractPart) {
+										String theAbstract = dc.getDescription();
+										if (theAbstract != null) {
+											publication.setAbstract(theAbstract, type, finalUrl, fetcherArgs, true);
+										}
+									}
+								}
+							}
+
+							if (publication != null && !publication.getKeywords().isFinal(fetcherArgs) && keywordsPart) {
+								AdobePDFSchema pdf = xmp.getAdobePDFSchema();
+								if (pdf != null) {
+									String keywords = pdf.getKeywords();
+									if (keywords != null) {
+										publication.setKeywords(Arrays.asList(SEPARATOR.split(keywords)), type, finalUrl, fetcherArgs, true);
+									}
+								}
+							}
+						} catch (IOException e) {
+							logger.warn(e);
+						} catch (XmpParsingException e) {
+							logger.warn(e);
+						} catch (IllegalArgumentException e) {
+							logger.warn(e);
+						}
+					}
+				}
+			} catch (InvalidPasswordException e) {
+				logger.warn(e);
+			} catch (java.net.ConnectException | java.net.NoRouteToHostException e) {
+				logger.warn(e);
+				setFetchException(webpage, publication, null);
+			} catch (SocketTimeoutException e) {
+				logger.warn(e);
+				setFetchException(webpage, publication, null);
+			} catch (IOException e) {
+				logger.warn(e);
+			} catch (Exception e) {
+				logger.warn("Exception!", e);
+				setFetchException(webpage, publication, null);
 			}
-		} catch (InvalidPasswordException e) {
-			logger.warn(e);
-		} catch (java.net.ConnectException | java.net.NoRouteToHostException e) {
-			logger.warn(e);
-			setFetchException(webpage, publication, null);
-		} catch (SocketTimeoutException e) {
-			logger.warn(e);
-			setFetchException(webpage, publication, null);
-		} catch (IOException e) {
-			logger.warn(e);
-		} catch (Exception e) {
-			logger.warn("Exception!", e);
-			setFetchException(webpage, publication, null);
+		} finally {
+			if (activeHost != null && !activeHost.decrement()) {
+				synchronized(activeHosts) {
+					activeHosts.remove(activeHost);
+					activeHosts.notifyAll();
+				}
+			}
 		}
 	}
 
@@ -614,7 +700,7 @@ public class Fetcher {
 
 	private void setTitle(Publication publication, Document doc, PublicationPartType type, String title, String subtitle, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {
-			if (!publication.isTitleFinal(fetcherArgs) && title != null && !title.trim().isEmpty()) {
+			if (!publication.getTitle().isFinal(fetcherArgs) && title != null && !title.trim().isEmpty()) {
 				publication.setTitle(getTitleText(doc, title, subtitle), type, doc.location(), fetcherArgs, false);
 			}
 		}
@@ -622,7 +708,7 @@ public class Fetcher {
 
 	private void setKeywords(Publication publication, Document doc, PublicationPartType type, String keywords, boolean split, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.keywords) != null && parts.get(PublicationPartName.keywords))) {
-			if (!publication.isKeywordsFinal(fetcherArgs) && keywords != null && !keywords.trim().isEmpty()) {
+			if (!publication.getKeywords().isFinal(fetcherArgs) && keywords != null && !keywords.trim().isEmpty()) {
 				Elements keywordsElements = getAll(doc, keywords, false); // false - don't complain about missing keywords
 				if (!keywordsElements.isEmpty()) {
 					List<String> keywordsList;
@@ -644,7 +730,7 @@ public class Fetcher {
 
 	private void setAbstract(Publication publication, Document doc, PublicationPartType type, String theAbstract, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.theAbstract) != null && parts.get(PublicationPartName.theAbstract))) {
-			if (!publication.isAbstractFinal(fetcherArgs) && theAbstract != null && !theAbstract.trim().isEmpty()) {
+			if (!publication.getAbstract().isFinal(fetcherArgs) && theAbstract != null && !theAbstract.trim().isEmpty()) {
 				publication.setAbstract(text(doc, theAbstract, true), type, doc.location(), fetcherArgs, false);
 			}
 		}
@@ -652,7 +738,7 @@ public class Fetcher {
 
 	private void setFulltext(Publication publication, Document doc, PublicationPartType type, String title, String subtitle, String theAbstract, String fulltext, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext))) {
-			if (!publication.isFulltextFinal(fetcherArgs) && fulltext != null && !fulltext.trim().isEmpty()) {
+			if (!publication.getFulltext().isFinal(fetcherArgs) && fulltext != null && !fulltext.trim().isEmpty()) {
 				String fulltextText = text(doc, fulltext, true);
 				if (!fulltextText.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
@@ -1056,7 +1142,7 @@ public class Fetcher {
 
 	private boolean isFinal(Publication publication, PublicationPartName[] names, EnumMap<PublicationPartName, Boolean> parts, boolean oa, FetcherArgs fetcherArgs) {
 		for (PublicationPartName name : names) {
-			if (!publication.isPartFinal(name, fetcherArgs) && (parts == null || (parts.get(name) != null && parts.get(name)))) {
+			if (!publication.getPart(name).isFinal(fetcherArgs) && (parts == null || (parts.get(name) != null && parts.get(name)))) {
 				return false;
 			}
 		}
@@ -1081,6 +1167,34 @@ public class Fetcher {
 		return false;
 	}
 
+	private String getEuropepmcUri(Publication publication, FetcherPublicationState state, FetcherArgs fetcherArgs) {
+		String europepmcQuery = "resulttype=core&pageSize=1&format=xml";
+		if (!publication.getPmid().isEmpty() && !state.europepmcPmid) {
+			europepmcQuery += "&query=ext_id:" + publication.getPmid().getContent() + " src:med";
+			state.europepmcPmid = true;
+		} else if (!publication.getPmcid().isEmpty() && !state.europepmcPmcid) {
+			europepmcQuery += "&query=pmcid:" + publication.getPmcid().getContent();
+			state.europepmcPmcid = true;
+		} else if (!publication.getDoi().isEmpty() && !state.europepmcDoi) {
+			europepmcQuery += "&query=doi:" + publication.getDoi().getContent();
+			state.europepmcDoi = true;
+		} else {
+			return null;
+		}
+
+		if (fetcherArgs.getPrivateArgs().getEuropepmcEmail() != null && !fetcherArgs.getPrivateArgs().getEuropepmcEmail().isEmpty()) {
+			europepmcQuery += "&email=" + fetcherArgs.getPrivateArgs().getEuropepmcEmail();
+		}
+
+		String europepmc = null;
+		try {
+			europepmc = new URI("https", "www.ebi.ac.uk", "/europepmc/webservices/rest/search", europepmcQuery, null).toASCIIString();
+		} catch (URISyntaxException e) {
+			logger.error(e);
+		}
+		return europepmc;
+	}
+
 	// https://europepmc.org/docs/EBI_Europe_PMC_Web_Service_Reference.pdf
 	void fetchEuropepmc(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (state.europepmc) return;
@@ -1097,31 +1211,8 @@ public class Fetcher {
 			return;
 		}
 
-		String europepmcQuery = "resulttype=core&pageSize=1&format=xml";
-		if (!publication.getPmid().isEmpty() && !state.europepmcPmid) {
-			europepmcQuery += "&query=ext_id:" + publication.getPmid().getContent() + " src:med";
-			state.europepmcPmid = true;
-		} else if (!publication.getPmcid().isEmpty() && !state.europepmcPmcid) {
-			europepmcQuery += "&query=pmcid:" + publication.getPmcid().getContent();
-			state.europepmcPmcid = true;
-		} else if (!publication.getDoi().isEmpty() && !state.europepmcDoi) {
-			europepmcQuery += "&query=doi:" + publication.getDoi().getContent();
-			state.europepmcDoi = true;
-		} else {
-			return;
-		}
-
-		if (fetcherArgs.getPrivateArgs().getEuropepmcEmail() != null && !fetcherArgs.getPrivateArgs().getEuropepmcEmail().isEmpty()) {
-			europepmcQuery += "&email=" + fetcherArgs.getPrivateArgs().getEuropepmcEmail();
-		}
-
-		String europepmc;
-		try {
-			europepmc = new URI("https", "www.ebi.ac.uk", "/europepmc/webservices/rest/search", europepmcQuery, null).toASCIIString();
-		} catch (URISyntaxException e) {
-			logger.error(e);
-			return;
-		}
+		String europepmc = getEuropepmcUri(publication, state, fetcherArgs);
+		if (europepmc == null) return;
 
 		PublicationPartType type = PublicationPartType.europepmc;
 
@@ -1156,7 +1247,7 @@ public class Fetcher {
 				setKeywords(publication, doc, type, "keyword", false, parts, fetcherArgs);
 
 				if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
-					if (!publication.isMeshTermsFinal(fetcherArgs)) {
+					if (!publication.getMeshTerms().isFinal(fetcherArgs)) {
 						List<MeshTerm> meshTerms = new ArrayList<>();
 						for (Element meshHeading : doc.getElementsByTag("meshHeading")) {
 							MeshTerm meshTerm = new MeshTerm();
@@ -1219,6 +1310,37 @@ public class Fetcher {
 				logger.error("There are {} results for {}", realCount, doc.location());
 			}
 		}
+	}
+
+	private void fetchCitationsCount(Publication publication, FetcherPublicationState state, FetcherArgs fetcherArgs) {
+		if (state.europepmc) return;
+
+		if (publication.getIdCount() < 1) {
+			logger.error("Can't fetch citations count for publication with no IDs");
+			return;
+		}
+
+		String europepmc = getEuropepmcUri(publication, state, fetcherArgs);
+		if (europepmc == null) return;
+
+		Document doc = getDoc(europepmc, publication, fetcherArgs);
+		if (doc != null) {
+			int count = doc.select("resultList > result").size();
+			if (count == 1) {
+				state.europepmc = true;
+				// "A count that indicates the number of times an article has been cited by other articles in our databases."
+				setCitationsCount(publication, doc, "citedByCount");
+			} else {
+				logger.error("There are {} results for {}", count, doc.location());
+			}
+		}
+	}
+
+	public void updateCitationsCount(Publication publication, FetcherArgs fetcherArgs) {
+		FetcherPublicationState state = new FetcherPublicationState();
+		fetchCitationsCount(publication, state, fetcherArgs);
+		fetchCitationsCount(publication, state, fetcherArgs);
+		fetchCitationsCount(publication, state, fetcherArgs);
 	}
 
 	// https://www.ncbi.nlm.nih.gov/pmc/pmcdoc/tagging-guidelines/article/style.html
@@ -1290,7 +1412,7 @@ public class Fetcher {
 		for (Element displayNone : doc.select(displayNoneSelector)) displayNone.remove();
 
 		if (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext))) {
-			if (!publication.isFulltextFinal(fetcherArgs)) {
+			if (!publication.getFulltext().isFinal(fetcherArgs)) {
 				String notFigTable = europepmc ? ":not(.fig):not(.table-wrap)" : "";
 				String fulltext = text(doc,
 					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) > :not(.sec):not(.goto)" + notFigTable + ", " +
@@ -1555,7 +1677,7 @@ public class Fetcher {
 			setKeywords(publication, doc, type, "Keyword", false, parts, fetcherArgs);
 
 			if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
-				if (!publication.isMeshTermsFinal(fetcherArgs)) {
+				if (!publication.getMeshTerms().isFinal(fetcherArgs)) {
 					List<MeshTerm> meshTerms = new ArrayList<>();
 					for (Element descriptorName : doc.getElementsByTag("DescriptorName")) {
 						MeshTerm meshTerm = new MeshTerm();
@@ -1627,7 +1749,7 @@ public class Fetcher {
 			setKeywords(publication, doc, type, ".rprt .keywords p", true, parts, fetcherArgs);
 
 			if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
-				if (!publication.isMeshTermsFinal(fetcherArgs)) {
+				if (!publication.getMeshTerms().isFinal(fetcherArgs)) {
 					List<MeshTerm> meshTerms = new ArrayList<>();
 					String previousDescriptorNameText = "";
 					for (Element descriptorName : doc.select(".rprt a[alsec=mesh]")) {
@@ -1777,7 +1899,7 @@ public class Fetcher {
 				}, parts, false, fetcherArgs)) return;
 		}
 
-		boolean javascript = scrape.getJavascript(PubFetcher.getDoiRegistrant(url));
+		boolean javascript = scrape.getJavascript(PubFetcher.extractDoiRegistrant(url));
 		if (!javascript) {
 			javascript = Boolean.valueOf(scrape.getSelector(scrape.getSite(url), ScrapeSiteKey.javascript));
 		}
@@ -1794,15 +1916,19 @@ public class Fetcher {
 			}
 		}
 
+		if (doc != null && !javascript) {
+			String finalUrl = doc.location();
+			String site = scrape.getSite(finalUrl);
+			if (site != null && Boolean.valueOf(scrape.getSelector(site, ScrapeSiteKey.javascript))) {
+				doc = getDoc(finalUrl, publication, type, from, links, parts, true, fetcherArgs);
+			}
+		}
+
 		if (doc != null) {
 			String finalUrl = doc.location();
 
 			String site = scrape.getSite(finalUrl);
 			if (site != null) {
-				if (!javascript && Boolean.valueOf(scrape.getSelector(site, ScrapeSiteKey.javascript))) {
-					doc = getDoc(finalUrl, publication, type, from, links, parts, true, fetcherArgs);
-				}
-
 				setIds(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.pmid), scrape.getSelector(site, ScrapeSiteKey.pmcid), scrape.getSelector(site, ScrapeSiteKey.doi), false, fetcherArgs);
 
 				setTitle(publication, doc, type, scrape.getSelector(site, ScrapeSiteKey.title), scrape.getSelector(site, ScrapeSiteKey.subtitle), parts, fetcherArgs);
@@ -1891,93 +2017,106 @@ public class Fetcher {
 		if (doi.isEmpty()) return;
 		state.oadoi = true;
 
-		URLConnection con;
+		String host = "api.unpaywall.org";
+		ActiveHost activeHost = activateHost(host);
+		if (Thread.currentThread().isInterrupted()) return;
+
 		try {
-			String oaDOI = new URI("https", "api.unpaywall.org", "/v2/" + doi, "email=" + fetcherArgs.getPrivateArgs().getOadoiEmail(), null).toASCIIString();
-			logger.info("    GET oaDOI {}", oaDOI);
-			con = PubFetcher.newConnection(oaDOI, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
-		} catch (URISyntaxException | IOException e) {
-			logger.error(e);
-			return;
-		}
-
-		try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
-			String finalUrl = con.getURL().toString();
-			logger.info("    GOT oaDOI {}", finalUrl);
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.CLOSE_CLOSEABLE);
-			JsonNode root = mapper.readTree(reader);
-
-			if (!publication.isOA()) {
-				JsonNode isOA = root.get("is_oa");
-				if (isOA != null && isOA.asBoolean()) {
-					publication.setOA(true);
-				}
+			URLConnection con;
+			try {
+				String oaDOI = new URI("https", host, "/v2/" + doi, "email=" + fetcherArgs.getPrivateArgs().getOadoiEmail(), null).toASCIIString();
+				logger.info("    GET oaDOI {}", oaDOI);
+				con = PubFetcher.newConnection(oaDOI, fetcherArgs.getTimeout(), fetcherArgs.getPrivateArgs().getUserAgent());
+			} catch (URISyntaxException | IOException e) {
+				logger.error(e);
+				return;
 			}
 
-			if (publication.getJournalTitle().isEmpty()) {
-				JsonNode journalName = root.get("journal_name");
-				if (journalName != null) {
-					String journalNameText = journalName.asText();
-					if (journalNameText != null && !journalNameText.trim().isEmpty() && !journalNameText.trim().equals("null")) {
-						publication.setJournalTitle(journalNameText.trim());
+			try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
+				String finalUrl = con.getURL().toString();
+				logger.info("    GOT oaDOI {}", finalUrl);
+
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.enable(SerializationFeature.CLOSE_CLOSEABLE);
+				JsonNode root = mapper.readTree(reader);
+
+				if (!publication.isOA()) {
+					JsonNode isOA = root.get("is_oa");
+					if (isOA != null && isOA.asBoolean()) {
+						publication.setOA(true);
+					}
+				}
+
+				if (publication.getJournalTitle().isEmpty()) {
+					JsonNode journalName = root.get("journal_name");
+					if (journalName != null) {
+						String journalNameText = journalName.asText();
+						if (journalNameText != null && !journalNameText.trim().isEmpty() && !journalNameText.trim().equals("null")) {
+							publication.setJournalTitle(journalNameText.trim());
+						} else {
+							logger.warn("Journal title empty in oaDOI {}", finalUrl);
+						}
 					} else {
-						logger.warn("Journal title empty in oaDOI {}", finalUrl);
+						logger.warn("Journal title not found in oaDOI {}", finalUrl);
 					}
-				} else {
-					logger.warn("Journal title not found in oaDOI {}", finalUrl);
 				}
-			}
 
-			JsonNode oaLocations = root.get("oa_locations");
-			if (oaLocations != null) {
-				for (JsonNode oaLocation : oaLocations) {
-					JsonNode urlPdf = oaLocation.get("url_for_pdf");
-					if (urlPdf != null) {
-						String urlPdfText = urlPdf.asText();
-						if (urlPdfText != null && !urlPdfText.isEmpty() && !urlPdfText.equals("null")) {
-							links.add(urlPdfText, PublicationPartType.pdf_oadoi, finalUrl, publication, fetcherArgs, false);
+				JsonNode oaLocations = root.get("oa_locations");
+				if (oaLocations != null) {
+					for (JsonNode oaLocation : oaLocations) {
+						JsonNode urlPdf = oaLocation.get("url_for_pdf");
+						if (urlPdf != null) {
+							String urlPdfText = urlPdf.asText();
+							if (urlPdfText != null && !urlPdfText.isEmpty() && !urlPdfText.equals("null")) {
+								links.add(urlPdfText, PublicationPartType.pdf_oadoi, finalUrl, publication, fetcherArgs, false);
+							}
 						}
-					}
-					JsonNode url = oaLocation.get("url");
-					if (url != null) {
-						String urlText = url.asText();
-						if (urlText != null && !urlText.isEmpty() && !urlText.equals("null")) {
-							links.add(urlText, PublicationPartType.link_oadoi, finalUrl, publication, fetcherArgs, false);
+						JsonNode url = oaLocation.get("url");
+						if (url != null) {
+							String urlText = url.asText();
+							if (urlText != null && !urlText.isEmpty() && !urlText.equals("null")) {
+								links.add(urlText, PublicationPartType.link_oadoi, finalUrl, publication, fetcherArgs, false);
+							}
 						}
-					}
-					JsonNode urlLandingPage = oaLocation.get("url_for_landing_page");
-					if (urlLandingPage != null) {
-						String urlLandingPageText = urlLandingPage.asText();
-						if (urlLandingPageText != null && !urlLandingPageText.isEmpty() && !urlLandingPageText.equals("null")) {
-							links.add(urlLandingPageText, PublicationPartType.link_oadoi, finalUrl, publication, fetcherArgs, false);
+						JsonNode urlLandingPage = oaLocation.get("url_for_landing_page");
+						if (urlLandingPage != null) {
+							String urlLandingPageText = urlLandingPage.asText();
+							if (urlLandingPageText != null && !urlLandingPageText.isEmpty() && !urlLandingPageText.equals("null")) {
+								links.add(urlLandingPageText, PublicationPartType.link_oadoi, finalUrl, publication, fetcherArgs, false);
+							}
 						}
 					}
 				}
-			}
 
-			if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {
-				// subtitle will be missing, for example:
-				// https://api.oadoi.org/v2/10.1145/2618243.2618289?email=test@example.com
-				// title: "MR-microT", should be "MR-microT: a MapReduce-based MicroRNA target prediction method"
-				JsonNode title = root.get("title");
-				if (title != null) {
-					String titleText = title.asText();
-					if (titleText != null && !titleText.isEmpty() && !titleText.equals("null")) {
-						publication.setTitle(titleText, PublicationPartType.oadoi, finalUrl, fetcherArgs, false);
+				if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {
+					// subtitle will be missing, for example:
+					// https://api.oadoi.org/v2/10.1145/2618243.2618289?email=test@example.com
+					// title: "MR-microT", should be "MR-microT: a MapReduce-based MicroRNA target prediction method"
+					JsonNode title = root.get("title");
+					if (title != null) {
+						String titleText = title.asText();
+						if (titleText != null && !titleText.isEmpty() && !titleText.equals("null")) {
+							publication.setTitle(titleText, PublicationPartType.oadoi, finalUrl, fetcherArgs, false);
+						}
 					}
 				}
+			} catch (SocketTimeoutException e) {
+				logger.warn(e);
+				setFetchException(null, publication, null);
+			} catch (IOException e) {
+				logger.warn(e);
+			} catch (Exception e) {
+				// any checked exception
+				logger.warn("Exception!", e);
+				setFetchException(null, publication, null);
 			}
-		} catch (SocketTimeoutException e) {
-			logger.warn(e);
-			setFetchException(null, publication, null);
-		} catch (IOException e) {
-			logger.warn(e);
-		} catch (Exception e) {
-			// any checked exception
-			logger.warn("Exception!", e);
-			setFetchException(null, publication, null);
+		} finally {
+			if (activeHost != null && !activeHost.decrement()) {
+				synchronized(activeHosts) {
+					activeHosts.remove(activeHost);
+					activeHosts.notifyAll();
+				}
+			}
 		}
 	}
 
@@ -1993,7 +2132,12 @@ public class Fetcher {
 		fetchEuropepmc(publication, state, parts, fetcherArgs);
 		fetchEuropepmc(publication, state, parts, fetcherArgs);
 		fetchEuropepmcFulltextXml(publication, state, parts, fetcherArgs);
-		fetchEuropepmcFulltextHtml(publication, links, state, parts, true, fetcherArgs);
+
+		// https://europepmc.org/developers
+		// These protocols provide access to Open Access content and metadata.
+		// It is not permissible to use any kind of automated process to bulk download other content from Europe PMC.
+		//fetchEuropepmcFulltextHtml(publication, links, state, parts, true, fetcherArgs);
+
 		fetchEuropepmcMinedTermsEfo(publication, state, parts, fetcherArgs);
 		fetchEuropepmcMinedTermsEfo(publication, state, parts, fetcherArgs);
 		fetchEuropepmcMinedTermsGo(publication, state, parts, fetcherArgs);
@@ -2001,7 +2145,11 @@ public class Fetcher {
 		fetchPubmedXml(publication, state, parts, fetcherArgs);
 		fetchPubmedHtml(publication, state, parts, fetcherArgs);
 		fetchPmcXml(publication, state, parts, fetcherArgs);
-		fetchPmcHtml(publication, links, state, parts, true, fetcherArgs);
+
+		// https://www.ncbi.nlm.nih.gov/pmc/tools/textmining/
+		// Many of the articles in PMC are subject to traditional copyright restrictions and are not available for bulk downloading.
+		//fetchPmcHtml(publication, links, state, parts, true, fetcherArgs);
+
 		fetchDoi(publication, links, state, parts, fetcherArgs);
 		fetchOaDoi(publication, links, state, parts, fetcherArgs);
 
@@ -2176,10 +2324,10 @@ public class Fetcher {
 	}
 
 	public boolean getWebpage(Webpage webpage, FetcherArgs fetcherArgs) {
-		return getWebpage(webpage, null, null, false, fetcherArgs);
+		return getWebpage(webpage, null, null, null, fetcherArgs);
 	}
 
-	public boolean getWebpage(Webpage webpage, String title, String content, boolean javascript, FetcherArgs fetcherArgs) {
+	public boolean getWebpage(Webpage webpage, String title, String content, Boolean javascript, FetcherArgs fetcherArgs) {
 		if (webpage == null) {
 			logger.error("null webpage given for getting webpage");
 			return false;
@@ -2189,9 +2337,9 @@ public class Fetcher {
 			return false;
 		}
 		if (title != null && !title.isEmpty() || content != null && !content.isEmpty()) {
-			logger.info("Get {}{} (with title selector {} and content selector {})", javascript ? "javascript " : "", webpage.getStartUrl(), title, content);
+			logger.info("Get {}{} (with title selector '{}' and content selector '{}')", (javascript != null && javascript.equals(Boolean.valueOf(true))) ? "javascript " : "", webpage.getStartUrl(), title, content);
 		} else {
-			logger.info("Get {}{}", javascript ? "javascript " : "", webpage.getStartUrl());
+			logger.info("Get {}{}", (javascript != null && javascript.equals(Boolean.valueOf(true))) ? "javascript " : "", webpage.getStartUrl());
 		}
 
 		if (webpage.canFetch(fetcherArgs)) {
@@ -2200,26 +2348,21 @@ public class Fetcher {
 			Webpage newWebpage = new Webpage();
 			newWebpage.setStartUrl(webpage.getStartUrl());
 
-			Boolean webpageJavascript = null;
-			Map<String, String> startWebpage = scrape.getWebpage(newWebpage.getStartUrl());
-			if (startWebpage != null) {
-				String webpageJavascriptString = startWebpage.get(ScrapeWebpageKey.javascript.toString());
-				if (webpageJavascriptString != null) {
-					if (webpageJavascriptString.equalsIgnoreCase("true")) {
-						webpageJavascript = Boolean.valueOf(true);
-					} else if (webpageJavascriptString.equalsIgnoreCase("false")) {
-						webpageJavascript = Boolean.valueOf(false);
-					} else {
-						logger.warn("Invalid javascript value: {}", webpageJavascriptString); // TODO move to Scrape
+			if (javascript == null) {
+				Map<String, String> startWebpage = scrape.getWebpage(newWebpage.getStartUrl());
+				if (startWebpage != null) {
+					String webpageJavascriptString = startWebpage.get(ScrapeWebpageKey.javascript.toString());
+					if (webpageJavascriptString != null) {
+						javascript = Boolean.valueOf(webpageJavascriptString);
 					}
+				} else {
+					logger.warn("No scrape rules for start webpage {}", newWebpage.getStartUrl());
 				}
-			} else {
-				logger.warn("No scrape rules for start webpage {}", newWebpage.getStartUrl());
 			}
 
-			Document doc = getDoc(newWebpage, javascript || (webpageJavascript != null && webpageJavascript.equals(Boolean.valueOf(true))), fetcherArgs);
+			Document doc = getDoc(newWebpage, javascript != null && javascript.equals(Boolean.valueOf(true)), fetcherArgs);
 
-			if (doc != null && (!javascript && webpageJavascript == null) && scrape.getWebpage(newWebpage.getFinalUrl()) == null) {
+			if (doc != null && javascript == null && scrape.getWebpage(newWebpage.getFinalUrl()) == null) {
 				int textLength = doc.text().length();
 				if (textLength < fetcherArgs.getWebpageMinLengthJavascript() || !doc.select("noscript").isEmpty()) {
 					logger.info("Refetching {} with JavaScript enabled", newWebpage.getStartUrl());

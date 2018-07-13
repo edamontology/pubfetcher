@@ -37,6 +37,14 @@ public class FetcherPrivateArgs {
 	@Parameter(names = { "--" + USER_AGENT }, description = "HTTP User-Agent")
 	private String userAgent = HttpConnection.DEFAULT_UA;
 
+	public static final String JOURNALS_YAML = "journalsYaml";
+	@Parameter(names = { "--" + JOURNALS_YAML }, description = "Custom journals scrape rules to add to default ones")
+	private String journalsYaml = "";
+
+	public static final String WEBPAGES_YAML = "webpagesYaml";
+	@Parameter(names = { "--" + WEBPAGES_YAML }, description = "Custom webpages scrape rules to add to default ones")
+	private String webpagesYaml = "";
+
 	public String getEuropepmcEmail() {
 		return europepmcEmail;
 	}
@@ -56,5 +64,19 @@ public class FetcherPrivateArgs {
 	}
 	public void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
+	}
+
+	public String getJournalsYaml() {
+		return journalsYaml;
+	}
+	public void setJournalsYaml(String journalsYaml) {
+		this.journalsYaml = journalsYaml;
+	}
+
+	public String getWebpagesYaml() {
+		return webpagesYaml;
+	}
+	public void setWebpagesYaml(String webpagesYaml) {
+		this.webpagesYaml = webpagesYaml;
 	}
 }

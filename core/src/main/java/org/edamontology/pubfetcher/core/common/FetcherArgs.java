@@ -63,7 +63,7 @@ public class FetcherArgs {
 
 	public static final String WEBPAGE_MIN_LENGTH = "webpageMinLength";
 	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid web page content")
-	private int webpageMinLength = 100; // TODO test default value
+	private int webpageMinLength = 100;
 
 	public static final String WEBPAGE_MIN_LENGTH_JAVASCRIPT = "webpageMinLengthJavascript";
 	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "If length of web page content is below this, then refetching using JavaScript support will be attempted")

@@ -44,7 +44,7 @@ public final class Cli {
 		logger.info("This is {} {}", version.getName(), version.getVersion());
 
 		try {
-			PubFetcherMethods.run(args.pubFetcherArgs, new Fetcher(), args.fetcherArgs, null, null, null, version);
+			PubFetcherMethods.run(args.pubFetcherArgs, new Fetcher(args.fetcherArgs.getPrivateArgs()), args.fetcherArgs, null, null, null, version, argv);
 		} catch (Throwable e) {
 			logger.error("Exception!", e);
 		}

@@ -19,9 +19,12 @@
 
 package org.edamontology.pubfetcher.core.db.publication;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import org.edamontology.pubfetcher.core.common.PubFetcher;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 public class PublicationIds implements Serializable, Comparable<PublicationIds> {
 
@@ -55,7 +58,7 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		} else {
 			doi = doi.trim();
 			if (PubFetcher.isDoi(doi)) {
-				this.doi = PubFetcher.normalizeDoi(doi);
+				this.doi = PubFetcher.normaliseDoi(doi);
 			} else {
 				this.doi = doi;
 			}
@@ -136,6 +139,33 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		return (other instanceof PublicationIds);
 	}
 
+	public static String toString(String pmid, String pmcid, String doi, boolean tab) {
+		StringBuilder sb = new StringBuilder();
+		if (pmid != null && !pmid.isEmpty()) {
+			sb.append(pmid);
+		}
+		if (tab) sb.append("\t");
+		if (pmcid != null && !pmcid.isEmpty()) {
+			if (sb.length() > 0 && !tab) sb.append(", ");
+			sb.append(pmcid);
+		}
+		if (tab) sb.append("\t");
+		if (doi != null && !doi.isEmpty()) {
+			if (sb.length() > 0 && !tab) sb.append(", ");
+			sb.append(doi);
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
+		return "[" + toString(pmid, pmcid, doi, false) + "]";
+	}
+	public String toString(boolean tab) {
+		if (tab) return toString(pmid, pmcid, doi, true);
+		else return "[" + toString(pmid, pmcid, doi, false) + "]";
+	}
+
 	public static String toStringHtml(String pmid, String pmcid, String doi, boolean tab) {
 		StringBuilder sb = new StringBuilder();
 		if (tab) sb.append("<tr><td>");
@@ -159,24 +189,6 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		return sb.toString();
 	}
 
-	public static String toString(String pmid, String pmcid, String doi, boolean tab) {
-		StringBuilder sb = new StringBuilder();
-		if (pmid != null && !pmid.isEmpty()) {
-			sb.append(pmid);
-		}
-		if (tab) sb.append("\t");
-		if (pmcid != null && !pmcid.isEmpty()) {
-			if (sb.length() > 0 && !tab) sb.append(", ");
-			sb.append(pmcid);
-		}
-		if (tab) sb.append("\t");
-		if (doi != null && !doi.isEmpty()) {
-			if (sb.length() > 0 && !tab) sb.append(", ");
-			sb.append(doi);
-		}
-		return sb.toString();
-	}
-
 	public String toStringHtml() {
 		return toStringHtml(pmid, pmcid, doi, false);
 	}
@@ -184,31 +196,16 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		return toStringHtml(pmid, pmcid, doi, tab);
 	}
 
-	@Override
-	public String toString() {
-		return "[" + toString(pmid, pmcid, doi, false) + "]";
-	}
-	public String toString(boolean tab) {
-		if (tab) return toString(pmid, pmcid, doi, true);
-		else return "[" + toString(pmid, pmcid, doi, false) + "]";
+	public static void toStringJson(String pmid, String pmcid, String doi, JsonGenerator generator) throws IOException {
+		generator.writeStartObject();
+		generator.writeStringField("pmid", pmid);
+		generator.writeStringField("pmcid", pmcid);
+		generator.writeStringField("doi", doi);
+		generator.writeEndObject();
 	}
 
-	public String toStringWithUrlHtml() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("(");
-		if (!pmid.isEmpty()) {
-			sb.append(PubFetcher.getLinkHtml(pmidUrl));
-		}
-		if (!pmcid.isEmpty()) {
-			if (sb.length() > 1) sb.append(", ");
-			sb.append(PubFetcher.getLinkHtml(pmcidUrl));
-		}
-		if (!doi.isEmpty()) {
-			if (sb.length() > 1) sb.append(", ");
-			sb.append(PubFetcher.getLinkHtml(doiUrl));
-		}
-		sb.append(")");
-		return toStringHtml() + " " + sb.toString();
+	public void toStringJson(JsonGenerator generator) throws IOException {
+		toStringJson(pmid, pmcid, doi, generator);
 	}
 
 	public String toStringWithUrl() {
@@ -229,20 +226,61 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		return "[" + toString(pmid, pmcid, doi, false) + "] " + sb.toString();
 	}
 
+	public String toStringWithUrlHtml() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		if (!pmid.isEmpty()) {
+			sb.append(PubFetcher.getLinkHtml(pmidUrl));
+		}
+		if (!pmcid.isEmpty()) {
+			if (sb.length() > 1) sb.append(", ");
+			sb.append(PubFetcher.getLinkHtml(pmcidUrl));
+		}
+		if (!doi.isEmpty()) {
+			if (sb.length() > 1) sb.append(", ");
+			sb.append(PubFetcher.getLinkHtml(doiUrl));
+		}
+		sb.append(")");
+		return toStringHtml() + " " + sb.toString();
+	}
+
+	public void toStringWithUrlJson(JsonGenerator generator) throws IOException {
+		generator.writeStartObject();
+		generator.writeStringField("pmid", pmid);
+		generator.writeStringField("pmcid", pmcid);
+		generator.writeStringField("doi", doi);
+		generator.writeStringField("pmidUrl", pmidUrl);
+		generator.writeStringField("pmcidUrl", pmcidUrl);
+		generator.writeStringField("doiUrl", doiUrl);
+		generator.writeEndObject();
+	}
+
 	public static int compareTo(String pmid, String pmcid, String doi, String oPmid, String oPmcid, String oDoi) {
 		if (!pmid.isEmpty()) {
-			if (oPmid.isEmpty()) return 1;
-			else return pmid.compareTo(oPmid);
+			if (oPmid.isEmpty()) return -1;
+			else {
+				try {
+					return Integer.valueOf(pmid).compareTo(Integer.valueOf(oPmid));
+				} catch (NumberFormatException e) {
+					return pmid.compareTo(oPmid);
+				}
+			}
 		} else if (!pmcid.isEmpty()) {
-			if (!oPmid.isEmpty()) return -1;
-			else if (oPmcid.isEmpty()) return 1;
-			else return pmcid.compareTo(oPmcid);
+			if (!oPmid.isEmpty()) return 1;
+			else if (oPmcid.isEmpty()) return -1;
+			else {
+				try {
+					return Integer.valueOf(PubFetcher.extractPmcid(pmcid)).compareTo(Integer.valueOf(PubFetcher.extractPmcid(oPmcid)));
+				} catch (NumberFormatException e) {
+					return pmcid.compareTo(oPmcid);
+				}
+			}
 		} else if (!doi.isEmpty()) {
-			if (!oPmid.isEmpty() || !oPmcid.isEmpty()) return -1;
-			else if (oDoi.isEmpty()) return 1;
+			if (!oPmid.isEmpty() || !oPmcid.isEmpty()) return 1;
+			else if (oDoi.isEmpty()) return -1;
 			else return doi.compareTo(oDoi);
 		} else {
-			if (!oPmid.isEmpty() || !oPmcid.isEmpty() || !oDoi.isEmpty()) return -1;
+			if (!oPmid.isEmpty() || !oPmcid.isEmpty() || !oDoi.isEmpty()) return 1;
 			else return 0;
 		}
 	}

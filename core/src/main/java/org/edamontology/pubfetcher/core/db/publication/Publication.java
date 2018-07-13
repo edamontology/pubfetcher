@@ -19,6 +19,7 @@
 
 package org.edamontology.pubfetcher.core.db.publication;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,6 +37,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import org.edamontology.pubfetcher.core.common.FetcherArgs;
 import org.edamontology.pubfetcher.core.common.PubFetcher;
@@ -110,21 +112,22 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	@Override
-	public boolean isFinal(FetcherArgs fetcherArgs) {
-		return isTitleFinal(fetcherArgs) && isAbstractFinal(fetcherArgs) && isFulltextFinal(fetcherArgs);
-	}
-
-	public boolean isTotallyFinal(FetcherArgs fetcherArgs) {
-		return isIdFinal() && isTitleFinal(fetcherArgs) && isKeywordsFinal(fetcherArgs) &&
-			isMeshTermsFinal(fetcherArgs) && isEfoTermsFinal(fetcherArgs) && isGoTermsFinal(fetcherArgs) &&
-			isAbstractFinal(fetcherArgs) && isFulltextFinal(fetcherArgs);
+	public boolean isUsable(FetcherArgs fetcherArgs) {
+		return title.isUsable(fetcherArgs) || keywords.isUsable(fetcherArgs) ||
+			meshTerms.isUsable(fetcherArgs) || efoTerms.isUsable(fetcherArgs) || goTerms.isUsable(fetcherArgs) ||
+			theAbstract.isUsable(fetcherArgs) || fulltext.isUsable(fetcherArgs);
 	}
 
 	@Override
-	public boolean isUsable(FetcherArgs fetcherArgs) {
-		return isTitleUsable(fetcherArgs) || isKeywordsUsable(fetcherArgs) ||
-			isMeshTermsUsable(fetcherArgs) || isEfoTermsUsable(fetcherArgs) || isGoTermsUsable(fetcherArgs) ||
-			isAbstractUsable(fetcherArgs) || isFulltextUsable(fetcherArgs);
+	public boolean isFinal(FetcherArgs fetcherArgs) {
+		return title.isFinal(fetcherArgs) && theAbstract.isFinal(fetcherArgs) && fulltext.isFinal(fetcherArgs);
+	}
+
+	public boolean isTotallyFinal(FetcherArgs fetcherArgs) {
+		return pmid.isFinal(fetcherArgs) && pmcid.isFinal(fetcherArgs) && doi.isFinal(fetcherArgs) &&
+			title.isFinal(fetcherArgs) && keywords.isFinal(fetcherArgs) &&
+			meshTerms.isFinal(fetcherArgs) && efoTerms.isFinal(fetcherArgs) && goTerms.isFinal(fetcherArgs) &&
+			theAbstract.isFinal(fetcherArgs) && fulltext.isFinal(fetcherArgs);
 	}
 
 	@Override
@@ -166,7 +169,7 @@ public class Publication extends DatabaseEntry<Publication> {
 		}
 	}
 
-	private boolean setId(String content, PublicationPartType type, String url, FetcherArgs fetcherArgs, BooleanSupplier isFinal, Function<String, Boolean> isId, PublicationPartString part) {
+	private boolean setId(String content, PublicationPartType type, String url, FetcherArgs fetcherArgs, Function<String, Boolean> isId, PublicationPartString part) {
 		if (content != null && !content.trim().isEmpty()) {
 			content = content.trim();
 			if (!isId.apply(content)) {
@@ -180,10 +183,10 @@ public class Publication extends DatabaseEntry<Publication> {
 						content = part.getContent();
 					}
 				}
-				if (!isFinal.getAsBoolean() && type.isBetterThan(part.getType())) {
+				if (!part.isFinal(fetcherArgs) && type.isBetterThan(part.getType())) {
 					part.set(content, type, url);
 					logger.info("        set {} {}", part.getName(), part.getContent());
-					if (isIdFinal()) {
+					if (pmid.isFinal(fetcherArgs) && pmcid.isFinal(fetcherArgs) && doi.isFinal(fetcherArgs)) {
 						logFinal("ID", false, fetcherArgs);
 					}
 					return true;
@@ -192,26 +195,26 @@ public class Publication extends DatabaseEntry<Publication> {
 		}
 		return false;
 	}
-	private void set(String content, PublicationPartType type, String url, FetcherArgs fetcherArgs, Function<FetcherArgs, Boolean> isFinal, PublicationPartString part, boolean canMakeFinal, boolean clean) {
+	private void set(String content, PublicationPartType type, String url, FetcherArgs fetcherArgs, PublicationPartString part, boolean canMakeFinal, boolean clean) {
 		content = content.trim();
 		if (clean) content = Jsoup.clean(content, new Whitelist());
-		if (!isFinal.apply(fetcherArgs) && !content.isEmpty()
+		if (!part.isFinal(fetcherArgs) && !content.isEmpty()
 			&& (type.isFinal() && part.getContent().length() < content.length()
 				|| type.isBetterThan(part.getType()))) {
 			part.set(content, type, url);
 			logSet(part.getName().toString());
-			if (isFinal.apply(fetcherArgs)) {
+			if (part.isFinal(fetcherArgs)) {
 				logFinal(part.getName().toString(), canMakeFinal, fetcherArgs);
 			}
 		}
 	}
-	private <T> void setList(List<T> list, PublicationPartType type, String url, FetcherArgs fetcherArgs, Function<FetcherArgs, Boolean> isFinal, PublicationPartList<T> part) {
-		if (!isFinal.apply(fetcherArgs) && !list.isEmpty()
+	private <T> void setList(List<T> list, PublicationPartType type, String url, FetcherArgs fetcherArgs, PublicationPartList<T> part) {
+		if (!part.isFinal(fetcherArgs) && !list.isEmpty()
 			&& (type.isFinal() && part.getList().size() < list.size()
 				|| type.isBetterThan(part.getType()))) {
 			part.set(list, type, url);
 			logSet(part.getName().toString());
-			if (isFinal.apply(fetcherArgs)) {
+			if (part.isFinal(fetcherArgs)) {
 				logFinal(part.getName().toString(), false, fetcherArgs);
 			}
 		}
@@ -221,57 +224,29 @@ public class Publication extends DatabaseEntry<Publication> {
 		return pmid;
 	}
 	public boolean setPmid(String pmid, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
-		return setId(pmid, type, url, fetcherArgs, this::isPmidFinal, PubFetcher::isPmid, this.pmid);
-	}
-	public boolean isPmidUsable() {
-		return !pmid.isEmpty();
-	}
-	public boolean isPmidFinal() {
-		return pmid.getType().isFinal() && isPmidUsable();
+		return setId(pmid, type, url, fetcherArgs, PubFetcher::isPmid, this.pmid);
 	}
 
 	public PublicationPartString getPmcid() {
 		return pmcid;
 	}
 	public boolean setPmcid(String pmcid, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
-		return setId(pmcid, type, url, fetcherArgs, this::isPmcidFinal, PubFetcher::isPmcid, this.pmcid);
-	}
-	public boolean isPmcidUsable() {
-		return !pmcid.isEmpty();
-	}
-	public boolean isPmcidFinal() {
-		return pmcid.getType().isFinal() && isPmcidUsable();
+		return setId(pmcid, type, url, fetcherArgs, PubFetcher::isPmcid, this.pmcid);
 	}
 
 	public PublicationPartString getDoi() {
 		return doi;
 	}
 	public boolean setDoi(String doi, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
-		doi = PubFetcher.normalizeDoi(doi);
-		return setId(doi, type, url, fetcherArgs, this::isDoiFinal, PubFetcher::isDoi, this.doi);
-	}
-	public boolean isDoiUsable() {
-		return !doi.isEmpty();
-	}
-	public boolean isDoiFinal() {
-		return doi.getType().isFinal() && isDoiUsable();
-	}
-
-	public boolean isIdFinal() {
-		return isPmidFinal() && isPmcidFinal() && isDoiFinal();
+		doi = PubFetcher.normaliseDoi(doi);
+		return setId(doi, type, url, fetcherArgs, PubFetcher::isDoi, this.doi);
 	}
 
 	public PublicationPartString getTitle() {
 		return title;
 	}
 	public void setTitle(String title, PublicationPartType type, String url, FetcherArgs fetcherArgs, boolean clean) {
-		set(title, type, url, fetcherArgs, this::isTitleFinal, this.title, true, clean);
-	}
-	public boolean isTitleUsable(FetcherArgs fetcherArgs) {
-		return title.getContent().length() >= fetcherArgs.getTitleMinLength();
-	}
-	public boolean isTitleFinal(FetcherArgs fetcherArgs) {
-		return title.getType().isFinal() && isTitleUsable(fetcherArgs);
+		set(title, type, url, fetcherArgs, this.title, true, clean);
 	}
 
 	public PublicationPartList<String> getKeywords() {
@@ -285,13 +260,7 @@ public class Publication extends DatabaseEntry<Publication> {
 			.filter(k -> !k.isEmpty())
 			.distinct()
 			.collect(Collectors.toList());
-		setList(keywordsFull, type, url, fetcherArgs, this::isKeywordsFinal, this.keywords);
-	}
-	public boolean isKeywordsUsable(FetcherArgs fetcherArgs) {
-		return keywords.getList().size() >= fetcherArgs.getKeywordsMinSize();
-	}
-	public boolean isKeywordsFinal(FetcherArgs fetcherArgs) {
-		return keywords.getType().isFinal() && isKeywordsUsable(fetcherArgs);
+		setList(keywordsFull, type, url, fetcherArgs, this.keywords);
 	}
 
 	public PublicationPartList<MeshTerm> getMeshTerms() {
@@ -301,13 +270,7 @@ public class Publication extends DatabaseEntry<Publication> {
 		List<MeshTerm> meshTermsFull = meshTerms.stream()
 			.filter(k -> k != null && !k.getTerm().isEmpty())
 			.collect(Collectors.toList());
-		setList(meshTermsFull, type, url, fetcherArgs, this::isMeshTermsFinal, this.meshTerms);
-	}
-	public boolean isMeshTermsUsable(FetcherArgs fetcherArgs) {
-		return meshTerms.getList().size() >= fetcherArgs.getKeywordsMinSize();
-	}
-	public boolean isMeshTermsFinal(FetcherArgs fetcherArgs) {
-		return meshTerms.getType().isFinal() && isMeshTermsUsable(fetcherArgs);
+		setList(meshTermsFull, type, url, fetcherArgs, this.meshTerms);
 	}
 
 	public PublicationPartList<MinedTerm> getEfoTerms() {
@@ -317,13 +280,7 @@ public class Publication extends DatabaseEntry<Publication> {
 		List<MinedTerm> efoTermsFull = efoTerms.stream()
 			.filter(k -> k != null && !k.getTerm().isEmpty())
 			.collect(Collectors.toList());
-		setList(efoTermsFull, type, url, fetcherArgs, this::isEfoTermsFinal, this.efoTerms);
-	}
-	public boolean isEfoTermsUsable(FetcherArgs fetcherArgs) {
-		return efoTerms.getList().size() >= fetcherArgs.getMinedTermsMinSize();
-	}
-	public boolean isEfoTermsFinal(FetcherArgs fetcherArgs) {
-		return efoTerms.getType().isFinal() && isEfoTermsUsable(fetcherArgs);
+		setList(efoTermsFull, type, url, fetcherArgs, this.efoTerms);
 	}
 
 	public PublicationPartList<MinedTerm> getGoTerms() {
@@ -333,39 +290,21 @@ public class Publication extends DatabaseEntry<Publication> {
 		List<MinedTerm> goTermsFull = goTerms.stream()
 			.filter(k -> k != null && !k.getTerm().isEmpty())
 			.collect(Collectors.toList());
-		setList(goTermsFull, type, url, fetcherArgs, this::isGoTermsFinal, this.goTerms);
-	}
-	public boolean isGoTermsUsable(FetcherArgs fetcherArgs) {
-		return goTerms.getList().size() >= fetcherArgs.getMinedTermsMinSize();
-	}
-	public boolean isGoTermsFinal(FetcherArgs fetcherArgs) {
-		return goTerms.getType().isFinal() && isGoTermsUsable(fetcherArgs);
+		setList(goTermsFull, type, url, fetcherArgs, this.goTerms);
 	}
 
 	public PublicationPartString getAbstract() {
 		return theAbstract;
 	}
 	public void setAbstract(String theAbstract, PublicationPartType type, String url, FetcherArgs fetcherArgs, boolean clean) {
-		set(theAbstract, type, url, fetcherArgs, this::isAbstractFinal, this.theAbstract, true, clean);
-	}
-	public boolean isAbstractUsable(FetcherArgs fetcherArgs) {
-		return theAbstract.getContent().length() >= fetcherArgs.getAbstractMinLength();
-	}
-	public boolean isAbstractFinal(FetcherArgs fetcherArgs) {
-		return theAbstract.getType().isFinal() && isAbstractUsable(fetcherArgs);
+		set(theAbstract, type, url, fetcherArgs, this.theAbstract, true, clean);
 	}
 
 	public PublicationPartString getFulltext() {
 		return fulltext;
 	}
 	public void setFulltext(String fulltext, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
-		set(fulltext, type, url, fetcherArgs, this::isFulltextFinal, this.fulltext, true, false);
-	}
-	public boolean isFulltextUsable(FetcherArgs fetcherArgs) {
-		return fulltext.getContent().length() >= fetcherArgs.getFulltextMinLength() && fulltext.getType().isBetterThan(PublicationPartType.webpage);
-	}
-	public boolean isFulltextFinal(FetcherArgs fetcherArgs) {
-		return fulltext.getType().isFinal() && isFulltextUsable(fetcherArgs);
+		set(fulltext, type, url, fetcherArgs, this.fulltext, true, false);
 	}
 
 	public boolean isOA() {
@@ -406,18 +345,16 @@ public class Publication extends DatabaseEntry<Publication> {
 		return citationsCount;
 	}
 	public void setCitationsCount(String citationsCount) {
-		if (this.citationsCount < 0) {
-			try {
-				int citationsCountParsed = Integer.parseInt(citationsCount);
-				if (citationsCountParsed >= 0) {
-					this.citationsCount = citationsCountParsed;
-					this.citationsTimestamp = System.currentTimeMillis();
-				} else {
-					logger.error("Citations count is negative: {}", citationsCountParsed);
-				}
-			} catch (NumberFormatException e) {
-				logger.error("Illegal citations count: {}", citationsCount);
+		try {
+			int citationsCountParsed = Integer.parseInt(citationsCount);
+			if (citationsCountParsed >= 0) {
+				this.citationsCount = citationsCountParsed;
+				this.citationsTimestamp = System.currentTimeMillis();
+			} else {
+				logger.error("Citations count is negative: {}", citationsCountParsed);
 			}
+		} catch (NumberFormatException e) {
+			logger.error("Illegal citations count: {}", citationsCount);
 		}
 	}
 
@@ -445,51 +382,28 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	public PublicationPart getPart(PublicationPartName name) {
+		PublicationPart part = null;
 		switch (name) {
-		case pmid: return pmid;
-		case pmcid: return pmcid;
-		case doi: return doi;
-		case title: return title;
-		case keywords: return keywords;
-		case mesh: return meshTerms;
-		case efo: return efoTerms;
-		case go: return goTerms;
-		case theAbstract: return theAbstract;
-		case fulltext: return fulltext;
-		default: return null;
+			case pmid: part = pmid; break;
+			case pmcid: part = pmcid; break;
+			case doi: part = doi; break;
+			case title: part = title; break;
+			case keywords: part = keywords; break;
+			case mesh: part = meshTerms; break;
+			case efo: part = efoTerms; break;
+			case go: part = goTerms; break;
+			case theAbstract: part = theAbstract; break;
+			case fulltext: part = fulltext; break;
 		}
+		return part;
 	}
 
-	public boolean isPartFinal(PublicationPartName name, FetcherArgs fetcherArgs) {
-		switch (name) {
-		case pmid: return isPmidFinal();
-		case pmcid: return isPmcidFinal();
-		case doi: return isDoiFinal();
-		case title: return isTitleFinal(fetcherArgs);
-		case keywords: return isKeywordsFinal(fetcherArgs);
-		case mesh: return isMeshTermsFinal(fetcherArgs);
-		case efo: return isEfoTermsFinal(fetcherArgs);
-		case go: return isGoTermsFinal(fetcherArgs);
-		case theAbstract: return isAbstractFinal(fetcherArgs);
-		case fulltext: return isFulltextFinal(fetcherArgs);
-		default: return false;
+	public List<PublicationPart> getParts(List<PublicationPartName> names) {
+		List<PublicationPart> parts = new ArrayList<>();
+		for (PublicationPartName name : names) {
+			parts.add(getPart(name));
 		}
-	}
-
-	public boolean isPartUsable(PublicationPartName name, FetcherArgs fetcherArgs) {
-		switch (name) {
-		case pmid: return isPmidUsable();
-		case pmcid: return isPmcidUsable();
-		case doi: return isDoiUsable();
-		case title: return isTitleUsable(fetcherArgs);
-		case keywords: return isKeywordsUsable(fetcherArgs);
-		case mesh: return isMeshTermsUsable(fetcherArgs);
-		case efo: return isEfoTermsUsable(fetcherArgs);
-		case go: return isGoTermsUsable(fetcherArgs);
-		case theAbstract: return isAbstractUsable(fetcherArgs);
-		case fulltext: return isFulltextUsable(fetcherArgs);
-		default: return false;
-		}
+		return parts;
 	}
 
 	@Override
@@ -500,6 +414,11 @@ public class Publication extends DatabaseEntry<Publication> {
 	@Override
 	public String toStringIdHtml() {
 		return PublicationIds.toStringHtml(pmid.getContent(), pmcid.getContent(), doi.getContent(), false);
+	}
+
+	@Override
+	public void toStringIdJson(JsonGenerator generator) throws IOException {
+		PublicationIds.toStringJson(pmid.getContent(), pmcid.getContent(), doi.getContent(), generator);
 	}
 
 	@Override
@@ -531,6 +450,22 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	@Override
+	public void toStringPlainJson(JsonGenerator generator) throws IOException {
+		generator.writeStartObject();
+		pmid.toStringPlainJson(generator, true);
+		pmcid.toStringPlainJson(generator, true);
+		doi.toStringPlainJson(generator, true);
+		title.toStringPlainJson(generator, true);
+		keywords.toStringPlainJson(generator, true);
+		meshTerms.toStringPlainJson(generator, true);
+		efoTerms.toStringPlainJson(generator, true);
+		goTerms.toStringPlainJson(generator, true);
+		theAbstract.toStringPlainJson(generator, "abstract");
+		fulltext.toStringPlainJson(generator, true);
+		generator.writeEndObject();
+	}
+
+	@Override
 	public String toStringMetaHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toStringHtml(prepend)).append("\n");
@@ -553,22 +488,26 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	@Override
-	public String toStringHtml(String prepend) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(prepend).append("<h2>Publication</h2>\n");
-		sb.append(pmid.toStringHtml(prepend)).append("\n");
-		sb.append(pmcid.toStringHtml(prepend)).append("\n");
-		sb.append(doi.toStringHtml(prepend)).append("\n");
-		sb.append(title.toStringHtml(prepend)).append("\n");
-		sb.append(keywords.toStringHtml(prepend)).append("\n");
-		sb.append(meshTerms.toStringHtml(prepend)).append("\n");
-		sb.append(efoTerms.toStringHtml(prepend)).append("\n");
-		sb.append(goTerms.toStringHtml(prepend)).append("\n");
-		sb.append(theAbstract.toStringHtml(prepend)).append("\n");
-		sb.append(fulltext.toStringHtml(prepend)).append("\n");
-		sb.append(prepend).append("<br>\n");
-		sb.append(toStringMetaHtml(prepend));
-		return sb.toString();
+	public void toStringMetaJson(JsonGenerator generator, FetcherArgs fetcherArgs) throws IOException {
+		super.toStringJson(generator);
+		generator.writeBooleanField("oa", oa);
+		generator.writeStringField("journalTitle", journalTitle);
+		generator.writeNumberField("pubDate", pubDate);
+		generator.writeStringField("pubDateHuman", getPubDateHuman());
+		generator.writeNumberField("citationsCount", citationsCount);
+		generator.writeNumberField("citationsTimestamp", citationsTimestamp);
+		generator.writeStringField("citationsTimestampHuman", getCitationsTimestampHuman());
+		generator.writeFieldName("correspAuthor");
+		generator.writeStartArray();
+		for (CorrespAuthor ca : correspAuthor) {
+			ca.toStringJson(generator);
+		}
+		generator.writeEndArray();
+		generator.writeObjectField("visitedSites", visitedSites);
+		generator.writeBooleanField("empty", isEmpty());
+		generator.writeBooleanField("usable", isUsable(fetcherArgs));
+		generator.writeBooleanField("final", isFinal(fetcherArgs));
+		generator.writeBooleanField("totallyFinal", isTotallyFinal(fetcherArgs));
 	}
 
 	@Override
@@ -595,6 +534,41 @@ public class Publication extends DatabaseEntry<Publication> {
 			sb.append("\n").append(link);
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public String toStringHtml(String prepend) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(prepend).append("<h2>Publication</h2>\n");
+		sb.append(pmid.toStringHtml(prepend)).append("\n");
+		sb.append(pmcid.toStringHtml(prepend)).append("\n");
+		sb.append(doi.toStringHtml(prepend)).append("\n");
+		sb.append(title.toStringHtml(prepend)).append("\n");
+		sb.append(keywords.toStringHtml(prepend)).append("\n");
+		sb.append(meshTerms.toStringHtml(prepend)).append("\n");
+		sb.append(efoTerms.toStringHtml(prepend)).append("\n");
+		sb.append(goTerms.toStringHtml(prepend)).append("\n");
+		sb.append(theAbstract.toStringHtml(prepend)).append("\n");
+		sb.append(fulltext.toStringHtml(prepend)).append("\n");
+		sb.append(prepend).append("<br>\n");
+		sb.append(toStringMetaHtml(prepend));
+		return sb.toString();
+	}
+
+	public void toStringJson(JsonGenerator generator, FetcherArgs fetcherArgs, boolean fulltextContent) throws IOException {
+		generator.writeStartObject();
+		toStringMetaJson(generator, fetcherArgs);
+		pmid.toStringJson(generator, fetcherArgs);
+		pmcid.toStringJson(generator, fetcherArgs);
+		doi.toStringJson(generator, fetcherArgs);
+		title.toStringJson(generator, fetcherArgs);
+		keywords.toStringJson(generator, fetcherArgs);
+		meshTerms.toStringJson(generator, fetcherArgs);
+		efoTerms.toStringJson(generator, fetcherArgs);
+		goTerms.toStringJson(generator, fetcherArgs);
+		theAbstract.toStringJson(generator, fetcherArgs, true, "abstract");
+		fulltext.toStringJson(generator, fetcherArgs, fulltextContent, "fulltext");
+		generator.writeEndObject();
 	}
 
 	@Override

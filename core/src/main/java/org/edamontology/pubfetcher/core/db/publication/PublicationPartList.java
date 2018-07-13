@@ -19,9 +19,14 @@
 
 package org.edamontology.pubfetcher.core.db.publication;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.edamontology.pubfetcher.core.common.FetcherArgs;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 public class PublicationPartList<T> extends PublicationPart {
 
@@ -59,6 +64,17 @@ public class PublicationPartList<T> extends PublicationPart {
 	}
 
 	@Override
+	public boolean isUsable(FetcherArgs fetcherArgs) {
+		switch (getName()) {
+			case keywords: return getSize() >= fetcherArgs.getKeywordsMinSize();
+			case mesh: return getSize() >= fetcherArgs.getKeywordsMinSize();
+			case efo: return getSize() >= fetcherArgs.getMinedTermsMinSize();
+			case go: return getSize() >= fetcherArgs.getMinedTermsMinSize();
+			default: return true;
+		}
+	}
+
+	@Override
 	public String toStringPlain() {
 		return "[" + list.stream().map(e -> e.toString()).collect(Collectors.joining("; ")) + "]";
 	}
@@ -70,5 +86,10 @@ public class PublicationPartList<T> extends PublicationPart {
 			else if (e instanceof MinedTerm) return ((MinedTerm) e).toStringHtml();
 			else return e.toString();
 		}).collect(Collectors.joining("; "));
+	}
+
+	@Override
+	public void toStringPlainJson(JsonGenerator generator, boolean withName) throws IOException {
+		generator.writeObjectField(withName ? getName().name() : "list", list);
 	}
 }

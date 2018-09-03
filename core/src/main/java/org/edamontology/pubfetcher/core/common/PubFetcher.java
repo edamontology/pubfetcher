@@ -283,7 +283,7 @@ public final class PubFetcher {
 		try {
 			String newUrl = new URL(url).toString();
 			if (!newUrl.equals(url)) {
-				logger.warn("URL changed from {} to {}", url, newUrl);
+				logger.error("URL changed from {} to {}", url, newUrl);
 			}
 			return newUrl;
 		} catch (MalformedURLException e) {
@@ -463,7 +463,9 @@ public final class PubFetcher {
 		logger.info("Load publication IDs from file {}", files);
 		for (String file : files) {
 			try (Stream<String> lines = Files.lines(Paths.get(file), StandardCharsets.UTF_8)) {
-				publicationIds.addAll(lines.map(l -> l.split("\t", -1))
+				publicationIds.addAll(lines
+					.filter(l -> !l.isEmpty() && !l.startsWith("#"))
+					.map(l -> l.split("\t", -1))
 					.filter(l -> {
 						if (l.length != 3) logger.error("Line containing {} tabs instead of required 2 in {}: {}", l.length - 1, file, Arrays.stream(l).collect(Collectors.joining(" \\t ")));
 						return l.length == 3;
@@ -494,7 +496,7 @@ public final class PubFetcher {
 		logger.info("Load webpage/doc URLs from file {}", files);
 		for (String file : files) {
 			try (Stream<String> lines = Files.lines(Paths.get(file), StandardCharsets.UTF_8)) {
-				webpageUrls.addAll(lines.collect(Collectors.toList()));
+				webpageUrls.addAll(lines.filter(l -> !l.isEmpty() && !l.startsWith("#")).collect(Collectors.toList()));
 			}
 		}
 		logger.info("Loaded {} webpage/doc URLs", webpageUrls.size());

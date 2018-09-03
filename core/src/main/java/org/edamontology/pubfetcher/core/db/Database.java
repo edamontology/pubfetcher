@@ -55,7 +55,7 @@ public class Database implements Closeable {
 	@SuppressWarnings("unchecked")
 	public Database(String database) throws FileNotFoundException {
 		if (database == null || !(new File(database).canRead())) {
-			throw new FileNotFoundException("Database file does not exist or is not readable!");
+			throw new FileNotFoundException("Database file " + database + " does not exist or is not readable!");
 		}
 
 		this.db = DBMaker.fileDB(database).closeOnJvmShutdown().transactionEnable().make();
@@ -90,11 +90,11 @@ public class Database implements Closeable {
 	private boolean removeOldId(String primaryId, String newId, String oldId, boolean primaryRemoved) {
 		if (!newId.isEmpty() && !oldId.isEmpty() && !newId.equals(oldId)) {
 			if (!primaryRemoved && primaryId.equals(oldId)) {
-				logger.warn("Removing old primary ID {} (overridden by {}) and corresponding publication from database", primaryId, newId);
+				logger.error("Removing old primary ID {} (overridden by {}) and corresponding publication from database", primaryId, newId);
 				removePublication(primaryId, false);
 				return true;
 			}
-			logger.warn("Removing old ID {} (overridden by {}) from database", oldId, newId);
+			logger.error("Removing old ID {} (overridden by {}) from database", oldId, newId);
 			publicationsMap.remove(oldId);
 		}
 		if (primaryRemoved) return true;
@@ -142,7 +142,7 @@ public class Database implements Closeable {
 			pmcidPrimary = publicationsMap.get(pmcid);
 			if (pmcidPrimary != null) {
 				if (pmidPrimary != null && !pmidPrimary.equals(pmcidPrimary)) {
-					logger.warn("Removing {}, equivalent to {}, merged by {}",
+					logger.error("Removing {}, equivalent to {}, merged by {}",
 						publicationsMapReverse.get(pmcid), publicationsMapReverse.get(pmid), publication.toStringId());
 					removePublication(pmcid, false);
 					pmcidPrimary = null;
@@ -160,10 +160,10 @@ public class Database implements Closeable {
 			if (doiPrimary != null) {
 				if (pmidPrimary != null && !pmidPrimary.equals(doiPrimary) || pmcidPrimary != null && !pmcidPrimary.equals(doiPrimary)) {
 					if (pmidPrimary != null) {
-						logger.warn("Removing {}, equivalent to {}, merged by {}",
+						logger.error("Removing {}, equivalent to {}, merged by {}",
 							publicationsMapReverse.get(doi), publicationsMapReverse.get(pmid), publication.toStringId());
 					} else {
-						logger.warn("Removing {}, equivalent to {}, merged by {}",
+						logger.error("Removing {}, equivalent to {}, merged by {}",
 							publicationsMapReverse.get(doi), publicationsMapReverse.get(pmcid), publication.toStringId());
 					}
 					removePublication(doi, false);

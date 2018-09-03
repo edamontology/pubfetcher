@@ -35,6 +35,10 @@
   content: body
   javascript: 'true'
 
+'git\.bioconductor\.org/+packages/':
+  title: ''
+  content: ''
+
 'github\.com/+[^/]+/+[^/]+/*$':
   title: h1 > [itemprop=name]
   content: '.repository-content .repository-meta-content, #readme > h3 ~ *'
@@ -77,10 +81,11 @@
 
 'sourceforge\.net/+projects/+[^/]+/+files/':
   title: .title > h1
+  content: '#readme > .content'
 
 'sourceforge\.net/+p/':
   title: .title > h1
-  content: '.title > .summary, #content_base .markdown_content'
+  content: '.title > .summary, #content_base .markdown_content, #readme + pre'
 
 'code\.google\.com':
   title: '#gca-project-header > h1'
@@ -184,3 +189,24 @@
   content: '.package-description__summary, #description > .project-description > *'
   license: .sidebar-section p:matches(^License:)
   language: .sidebar-section dt:matchesOwn(^Programming Language$) + dd
+
+'bioinformatics\.org/+[^/]+/+wiki/':
+  title: '#headlogo'
+  content: '#sitemain'
+
+'bioinformatics\.org/+(groups|project)/':
+  title: body > table:nth-of-type(2) > tbody > tr > td:nth-of-type(2) > table:first-child
+  content: body > table:nth-of-type(2) > tbody > tr > td:nth-of-type(2) > p:first-of-type ~ p
+  license: body > table:nth-of-type(2) > tbody > tr > td:nth-of-type(2) > table:nth-of-type(2)
+
+'omics\.pnl\.gov':
+  title: '#page-title'
+  content: '#block-system-main'
+
+'en\.wikipedia\.org':
+  title: '#firstHeading'
+  content: '#bodyContent'
+
+'webchem\.ncbr\.muni\.cz/+Wiki/':
+  title: '#firstHeading'
+  content: '#bodyContent'

@@ -67,20 +67,17 @@ public class PubFetcherArgs {
 	@Parameter(names = { "--fetch-webpage-selector" }, arity = 4, description = "TODO")
 	List<String> fetchWebpageSelector = null;
 
-	@Parameter(names = { "--fetch-webpage-selector-html" }, arity = 4, description = "TODO")
-	List<String> fetchWebpageSelectorHtml = null;
-
 	@Parameter(names = { "--scrape-site" }, description = "TODO")
 	String scrapeSite = null;
 
 	@Parameter(names = { "--scrape-selector" }, arity = 2, description = "TODO")
 	List<String> scrapeSelector = null;
 
-	@Parameter(names = { "--scrape-webpage" }, description = "TODO")
-	String scrapeWebpage = null;
-
 	@Parameter(names = { "--scrape-javascript" }, description = "TODO")
 	String scrapeJavascript = null;
+
+	@Parameter(names = { "--scrape-webpage" }, description = "TODO")
+	String scrapeWebpage = null;
 
 	@Parameter(names = { "--is-pmid" }, description = "TODO")
 	String isPmid = null;
@@ -115,11 +112,14 @@ public class PubFetcherArgs {
 	@Parameter(names = { "--check-url" }, description = "TODO")
 	String checkUrl = null;
 
-	@Parameter(names = { "-fetch-part" }, variableArity = true, description = "TODO")
-	List<PublicationPartName> fetchPart = null;
+	@Parameter(names = { "-pub" }, variableArity = true, description = "TODO")
+	List<String> pub = null;
 
-	@Parameter(names = { "-not-fetch-part" }, variableArity = true, description = "TODO")
-	List<PublicationPartName> notFetchPart = null;
+	@Parameter(names = { "-web" }, variableArity = true, description = "TODO")
+	List<String> web = null;
+
+	@Parameter(names = { "-doc" }, variableArity = true, description = "TODO")
+	List<String> doc = null;
 
 	@Parameter(names = { "-pub-file" }, variableArity = true, description = "TODO")
 	List<String> pubFile = null;
@@ -129,15 +129,6 @@ public class PubFetcherArgs {
 
 	@Parameter(names = { "-doc-file" }, variableArity = true, description = "TODO")
 	List<String> docFile = null;
-
-	@Parameter(names = { "-pub" }, variableArity = true, description = "TODO")
-	List<String> pub = null;
-
-	@Parameter(names = { "-web" }, variableArity = true, description = "TODO")
-	List<String> web = null;
-
-	@Parameter(names = { "-doc" }, variableArity = true, description = "TODO")
-	List<String> doc = null;
 
 	@Parameter(names = { "-pub-db" }, variableArity = true, description = "TODO")
 	List<String> pubDb = null;
@@ -256,11 +247,20 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-count-ids" }, description = "TODO")
 	boolean countIds = false;
 
-	@Parameter(names = { "-pre-filter" }, description = "TODO")
+	@Parameter(names = { "--fetch-part" }, variableArity = true, description = "TODO")
+	List<PublicationPartName> fetchPart = null;
+
+	@Parameter(names = { "--not-fetch-part" }, variableArity = true, description = "TODO")
+	List<PublicationPartName> notFetchPart = null;
+
+	@Parameter(names = { "--pre-filter" }, description = "TODO")
 	boolean preFilter = false;
 
-	@Parameter(names = { "-limit" }, validateWith = PositiveInteger.class, description = "TODO")
+	@Parameter(names = { "--limit" }, validateWith = PositiveInteger.class, description = "TODO")
 	int limit = 0;
+
+	@Parameter(names = { "--threads" }, validateWith = PositiveInteger.class, description = "TODO")
+	int threads = 8;
 
 	@Parameter(names = { "-db" }, description = "TODO")
 	String db = null;
@@ -276,9 +276,6 @@ public class PubFetcherArgs {
 
 	@Parameter(names = { "-db-fetch-end" }, description = "TODO")
 	String dbFetchEnd = null;
-
-	@Parameter(names = { "-threads" }, validateWith = PositiveInteger.class, description = "TODO")
-	int threads = 8;
 
 	@Parameter(names = { "-fetch-time-more" }, converter = ISO8601Converter.class, description = "TODO more or equal")
 	Long fetchTimeMore = null;
@@ -748,6 +745,24 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-content-time-less" }, converter = ISO8601Converter.class, description = "TODO less or equal")
 	Long contentTimeLess = null;
 
+	@Parameter(names = { "-title-and-content" }, description = "TODO")
+	String titleAndContent = null;
+
+	@Parameter(names = { "-not-title-and-content" }, description = "TODO")
+	String notTitleAndContent = null;
+
+	@Parameter(names = { "-title-and-content-size" }, variableArity = true, validateWith = PositiveInteger.class, description = "TODO")
+	List<Integer> titleAndContentSize = null;
+
+	@Parameter(names = { "-not-title-and-content-size" }, variableArity = true, validateWith = PositiveInteger.class, description = "TODO")
+	List<Integer> notTitleAndContentSize = null;
+
+	@Parameter(names = { "-title-and-content-size-more" }, variableArity = true, validateWith = PositiveInteger.class, description = "TODO")
+	Integer titleAndContentSizeMore = null;
+
+	@Parameter(names = { "-title-and-content-size-less" }, variableArity = true, validateWith = PositiveInteger.class, description = "TODO")
+	Integer titleAndContentSizeLess = null;
+
 	@Parameter(names = { "-license" }, description = "TODO")
 	String license = null;
 
@@ -803,7 +818,7 @@ public class PubFetcherArgs {
 	Integer tail = null;
 
 	@Parameter(names = { "-update-citations-count" }, description = "TODO")
-	boolean updateCitationsCount = false;
+	String updateCitationsCount = null;
 
 	@Parameter(names = { "-put" }, description = "TODO")
 	String put = null;
@@ -811,13 +826,13 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-remove" }, description = "TODO")
 	String remove = null;
 
-	@Parameter(names = { "-plain" }, description = "TODO")
+	@Parameter(names = { "--plain" }, description = "TODO")
 	boolean plain = false;
 
-	@Parameter(names = { "-format" }, description = "TODO")
+	@Parameter(names = { "--format" }, description = "TODO")
 	Format format = Format.text;
 
-	@Parameter(names = { "-out-part" }, variableArity = true, description = "TODO")
+	@Parameter(names = { "--out-part" }, variableArity = true, description = "TODO")
 	List<PublicationPartName> outPart = null;
 
 	@Parameter(names = { "-out" }, description = "TODO")

@@ -19,8 +19,6 @@
 
 package org.edamontology.pubfetcher.core.common;
 
-import org.jsoup.helper.HttpConnection;
-
 import com.beust.jcommander.Parameter;
 
 public class FetcherPrivateArgs {
@@ -30,19 +28,20 @@ public class FetcherPrivateArgs {
 	private String europepmcEmail = "";
 
 	public static final String OADOI_EMAIL = "oadoiEmail";
-	@Parameter(names = { "--" + OADOI_EMAIL }, description = "E-mail to send to the oaDOI API")
+	@Parameter(names = { "--" + OADOI_EMAIL }, description = "E-mail to send to the oaDOI (Unpaywall) API")
 	private String oadoiEmail = "test";
 
 	public static final String USER_AGENT = "userAgent";
 	@Parameter(names = { "--" + USER_AGENT }, description = "HTTP User-Agent")
-	private String userAgent = HttpConnection.DEFAULT_UA;
+	// better to use a Desktop UA
+	private String userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0";
 
 	public static final String JOURNALS_YAML = "journalsYaml";
-	@Parameter(names = { "--" + JOURNALS_YAML }, description = "Custom journals scrape rules to add to default ones")
+	@Parameter(names = { "--" + JOURNALS_YAML }, description = "YAML file containing custom journals scrape rules to add to default ones")
 	private String journalsYaml = "";
 
 	public static final String WEBPAGES_YAML = "webpagesYaml";
-	@Parameter(names = { "--" + WEBPAGES_YAML }, description = "Custom webpages scrape rules to add to default ones")
+	@Parameter(names = { "--" + WEBPAGES_YAML }, description = "YAML file containing custom web page scrape rules to add to default ones")
 	private String webpagesYaml = "";
 
 	public String getEuropepmcEmail() {

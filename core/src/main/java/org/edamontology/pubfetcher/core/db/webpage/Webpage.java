@@ -71,7 +71,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public boolean isEmpty() {
-		return content.isEmpty();
+		return getTitleAndContent().isEmpty();
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public boolean isFinal(FetcherArgs fetcherArgs) {
-		return content.length() >= fetcherArgs.getWebpageMinLength();
+		return getTitleAndContent().length() >= fetcherArgs.getWebpageMinLength();
 	}
 
 	public boolean isBroken() {
@@ -156,6 +156,14 @@ public class Webpage extends DatabaseEntry<Webpage> {
 		return Instant.ofEpochMilli(contentTime).toString();
 	}
 
+	public String getTitleAndContent() {
+		if (content.startsWith(title)) {
+			return content;
+		} else {
+			return title + "\n" + content;
+		}
+	}
+
 	public String getLicense() {
 		return license;
 	}
@@ -208,8 +216,8 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public void toStringPlainJson(JsonGenerator generator) throws IOException {
-		generator.writeFieldName(toStringId());
 		generator.writeStartObject();
+		generator.writeStringField("startUrl", toStringId());
 		generator.writeStringField("title", title);
 		generator.writeStringField("content", content);
 		generator.writeEndObject();
@@ -302,6 +310,6 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	@Override
 	public int compareTo(Webpage o) {
 		if (o == null) return 1;
-		return title.compareTo(o.title);
+		return startUrl.compareTo(o.startUrl);
 	}
 }

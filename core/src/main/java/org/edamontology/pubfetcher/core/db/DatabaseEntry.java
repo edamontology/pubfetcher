@@ -57,13 +57,13 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 		if (fetchTime == 0) {
 			logger.info("    can fetch {} entry: first fetch", finality);
 			canFetch = true;
-		} else if (isEmpty() && currentTime > fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000) {
+		} else if (isEmpty() && !(fetcherArgs.getEmptyCooldown() < 0) && currentTime >= fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000) {
 			logger.info("    can fetch {} entry: more than {} min since {}", finality, fetcherArgs.getEmptyCooldown(), getFetchTimeHuman());
 			canFetch = true;
-		} else if (!isFinal(fetcherArgs) && !isEmpty() && currentTime > fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000) {
+		} else if (!isFinal(fetcherArgs) && !isEmpty() && !(fetcherArgs.getNonFinalCooldown() < 0) && currentTime >= fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000) {
 			logger.info("    can fetch {} entry: more than {} min since {}", finality, fetcherArgs.getNonFinalCooldown(), getFetchTimeHuman());
 			canFetch = true;
-		} else if (fetchException && currentTime > fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000) {
+		} else if (fetchException && !(fetcherArgs.getFetchExceptionCooldown() < 0) && currentTime >= fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000) {
 			logger.info("    can fetch {} entry with fetching exception: more than {} min since {}", finality, fetcherArgs.getFetchExceptionCooldown(), getFetchTimeHuman());
 			canFetch = true;
 		} else if ((isEmpty() || !isFinal(fetcherArgs) || fetchException) && (retryCounter < fetcherArgs.getRetryLimit() || fetcherArgs.getRetryLimit() < 0)) {
@@ -81,9 +81,9 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 	public boolean updateCounters(FetcherArgs fetcherArgs) {
 		long currentTime = System.currentTimeMillis();
 		if (fetchTime == 0
-			|| (isEmpty() && currentTime > fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000)
-			|| (!isFinal(fetcherArgs) && !isEmpty() && currentTime > fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000)
-			|| (fetchException && currentTime > fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000)) {
+			|| (isEmpty() && !(fetcherArgs.getEmptyCooldown() < 0) && currentTime > fetchTime + fetcherArgs.getEmptyCooldown() * 60 * 1000)
+			|| (!isFinal(fetcherArgs) && !isEmpty() && !(fetcherArgs.getNonFinalCooldown() < 0) && currentTime > fetchTime + fetcherArgs.getNonFinalCooldown() * 60 * 1000)
+			|| (fetchException && !(fetcherArgs.getFetchExceptionCooldown() < 0) && currentTime > fetchTime + fetcherArgs.getFetchExceptionCooldown() * 60 * 1000)) {
 			fetchTime = currentTime;
 			retryCounter = 0;
 			return true;
@@ -133,14 +133,16 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("FETCH TIME: ").append(getFetchTimeHuman()).append(" (").append(fetchTime).append(")\n");
-		sb.append("RETRY COUNTER: ").append(retryCounter);
+		sb.append("RETRY COUNTER: ").append(retryCounter).append("\n");
+		sb.append("FETCHING EXCEPTION: ").append(fetchException);
 		return sb.toString();
 	}
 
 	public String toStringHtml(String prepend) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(prepend).append("<div><span>Fetch time:</span> <span>").append(getFetchTimeHuman()).append(" (").append(fetchTime).append(")</span></div>\n");
-		sb.append(prepend).append("<div><span>Retry counter:</span> <span>").append(retryCounter).append("</span></div>");
+		sb.append(prepend).append("<div><span>Retry counter:</span> <span>").append(retryCounter).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Fetching exception:</span> <span>").append(fetchException).append("</span></div>");
 		return sb.toString();
 	}
 
@@ -148,5 +150,6 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 		generator.writeNumberField("fetchTime", fetchTime);
 		generator.writeStringField("fetchTimeHuman", getFetchTimeHuman());
 		generator.writeNumberField("retryCounter", retryCounter);
+		generator.writeBooleanField("fetchException", fetchException);
 	}
 }

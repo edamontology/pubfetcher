@@ -27,18 +27,18 @@
 '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com/+doi/+(abs|10)': wiley
 '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com/+doi/+(full)': wiley_full
 'sciencedirect\.com': sciencedirect
-'[a-zA-Z0-9.-]*biomedcentral\.com': biomedcentral
 'link\.springer\.com/+(article|chapter|protocol|referencework|book)/': springer
 'link\.springer\.com/+referenceworkentry/': springer_ref
-'[a-zA-Z0-9.-]*cshlp\.org/.+[^f][^u][^l][^l]$': highwire
+'[a-zA-Z0-9.-]*biomedcentral\.com': biomedcentral
+'[a-zA-Z0-9.-]*cshlp\.org': highwire
 '[a-zA-Z0-9.-]*cshlp\.org/.+full$': highwire_full
 'nature\.com': nature
 'journals\.plos\.org': plos
-'biorxiv\.org': highwire2
+'biorxiv\.org': biorxiv
 'pubs\.acs\.org/+doi/+abs/+10': acs
 'pubs\.acs\.org/+doi/+(full/+)?10': acs_full
 'arxiv\.org': arxiv
-'mcponline\.org/.+[^f][^u][^l][^l]$': highwire
+'mcponline\.org': highwire
 'mcponline\.org/.+full$': highwire_full
 'pnas\.org': highwire2
 'ieeexplore\.ieee\.org[^/]*/+document': ieee
@@ -56,21 +56,21 @@
 'orbit\.dtu\.dk': dtu
 'tandfonline\.com/+doi/+abs/+10': tandfonline
 'tandfonline\.com/+doi/+full/+10': tandfonline_full
-'[a-zA-Z0-9.-]*asm\.org/.+[^f][^u][^l][^l]$': highwire
+'[a-zA-Z0-9.-]*asm\.org': highwire
 '[a-zA-Z0-9.-]*asm\.org/.+full$': highwire_full
 'mra\.asm\.org': highwire2
 'dl\.acm\.org': acm
 'degruyter\.com': degruyter
 'hindawi\.com': hindawi
 'biecoll\.ub\.uni-bielefeld\.de': biecoll
-'jbc\.org/.+[^f][^u][^l][^l]$': highwire
+'jbc\.org': highwire
 'jbc\.org/.+full$': highwire_full
 'karger\.com/+Article/+Abstract': karger
 'karger\.com/+Article/+FullText': karger_full
 'eurekaselect\.com': eurekaselect
-'journal\.embnet\.org.*[^0-9]/+[0-9]+/*$': embnet
+'journal\.embnet\.org': embnet
 'journal\.embnet\.org.*/+[0-9]+/+[0-9]+/*$': embnet_full
-'[a-zA-Z0-9.-]*sciencemag\.org/.+[^f][^u][^l][^l]$': sciencemag
+'[a-zA-Z0-9.-]*sciencemag\.org': sciencemag
 '[a-zA-Z0-9.-]*sciencemag\.org/.+full$': sciencemag_full
 'bioinformation\.net': bioinformation
 'journals\.aps\.org': aps
@@ -91,6 +91,13 @@
 'biochemj\.org': highwire2
 'biochemsoctrans\.org': highwire2
 '[a-zA-Z0-9.-]*aacrjournals\.org': highwire2
+'zenodo\.org': zenodo
+'future-science\.com': liebertpub_full
+'jstatsoft\.org': jstatsoft
+'journals\.sagepub\.com/+doi/+abs/+10': sagepub
+'journals\.sagepub\.com/+doi/+(full/+)?10': sagepub_full
+'[a-zA-Z0-9.-]*springeropen\.com': biomedcentral
+'omicsonline\.org': omicsonline
 
 ---
 
@@ -110,7 +117,6 @@
 #  pdf_src:
 #  pdf_dst:
 #  pdf_a:
-#  javascript:
 
 # Selector reference:
 # https://jsoup.org/cookbook/extracting-data/selector-syntax
@@ -158,9 +164,9 @@ sciencedirect:
   pdf_a: .PdfDropDownMenu a:matchesOwn(^Article$)
 
 biomedcentral:
-  doi: .ArticleDoi
+  doi: .ContextInformation > .ArticleDOI
   title: .ArticleTitle
-  keywords: .FullTextWrapper > section.KeywordGroup .Keyword
+  keywords: .FullTextWrapper > section.KeywordGroup li
   abstract: .Abstract > div > div, .Abstract > div > p
   fulltext: .FullTextWrapper > section[id^=Sec] > *, .FullTextWrapper > section:not([id]):not(.KeywordGroup) > *, .FullTextWrapper > p.Para
   pdf_a: '#articlePdf'
@@ -224,7 +230,14 @@ highwire2:
   fulltext: .fulltext-view > p:matchText, .fulltext-view > p > :not(.disp-formula):not(.inline-formula), .fulltext-view > div.glossary, .fulltext-view [id^=sec] > h2, .fulltext-view [id^=sec] > h3, .fulltext-view [id^=sec] > h4, .fulltext-view [id^=sec] > h5, .fulltext-view [id^=sec] > p:matchText, .fulltext-view [id^=sec] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view li[id^=list-item] > p:matchText, .fulltext-view [id^=list-item] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view [id^=sec] > div[id~=^F[0-9]] > :not(.highwire-figure), .fulltext-view [id^=sec] > div[id~=^T[0-9]] > :not(.table-inline), .fulltext-view > div[id~=^F[0-9]] > :not(.highwire-figure), .fulltext-view > div[id~=^T[0-9]] > :not(.table-inline)
   pdf_src: (\.full)?(\?sso-checked=true)?/*$
   pdf_dst: \.full-text.pdf
-  javascript: 'true'
+
+biorxiv:
+  doi: .highwire-cite-metadata-doi
+  title: '#page-title'
+  subtitle: .highwire-cite-subtitle
+  abstract: .abstract > :not(h2), .executive-summary > :not(h2)
+  pdf_src: (\.full)?(\?sso-checked=true)?/*$
+  pdf_dst: \.full.pdf
 
 acs:
   doi: '#doi'
@@ -262,7 +275,6 @@ ieee:
   fulltext_a: '#full-text-section a[ng-if=::ft.article.fullTextAccess]'
   pdf_src: /+document/+([0-9]+).*
   pdf_dst: /stamp/stamp.jsp\?tp=&arnumber=$1
-  javascript: 'true'
 
 ieee_full:
   doi: '#dt_doi'
@@ -271,7 +283,6 @@ ieee_full:
   abstract: '#at-glance .text p'
   fulltext: '#article > .section > :not(div), #article > .section > div > :not(.toc)'
   pdf_a: .pdf > a
-  javascript: 'true'
 
 liebertpub:
   doi: .epub-section__doi__text
@@ -296,7 +307,6 @@ rsc:
   abstract: h3:matchesOwn(^Abstract$) + div > *
   fulltext_a: '#DownloadOption a:contains(HTML)'
   pdf_a: '#DownloadOption a:contains(PDF)'
-  javascript: 'true' # for fulltext_a, pdf_a
 
 rsc_full:
   doi: .article_info > a:matchesOwn(^10\.)
@@ -323,7 +333,6 @@ f1000research_posters:
   title: .asset-title > h2
   keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
   abstract: .abstract__content
-  javascript: 'true'
 
 peerj:
   pmid: '#article-identifier-pmid'
@@ -370,7 +379,6 @@ acm:
   keywords: '#authortags a'
   abstract: '#abstract'
   pdf_a: '#divmain a[name=FullTextPDF]'
-  javascript: 'true'
 
 degruyter:
   doi: .article-doi
@@ -415,7 +423,7 @@ eurekaselect:
   abstract: '#content h4:matches(^Abstract:) ~ *'
 
 embnet:
-  doi: '#content > a[href^=http://dx.doi.org]'
+  doi: '#content > a[href^=https://doi.org]'
   title: '#articleTitle'
   keywords_split: '#articleSubject > div'
   abstract: '#articleAbstract > div > *'
@@ -434,7 +442,6 @@ sciencemag:
   fulltext_dst: \.full
   pdf_src: /*$
   pdf_dst: \.full\.pdf
-  javascript: 'true'
 
 sciencemag_full:
   title: article.primary header h1
@@ -442,7 +449,6 @@ sciencemag_full:
   fulltext: article.primary .article > p, article.primary .article [id^=sec] > :not([id^=sec]):not(figure[id^=F]), article.primary .article [id^=sec] > figure[id^=F] > figcaption, article.primary .article > [id^=notes] > *, article.primary .article > figure[id^=F] > figcaption, article.primary .article > div[id^=T]
   pdf_src: /*$
   pdf_dst: \.pdf
-  javascript: 'true'
 
 bioinformation:
   title: tr > td:matches(^Title$) ~ td:last-of-type
@@ -496,7 +502,6 @@ theiet:
 bmj:
   title: '#article-top .highwire-cite-title'
   abstract: '#article-top .article > .abstract > :not(h2)'
-  javascript: 'true'
 
 nrcresearchpress:
   doi: '#content .citationLine > a'
@@ -508,19 +513,67 @@ inderscience:
   title: '#main table td > p:first-child > b > font > a'
   abstract: '#main table td > font'
 
+zenodo:
+  doi: .col-right h4:matchesOwn(^Versions$) + table .info > td:first-child > small
+  title: .col-left > h1
+  keywords: .col-right dt:matchesOwn(^Keyword\(s\):$) + dd > a
+  abstract: .col-left > p:gt(2), .col-left > ul
+  pdf_a: '#files a[href~=/files/article.pdf\?download=1$]'
+
+jstatsoft:
+  doi: '#content td:matchesOwn(^DOI:$) + td'
+  title: '#content td:matchesOwn(^Title:$) + td'
+  abstract: '#content td:matchesOwn(^Abstract:$) + td'
+  pdf_a: '#content td:matchesOwn(^Paper:$) + td > a.file'
+
+sagepub:
+  doi: .articleMeta .doiWidgetLink
+  title: .hlFld-Title > .publicationContentTitle > h1
+  keywords: .abstractKeywords > .hlFld-KeywordText a
+  abstract: .contents > :not(.doNotShow) .hlFld-Abstract > .abstractSection > *
+  fulltext_a: .showFullText > a
+  pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
+
+sagepub_full:
+  doi: .articleMeta .doiWidgetLink
+  title: .hlFld-Title > .publicationContentTitle > h1
+  keywords: .abstractKeywords > .hlFld-KeywordText a
+  abstract: .hlFld-Abstract > .abstractSection > *
+  fulltext: .hlFld-Fulltext > :not(.acknowledgement):not(.fn-group):not(.sectionInfo):not(.references)
+  pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
+
+omicsonline:
+  title: .full-text > h1.fulltext_h1heading
+  keywords_split: .full-text > h4:matchesOwn(^Keywords$) + p
+  abstract: .full-text > h4:matchesOwn(^Abstract$) + p + p
+  fulltext: .full-text > h4:matchesOwn(^Introduction$), .full-text > h4:matchesOwn(^Introduction$) ~ :not(ol):not(h4:matchesOwn(^References$)), .full-text > h4:matchesOwn(^Abbreviations$), .full-text > h4:matchesOwn(^Abbreviations$) + p
+  pdf_a: a[title=Download PDF]
+
 ---
 
-'1126': true # sciencemag
-'1101': true # biorxiv (highwire2) / cshlp
-'1136': true # bmj
-'1534': true # highwire2
-'1104': true # highwire2
-'1105': true # highwire2
-'1182': true # highwire2
-'1042': true # highwire2
-'1158': true # highwire2
-'1109': true # ieee
-'1039': true # rsc
-'7490': true # f1000research_posters
-'1145': true # acm
-'1128': true # asm (highwire2)
+# javascript
+
+# '(?i)^https?://(www\.)?' is automatically put in front of regex
+# except when regex already begins with '^'
+
+- '[a-zA-Z0-9.-]*sciencemag\.org'
+- '[a-zA-Z0-9.-]*bmj\.com'
+- 'ieeexplore\.ieee\.org'
+- 'xlink\.rsc\.org' # for fulltext_a, pdf_a
+- 'pubs\.rsc\.org' # for fulltext_a, pdf_a
+- 'f1000research\.com/+posters'
+- 'portal\.acm\.org'
+- 'dl\.acm\.org'
+
+# highwire2
+- 'pnas\.org'
+- 'genomea\.asm\.org'
+- 'mra\.asm\.org'
+- 'genetics\.org'
+- 'plantphysiol\.org'
+- 'plantcell\.org'
+- 'bloodjournal\.org'
+- 'bloodadvances\.org'
+- 'biochemj\.org'
+- 'biochemsoctrans\.org'
+- '[a-zA-Z0-9.-]*aacrjournals\.org'

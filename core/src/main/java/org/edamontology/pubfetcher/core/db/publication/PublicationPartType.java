@@ -123,7 +123,7 @@ public enum PublicationPartType {
 			if (isPdf()) {
 				logger.warn("Publication part type {} is already of PDF type", this);
 			} else {
-				logger.warn("Publication part type {} can't be converted to PDF type", this);
+				logger.error("Publication part type {} can't be converted to PDF type", this);
 			}
 			return this;
 		}

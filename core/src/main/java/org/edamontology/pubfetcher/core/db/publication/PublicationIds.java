@@ -278,7 +278,18 @@ public class PublicationIds implements Serializable, Comparable<PublicationIds> 
 		} else if (!doi.isEmpty()) {
 			if (!oPmid.isEmpty() || !oPmcid.isEmpty()) return 1;
 			else if (oDoi.isEmpty()) return -1;
-			else return doi.compareTo(oDoi);
+			else {
+				try {
+					int compareTo = Integer.valueOf(PubFetcher.extractDoiRegistrant(doi)).compareTo(Integer.valueOf(PubFetcher.extractDoiRegistrant(oDoi)));
+					if (compareTo != 0) {
+						return compareTo;
+					} else {
+						return doi.compareTo(oDoi);
+					}
+				} catch (NumberFormatException e) {
+					return doi.compareTo(oDoi);
+				}
+			}
 		} else {
 			if (!oPmid.isEmpty() || !oPmcid.isEmpty() || !oDoi.isEmpty()) return 1;
 			else return 0;

@@ -192,7 +192,7 @@ public final class HtmlMeta {
 		return (metaType.isBetterThan(type) ? type : metaType);
 	}
 
-	static void fillWith(Publication publication, Document doc, PublicationPartType type, Links links, FetcherArgs fetcherArgs, EnumMap<PublicationPartName, Boolean> parts, boolean keywords) {
+	static void fillWith(Publication publication, Document doc, PublicationPartType type, Links links, FetcherArgs fetcherArgs, EnumMap<PublicationPartName, Boolean> parts, boolean keywords, String site) {
 
 		fillWithIds(publication, doc, type, fetcherArgs);
 
@@ -205,8 +205,12 @@ public final class HtmlMeta {
 			setKeywords(publication, doc, citationType, CITATION_KEYWORDS_SELECTOR, fetcherArgs, parts);
 		}
 		setAbstract(publication, doc, citationType, CITATION_ABSTRACT_SELECTOR, fetcherArgs, parts);
-		addLinks(publication, doc, citationLinkType, CITATION_FULLTEXT_SELECTOR, links, fetcherArgs);
-		addLinks(publication, doc, citationPdfType, CITATION_FULLTEXT_PDF_SELECTOR, links, fetcherArgs);
+		if (!Fetcher.BIORXIV.matcher(doc.location()).matches()) {
+			addLinks(publication, doc, citationLinkType, CITATION_FULLTEXT_SELECTOR, links, fetcherArgs);
+		}
+		if (!Fetcher.BIORXIV.matcher(doc.location()).matches() && (site == null || !site.equals("highwire2"))) {
+			addLinks(publication, doc, citationPdfType, CITATION_FULLTEXT_PDF_SELECTOR, links, fetcherArgs);
+		}
 
 		// eprints
 		PublicationPartType eprintsType = chooseType(PublicationPartType.eprints, type);

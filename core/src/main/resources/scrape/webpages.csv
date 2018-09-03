@@ -11,6 +11,9 @@ title,content,license,language,webpage
 23,54383,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
 69,29699,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
+# git.bioconductor.org
+0,0,0,0,https://git.bioconductor.org/packages/RIVER
+
 # github.com
 7,942,0,4,https://github.com/sgoodswe/vacceed
 9,15148,0,6,https://github.com/quwubin/MFEprimer
@@ -71,12 +74,15 @@ title,content,license,language,webpage
 # sourceforge.net files
 10,0,0,0,https://sourceforge.net/projects/protms/files/mres2x/
 10,0,0,0,https://sourceforge.net/projects/pathoscope/files/pathoscope2.0_v0.02_tutorial.pdf/download
+7,1990,0,0,https://sourceforge.net/projects/sb2nhri/files/drVM/
+4,7784,0,0,https://sourceforge.net/projects/plek/files/
 
 # sourceforge.net wiki
 32,5602,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
 4,5258,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
 4,972,0,0,https://sourceforge.net/p/treq/home/Home/
 6,14121,0,0,https://sourceforge.net/p/virmid/wiki/Home/
+21,3979,0,0,https://sourceforge.net/p/metabolic-network-sgl/git/ci/master/tree/
 
 # code.google.com
 6,1984,10,0,https://code.google.com/archive/p/acpype
@@ -158,3 +164,23 @@ title,content,license,language,webpage
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe
 13,1955,35,13,http://pypi.python.org/pypi/plastid
 17,69,48,11,https://pypi.org/project/bio-apricot/
+
+# bioinformatics.org wiki
+32,2062,0,0,http://www.bioinformatics.org/bna/wiki/
+10,19130,0,0,https://www.bioinformatics.org/chemchains/wiki/Main/Tutorial
+
+# bioinformatics.org groups/project
+18,179,35,0,http://www.bioinformatics.org/groups/?group_id=493
+47,252,35,0,http://www.bioinformatics.org/project/?group_id=39
+
+# omics.pnl.gov
+60,962,0,0,https://omics.pnl.gov/software/concatenated-dta-mascot-generic-file-mgf-file-converter
+27,2287,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
+
+# en.wikipedia.org
+5,1254,0,0,https://en.wikipedia.org/wiki/CLIPZ
+9,1174,0,0,https://en.wikipedia.org/wiki/ProRepeat
+
+# webchem.ncbr.muni.cz wiki
+27,1933,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
+26,1430,0,0,http://webchem.ncbr.muni.cz/Wiki/MotiveValidator:UserManual

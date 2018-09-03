@@ -26,19 +26,19 @@ import com.beust.jcommander.validators.PositiveInteger;
 public class FetcherArgs {
 
 	public static final String EMPTY_COOLDOWN = "emptyCooldown";
-	@Parameter(names = { "--" + EMPTY_COOLDOWN }, validateWith = PositiveInteger.class, description = "If that many minutes have passed since last fetching attempt of an empty database entry, then fetching can be attempted again, resetting the retry limit")
+	@Parameter(names = { "--" + EMPTY_COOLDOWN }, description = "If that many minutes have passed since last fetching attempt of an empty database entry, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of empty database entries will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry is empty.")
 	private int emptyCooldown = 720; // 12 h
 
 	public static final String NON_FINAL_COOLDOWN = "nonFinalCooldown";
-	@Parameter(names = { "--" + NON_FINAL_COOLDOWN }, validateWith = PositiveInteger.class, description = "If that many minutes have passed since last fetching attempt of a non-final database entry, then fetching can be attempted again, resetting the retry limit")
+	@Parameter(names = { "--" + NON_FINAL_COOLDOWN }, description = "If that many minutes have passed since last fetching attempt of a non-final (and non-empty) database entry, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of non-final database entries will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry is non-final.")
 	private int nonFinalCooldown = 10080; // a week
 
 	public static final String FETCH_EXCEPTION_COOLDOWN = "fetchExceptionCooldown";
-	@Parameter(names = { "--" + FETCH_EXCEPTION_COOLDOWN }, validateWith = PositiveInteger.class, description = "If that many minutes have passed since last fetching attempt of a database entry with fetching error, then fetching can be attempted again, resetting the retry limit")
+	@Parameter(names = { "--" + FETCH_EXCEPTION_COOLDOWN }, description = "If that many minutes have passed since last fetching attempt of a database entry with fetching exception, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of database entries with fetching exception will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry has a fetching exception.")
 	private int fetchExceptionCooldown = 1440; // a day
 
 	public static final String RETRY_LIMIT = "retryLimit";
-	@Parameter(names = { "--" + RETRY_LIMIT }, description = "How many times can fetching of a still non-final database entry be retried after initial attempt. Setting to 0 will disable retrying, setting to a negative value will disable limit.")
+	@Parameter(names = { "--" + RETRY_LIMIT }, description = "How many times can fetching be retried for an entry that is still empty, non-final or has a fetching exception after initial attempt. Setting to 0 will disable retrying, unless the retry counter is reset by a cooldown in which case one initial attempt is allowed again. Setting to a negative value will disable this upper limit.")
 	private int retryLimit = 3;
 
 	public static final String TITLE_MIN_LENGTH = "titleMinLength";
@@ -58,15 +58,15 @@ public class FetcherArgs {
 	private int abstractMinLength = 200;
 
 	public static final String FULLTEXT_MIN_LENGTH = "fulltextMinLength";
-	@Parameter(names = { "--" + FULLTEXT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid publication full text")
+	@Parameter(names = { "--" + FULLTEXT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid publication fulltext")
 	private int fulltextMinLength = 2000;
 
 	public static final String WEBPAGE_MIN_LENGTH = "webpageMinLength";
-	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid web page content")
-	private int webpageMinLength = 100;
+	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a valid webpage combined title and content")
+	private int webpageMinLength = 50;
 
 	public static final String WEBPAGE_MIN_LENGTH_JAVASCRIPT = "webpageMinLengthJavascript";
-	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "If length of web page content is below this, then refetching using JavaScript support will be attempted")
+	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "If length of a whole web page content fetched without JavaScript is below the specified limit and no scraping rules are found for the corresponding URL, then refetching using JavaScript support will be attempted")
 	private int webpageMinLengthJavascript = 200;
 
 	public static final String TIMEOUT = "timeout";

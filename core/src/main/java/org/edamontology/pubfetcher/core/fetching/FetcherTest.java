@@ -79,54 +79,86 @@ public final class FetcherTest {
 		}
 	}
 
-	private static int testPmc(String[] test, Publication publication) {
+	private static boolean fetchPart(EnumMap<PublicationPartName, Boolean> parts, PublicationPartName part) {
+		return parts == null || (parts.get(part) != null && parts.get(part));
+	}
+
+	private static int testPmc(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
 		int mismatch = 0;
-		mismatch += equal(test[1], publication.getPmid().getContent().length(), "PMID length");
-		mismatch += equal(test[2], publication.getPmcid().getContent().length(), "PMCID length");
-		mismatch += equal(test[3], publication.getDoi().getContent().length(), "DOI length");
-		mismatch += equal(test[4], publication.getTitle().getContent().length(), "title length");
-		mismatch += equal(test[5], publication.getKeywords().getList().size(), "keywords size");
-		mismatch += equal(test[6], publication.getAbstract().getContent().length(), "abstract length");
-		mismatch += equal(test[7], publication.getFulltext().getContent().length(), "fulltext length");
+		if (fetchPart(parts, PublicationPartName.pmid)) {
+			mismatch += equal(test[1], publication.getPmid().getContent().length(), "PMID length");
+		}
+		if (fetchPart(parts, PublicationPartName.pmcid)) {
+			mismatch += equal(test[2], publication.getPmcid().getContent().length(), "PMCID length");
+		}
+		if (fetchPart(parts, PublicationPartName.doi)) {
+			mismatch += equal(test[3], publication.getDoi().getContent().length(), "DOI length");
+		}
+		if (fetchPart(parts, PublicationPartName.title)) {
+			mismatch += equal(test[4], publication.getTitle().getContent().length(), "title length");
+		}
+		if (fetchPart(parts, PublicationPartName.keywords)) {
+			mismatch += equal(test[5], publication.getKeywords().getList().size(), "keywords size");
+		}
+		if (fetchPart(parts, PublicationPartName.theAbstract)) {
+			mismatch += equal(test[6], publication.getAbstract().getContent().length(), "abstract length");
+		}
+		if (fetchPart(parts, PublicationPartName.fulltext)) {
+			mismatch += equal(test[7], publication.getFulltext().getContent().length(), "fulltext length");
+		}
 		mismatch += equal(test[8], CorrespAuthor.toString(publication.getCorrespAuthor()).length(), "corresponding author length");
 		return mismatch;
 	}
 
 	@SuppressWarnings("unused")
-	private static int testPmcXml(String[] test, Publication publication) {
-		int mismatch = testPmc(test, publication);
+	private static int testPmcXml(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
+		int mismatch = testPmc(test, publication, parts);
 		mismatch += equal(test[9], publication.getJournalTitle().length(), "journal title length");
 		return mismatch;
 	}
 
 	@SuppressWarnings("unused")
-	private static int testPmcHtml(String[] test, Publication publication) {
-		int mismatch = testPmc(test, publication);
+	private static int testPmcHtml(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
+		int mismatch = testPmc(test, publication, parts);
 		mismatch += equal(test[9], publication.getVisitedSites().size(), "visited sites size");
 		return mismatch;
 	}
 
-	private static int testPubmedHtml(String[] test, Publication publication) {
+	private static int testPubmedHtml(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
 		int mismatch = 0;
-		mismatch += equal(test[1], publication.getPmid().getContent().length(), "PMID length");
-		mismatch += equal(test[2], publication.getPmcid().getContent().length(), "PMCID length");
-		mismatch += equal(test[3], publication.getDoi().getContent().length(), "DOI length");
-		mismatch += equal(test[4], publication.getTitle().getContent().length(), "title length");
-		mismatch += equal(test[5], publication.getKeywords().getList().size(), "keywords size");
-		mismatch += equal(test[6], publication.getMeshTerms().getList().size(), "MeSH terms size");
-		mismatch += equal(test[7], publication.getAbstract().getContent().length(), "abstract length");
+		if (fetchPart(parts, PublicationPartName.pmid)) {
+			mismatch += equal(test[1], publication.getPmid().getContent().length(), "PMID length");
+		}
+		if (fetchPart(parts, PublicationPartName.pmcid)) {
+			mismatch += equal(test[2], publication.getPmcid().getContent().length(), "PMCID length");
+		}
+		if (fetchPart(parts, PublicationPartName.doi)) {
+			mismatch += equal(test[3], publication.getDoi().getContent().length(), "DOI length");
+		}
+		if (fetchPart(parts, PublicationPartName.title)) {
+			mismatch += equal(test[4], publication.getTitle().getContent().length(), "title length");
+		}
+		if (fetchPart(parts, PublicationPartName.keywords)) {
+			mismatch += equal(test[5], publication.getKeywords().getList().size(), "keywords size");
+		}
+		if (fetchPart(parts, PublicationPartName.mesh)) {
+			mismatch += equal(test[6], publication.getMeshTerms().getList().size(), "MeSH terms size");
+		}
+		if (fetchPart(parts, PublicationPartName.theAbstract)) {
+			mismatch += equal(test[7], publication.getAbstract().getContent().length(), "abstract length");
+		}
 		return mismatch;
 	}
 
-	private static int testPubmedXml(String[] test, Publication publication) {
-		int mismatch = testPubmedHtml(test, publication);
+	private static int testPubmedXml(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
+		int mismatch = testPubmedHtml(test, publication, parts);
 		mismatch += equal(test[8], publication.getJournalTitle().length(), "journal title length");
 		mismatch += equal(test[9], publication.getPubDateHuman(), "publication date");
 		return mismatch;
 	}
 
-	private static int testEuropepmc(String[] test, Publication publication, FetcherPublicationState state) {
-		int mismatch = testPubmedXml(test, publication);
+	private static int testEuropepmc(String[] test, Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
+		int mismatch = testPubmedXml(test, publication, parts);
 		mismatch += equal(test[10], publication.isOA() ? 1 : 0, "Open Access");
 		mismatch += equal(test[11], state.europepmcHasFulltextHTML ? 1 : 0, "has HTML");
 		mismatch += equal(test[12], state.europepmcHasPDF ? 1 : 0, "has PDF");
@@ -135,15 +167,19 @@ public final class FetcherTest {
 	}
 
 	@SuppressWarnings("unused")
-	private static int testEuropepmcMined(String[] test, Publication publication) {
+	private static int testEuropepmcMined(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
 		int mismatch = 0;
-		mismatch += equal(test[1], publication.getEfoTerms().getList().size(), "EFO terms size");
-		mismatch += equal(test[2], publication.getGoTerms().getList().size(), "GO terms size");
+		if (fetchPart(parts, PublicationPartName.efo)) {
+			mismatch += equal(test[1], publication.getEfoTerms().getList().size(), "EFO terms size");
+		}
+		if (fetchPart(parts, PublicationPartName.go)) {
+			mismatch += equal(test[2], publication.getGoTerms().getList().size(), "GO terms size");
+		}
 		return mismatch;
 	}
 
 	@SuppressWarnings("unused")
-	private static int testOaDoi(String[] test, Publication publication) {
+	private static int testOaDoi(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
 		int mismatch = 0;
 		mismatch += equal(test[1], publication.isOA() ? 1 : 0, "Open Access");
 		mismatch += equal(test[2], publication.getVisitedSites().size(), "visited sites size");
@@ -152,15 +188,29 @@ public final class FetcherTest {
 		return mismatch;
 	}
 
-	private static int testSite(String[] test, Publication publication) {
+	private static int testSite(String[] test, Publication publication, EnumMap<PublicationPartName, Boolean> parts) {
 		int mismatch = 0;
-		mismatch += equal(test[0], publication.getPmid().getContent().length(), "PMID length");
-		mismatch += equal(test[1], publication.getPmcid().getContent().length(), "PMCID length");
-		mismatch += equal(test[2], publication.getDoi().getContent().length(), "DOI length");
-		mismatch += equal(test[3], publication.getTitle().getContent().length(), "title length");
-		mismatch += equal(test[4], publication.getKeywords().getList().size(), "keywords size");
-		mismatch += equal(test[5], publication.getAbstract().getContent().length(), "abstract length");
-		mismatch += equal(test[6], publication.getFulltext().getContent().length(), "fulltext length");
+		if (fetchPart(parts, PublicationPartName.pmid)) {
+			mismatch += equal(test[0], publication.getPmid().getContent().length(), "PMID length");
+		}
+		if (fetchPart(parts, PublicationPartName.pmcid)) {
+			mismatch += equal(test[1], publication.getPmcid().getContent().length(), "PMCID length");
+		}
+		if (fetchPart(parts, PublicationPartName.doi)) {
+			mismatch += equal(test[2], publication.getDoi().getContent().length(), "DOI length");
+		}
+		if (fetchPart(parts, PublicationPartName.title)) {
+			mismatch += equal(test[3], publication.getTitle().getContent().length(), "title length");
+		}
+		if (fetchPart(parts, PublicationPartName.keywords)) {
+			mismatch += equal(test[4], publication.getKeywords().getList().size(), "keywords size");
+		}
+		if (fetchPart(parts, PublicationPartName.theAbstract)) {
+			mismatch += equal(test[5], publication.getAbstract().getContent().length(), "abstract length");
+		}
+		if (fetchPart(parts, PublicationPartName.fulltext)) {
+			mismatch += equal(test[6], publication.getFulltext().getContent().length(), "fulltext length");
+		}
 		mismatch += equal(test[7], publication.getVisitedSites().size(), "visited sites size");
 		return mismatch;
 	}
@@ -176,7 +226,7 @@ public final class FetcherTest {
 				.invoke(null, test[0], fetcher, parts, fetcherArgs);
 			if (publication != null) {
 				mismatch += (Integer) FetcherTest.class.getDeclaredMethod(testMethod, test.getClass(), publication.getClass())
-					.invoke(null, test, publication);
+					.invoke(null, test, publication, parts);
 			} else ++mismatch;
 		}
 		if (mismatch == 0) logger.info("OK");
@@ -307,7 +357,7 @@ public final class FetcherTest {
 			if (publication != null) {
 				FetcherPublicationState state = new FetcherPublicationState();
 				fetcher.fetchEuropepmc(publication, state, parts, fetcherArgs);
-				mismatch += testEuropepmc(test, publication, state);
+				mismatch += testEuropepmc(test, publication, state, parts);
 			} else ++mismatch;
 		}
 		if (mismatch == 0) logger.info("OK");
@@ -384,7 +434,7 @@ public final class FetcherTest {
 			++i;
 			logger.info("Test {} {}", test[8], PubFetcher.progress(i, tests.size(), start));
 			Publication publication = fetchSite(test[8], fetcher, parts, fetcherArgs);
-			mismatch += testSite(test, publication);
+			mismatch += testSite(test, publication, parts);
 		}
 		if (mismatch == 0) logger.info("OK");
 		else logger.error("There were {} mismatches!", mismatch);

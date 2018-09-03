@@ -24,28 +24,36 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 public class Scrape {
 
+	private static final Logger logger = LogManager.getLogger();
+
 	private final Map<Pattern, String> regex = new LinkedHashMap<>();
 
 	private final Map<String, Map<String, String>> site = new LinkedHashMap<>();
 
-	private final Map<String, Boolean> javascript = new LinkedHashMap<>();
+	private final List<Pattern> javascript = new ArrayList<>();
 
 	private final Map<Pattern, Map<String, String>> webpages = new LinkedHashMap<>();
 
@@ -79,19 +87,19 @@ public class Scrape {
 		Yaml yaml = new Yaml();
 		Iterator<Object> it = yaml.loadAll(br).iterator();
 
-		Map<String, String> regexSection = (Map<String, String>) nextSection(it, journals, 1, 3);
+		Map<String, String> regexSection = (Map<String, String>) nextSection(it, journals, 1, 3, Map.class);
 		if (regexSection != null) {
 			regex.putAll(makeRegex(regexSection, journals));
 		}
 
-		Map<String, Map<String, String>> siteSection = (Map<String, Map<String, String>>) nextSection(it, journals, 2, 3);
+		Map<String, Map<String, String>> siteSection = (Map<String, Map<String, String>>) nextSection(it, journals, 2, 3, Map.class);
 		if (siteSection != null) {
 			site.putAll(siteSection);
 		}
 
-		Map<String, Boolean> javascriptSection = (Map<String, Boolean>) nextSection(it, journals, 3, 3);
+		List<String> javascriptSection = (List<String>) nextSection(it, journals, 3, 3, List.class);
 		if (javascriptSection != null) {
-			javascript.putAll(javascriptSection);
+			javascript.addAll(makeJavascript(javascriptSection, journals));
 		}
 
 		validateTooManySections(it, journals, 3);
@@ -104,7 +112,7 @@ public class Scrape {
 		Yaml yaml = new Yaml();
 		Iterator<Object> it = yaml.loadAll(br).iterator();
 
-		Map<String, Map<String, String>> webpagesSection = (Map<String, Map<String, String>>) nextSection(it, webpages, 1, 1);
+		Map<String, Map<String, String>> webpagesSection = (Map<String, Map<String, String>>) nextSection(it, webpages, 1, 1, Map.class);
 		if (webpagesSection != null) {
 			this.webpages.putAll(makeWebpages(webpagesSection, webpages));
 		}
@@ -127,16 +135,49 @@ public class Scrape {
 		int i = 0;
 		for (Map.Entry<String, String> r : regexString.entrySet()) {
 			++i;
-			String k = r.getKey();
+			String k;
+			try {
+				k = r.getKey();
+			} catch (ClassCastException e) {
+				throw new ParseException("Syntax error in regex in scraping rules '" + name + "'! (regex pos " + i + ")\n" + e, i);
+			}
 			if (k.isEmpty()) {
 				throw new ParseException("Regex cannot be empty in scraping rules '" + name + "'! (regex pos " + i + ")", i);
+			}
+			String v;
+			try {
+				v = r.getValue();
+			} catch (ClassCastException e) {
+				throw new ParseException("Syntax error in regex value in scraping rules '" + name + "'! (regex pos " + i + ")\n" + e, i);
+			}
+			if (v == null || v.isEmpty()) {
+				throw new ParseException("Regex value cannot be empty in scraping rules '" + name + "'! (regex pos " + i + ")", i);
 			}
 			if (k.charAt(0) != '^') {
 				k = "(?i)^https?://(www\\.)?" + k;
 			}
-			regex.put(Pattern.compile(k), r.getValue());
+			regex.put(Pattern.compile(k), v);
 		}
 		return regex;
+	}
+	private List<Pattern> makeJavascript(List<String> javascriptString, String name) throws ParseException {
+		List<Pattern> javascript = new ArrayList<>();
+		for (int i = 0; i < javascriptString.size(); ++i) {
+			String j;
+			try {
+				j = javascriptString.get(i);
+			} catch (ClassCastException e) {
+				throw new ParseException("Syntax error in javascript regex in scraping rules '" + name + "'! (javascript pos " + (i + 1) + ")\n" + e, i + 1);
+			}
+			if (j == null || j.isEmpty()) {
+				throw new ParseException("Javascript regex cannot be empty in scraping rules '" + name + "'! (javascript pos " + (i + 1) + ")", i + 1);
+			}
+			if (j.charAt(0) != '^') {
+				j = "(?i)^https?://(www\\.)?" + j;
+			}
+			javascript.add(Pattern.compile(j));
+		}
+		return javascript;
 	}
 
 	private Map<Pattern, Map<String, String>> makeWebpages(Map<String, Map<String, String>> yaml, String name) throws ParseException {
@@ -157,13 +198,13 @@ public class Scrape {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, ?> nextSection(Iterator<Object> it, String name, int count, int required) throws ParseException {
+	private <T> T nextSection(Iterator<Object> it, String name, int count, int required, Class<T> clazz) throws ParseException {
 		if (!it.hasNext()) {
 			throw new ParseException("Scraping rules '" + name + "' contains " + (count - 1) + " sections instead of required " + required + "! (separated by ---)", count);
 		}
-		Map<String, ?> next = null;
+		T next = null;
 		try {
-			next = (Map<String, ?>) it.next();
+			next = (T) it.next();
 		} catch (ClassCastException | YAMLException e) {
 			throw new ParseException("Syntax error in section " + count + " of scraping rules '" + name + "'!\n" + e, count);
 		}
@@ -267,7 +308,12 @@ public class Scrape {
 	}
 
 	public String getSite(String url) {
-		if (url == null || url.isEmpty()) return null;
+		try {
+			url = new URL(url).toString();
+		} catch (MalformedURLException e) {
+			logger.error(e);
+			return null;
+		}
 		String site = null;
 		for (Pattern pattern : regex.keySet()) {
 			if (pattern.matcher(url).find()) {
@@ -282,14 +328,28 @@ public class Scrape {
 		return this.site.get(site).get(siteKey.toString());
 	}
 
-	public boolean getJavascript(String doiRegistrant) {
-		if (doiRegistrant == null || doiRegistrant.isEmpty()) return false;
-		Boolean js = javascript.get(doiRegistrant);
-		return (js == null ? false : js);
+	public boolean getJavascript(String url) {
+		try {
+			url = new URL(url).toString();
+		} catch (MalformedURLException e) {
+			logger.error(e);
+			return false;
+		}
+		for (Pattern pattern : javascript) {
+			if (pattern.matcher(url).find()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Map<String, String> getWebpage(String url) {
-		if (url == null || url.isEmpty()) return null;
+		try {
+			url = new URL(url).toString();
+		} catch (MalformedURLException e) {
+			logger.error(e);
+			return null;
+		}
 		Map<String, String> webpage = null;
 		for (Pattern pattern : webpages.keySet()) {
 			if (pattern.matcher(url).find()) {

@@ -344,17 +344,20 @@ public class Publication extends DatabaseEntry<Publication> {
 	public int getCitationsCount() {
 		return citationsCount;
 	}
-	public void setCitationsCount(String citationsCount) {
+	public boolean setCitationsCount(String citationsCount) {
 		try {
 			int citationsCountParsed = Integer.parseInt(citationsCount);
 			if (citationsCountParsed >= 0) {
 				this.citationsCount = citationsCountParsed;
 				this.citationsTimestamp = System.currentTimeMillis();
+				return true;
 			} else {
 				logger.error("Citations count is negative: {}", citationsCountParsed);
+				return false;
 			}
 		} catch (NumberFormatException e) {
 			logger.error("Illegal citations count: {}", citationsCount);
+			return false;
 		}
 	}
 

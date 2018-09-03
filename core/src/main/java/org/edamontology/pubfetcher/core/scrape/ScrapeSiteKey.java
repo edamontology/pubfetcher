@@ -34,8 +34,7 @@ public enum ScrapeSiteKey {
 	fulltext_a,
 	pdf_src,
 	pdf_dst,
-	pdf_a,
-	javascript;
+	pdf_a;
 
 	private String key;
 

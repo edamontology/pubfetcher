@@ -22,6 +22,13 @@
 # '(?i)^https?://(www\.)?' is automatically put in front of regex
 # except when regex already begins with '^'
 
+# For each site, there must be a corresponding key in the next section
+
+# If multiple regex have a match, then the site of the last one is selected
+
+# Different publishers can use a common platform, in which case the different
+# corresponding regex may point to a common site, e.g. highwire and highwire2
+
 'academic\.oup\.com': oup
 'citeseerx\.ist\.psu\.edu': citeseerx
 '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com/+doi/+(abs|10)': wiley
@@ -38,8 +45,7 @@
 'pubs\.acs\.org/+doi/+abs/+10': acs
 'pubs\.acs\.org/+doi/+(full/+)?10': acs_full
 'arxiv\.org': arxiv
-'mcponline\.org': highwire
-'mcponline\.org/.+full$': highwire_full
+'mcponline\.org': highwire2
 'pnas\.org': highwire2
 'ieeexplore\.ieee\.org[^/]*/+document': ieee
 'ieeexplore\.ieee\.org[^/]*/+xpls': ieee_full
@@ -56,9 +62,7 @@
 'orbit\.dtu\.dk': dtu
 'tandfonline\.com/+doi/+abs/+10': tandfonline
 'tandfonline\.com/+doi/+full/+10': tandfonline_full
-'[a-zA-Z0-9.-]*asm\.org': highwire
-'[a-zA-Z0-9.-]*asm\.org/.+full$': highwire_full
-'mra\.asm\.org': highwire2
+'[a-zA-Z0-9.-]*asm\.org': highwire2
 'dl\.acm\.org': acm
 'degruyter\.com': degruyter
 'hindawi\.com': hindawi
@@ -118,12 +122,22 @@
 #  pdf_dst:
 #  pdf_a:
 
+# Each site must have at least one mention in the previous section
+
 # Selector reference:
 # https://jsoup.org/cookbook/extracting-data/selector-syntax
 # https://jsoup.org/apidocs/org/jsoup/select/Selector.html
 
-# check that selectors don't select text multiple times (for example, if p
+# Check that selectors don't select text multiple times (for example, if p
 # inside p, then both outer p and duplicate inner p could be selected)
+
+# The fulltext selector must not select the title and abstract (and keywords),
+# as these are extracted using the corresponding selectors. The fulltext
+# selector must also exclude parts of the full text itself, mostly back matter
+# and metadata at the end, like acknowledgements, author information, author
+# contributions and, most importantly, references. But descriptions of
+# supplementary materials, glossaries and captions of figures and tables should
+# be selected.
 
 oup:
   doi: .ww-citation-primary > a
@@ -173,8 +187,8 @@ biomedcentral:
 
 springer:
   doi: '#doi-url'
-  title: 'h1.ArticleTitle, h1.ChapterTitle, #book-title > h1, h1.unified-header__title'
-  subtitle: '#book-title > .page-title__subtitle'
+  title: 'h1.ArticleTitle, h1.ChapterTitle, .page-title > h1, h1.unified-header__title'
+  subtitle: '.page-title > .page-title__subtitle'
   keywords: .Keyword
   abstract: 'section.Abstract > p, #book-description > *'
   fulltext: '#body > section > *'
@@ -323,7 +337,7 @@ iucr:
 
 f1000research_articles:
   doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=http://dx.doi.org]
-  #title: '#anchor-title'
+  #title: '#anchor-title' # has non-excludable information about approval as part of the title
   abstract: .abstract-text
   fulltext: '#article-context > .generated-article-body > *, #article-context > .generated-article-footer > :has(h2:containsOwn(Supplementary materials))'
   pdf_src: /*$
@@ -566,9 +580,10 @@ omicsonline:
 - 'dl\.acm\.org'
 
 # highwire2
+- 'mcponline\.org'
 - 'pnas\.org'
 - 'genomea\.asm\.org'
-- 'mra\.asm\.org'
+- '[a-zA-Z0-9.-]*asm\.org'
 - 'genetics\.org'
 - 'plantphysiol\.org'
 - 'plantcell\.org'

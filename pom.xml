@@ -35,26 +35,26 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <pubfetcher.version>0.2-SNAPSHOT</pubfetcher.version>
-    <maven.enforcer.version>3.0.0-M1</maven.enforcer.version>
-    <maven.compiler.version>3.7.0</maven.compiler.version>
-    <maven.jar.version>3.0.2</maven.jar.version>
-    <maven.dependency.version>3.0.2</maven.dependency.version>
-    <maven.resources.version>3.0.2</maven.resources.version>
+    <maven.enforcer.version>3.0.0-M2</maven.enforcer.version>
+    <maven.compiler.version>3.8.0</maven.compiler.version>
+    <maven.jar.version>3.1.0</maven.jar.version>
+    <maven.dependency.version>3.1.1</maven.dependency.version>
+    <maven.resources.version>3.1.0</maven.resources.version>
     <maven.source.version>3.0.1</maven.source.version>
-    <maven.clean.version>3.0.0</maven.clean.version>
-    <maven.surefire.version>2.20.1</maven.surefire.version>
+    <maven.clean.version>3.1.0</maven.clean.version>
+    <maven.surefire.version>2.22.0</maven.surefire.version>
     <maven.install.version>2.5.2</maven.install.version>
     <maven.deploy.version>2.8.2</maven.deploy.version>
-    <maven.site.version>3.7</maven.site.version>
+    <maven.site.version>3.7.1</maven.site.version>
     <jcommander.version>1.72</jcommander.version>
-    <jsoup.version>1.11.2</jsoup.version>
-    <snakeyaml.version>1.18</snakeyaml.version>
-    <pdfbox.version>2.0.8</pdfbox.version>
-    <bouncycastle.version>1.59</bouncycastle.version>
-    <mapdb.version>3.0.5</mapdb.version>
-    <jackson.version>2.9.4</jackson.version>
-    <htmlunit.version>2.29</htmlunit.version>
-    <log4j.version>2.11.0</log4j.version>
+    <jsoup.version>1.11.3</jsoup.version>
+    <snakeyaml.version>1.23</snakeyaml.version>
+    <pdfbox.version>2.0.11</pdfbox.version>
+    <bouncycastle.version>1.60</bouncycastle.version>
+    <mapdb.version>3.0.7</mapdb.version>
+    <jackson.version>2.9.6</jackson.version>
+    <htmlunit.version>2.33</htmlunit.version>
+    <log4j.version>2.11.1</log4j.version>
     <slf4j.version>1.7.25</slf4j.version>
   </properties>
 

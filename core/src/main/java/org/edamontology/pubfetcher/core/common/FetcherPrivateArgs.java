@@ -33,8 +33,8 @@ public class FetcherPrivateArgs {
 
 	public static final String USER_AGENT = "userAgent";
 	@Parameter(names = { "--" + USER_AGENT }, description = "HTTP User-Agent")
-	// better to use a Desktop UA
-	private String userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0";
+	// better to use a Desktop UA, like Firefox ESR
+	private String userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0";
 
 	public static final String JOURNALS_YAML = "journalsYaml";
 	@Parameter(names = { "--" + JOURNALS_YAML }, description = "YAML file containing custom journals scrape rules to add to default ones")

@@ -403,13 +403,11 @@ public class Database implements Closeable {
 		return docs.containsKey(docUrl);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Set<PublicationIds> getPublicationIds() {
 		Set<PublicationIds> publicationIds = new LinkedHashSet<>();
 		publicationIds.addAll(publicationsMapReverse.values());
 		return publicationIds;
 	}
-	@SuppressWarnings("unchecked")
 	public Set<String> getPublicationIdsFlat() {
 		Set<String> publicationIdsFlat = new LinkedHashSet<>();
 		publicationIdsFlat.addAll(publicationsMap.keySet());
@@ -431,13 +429,11 @@ public class Database implements Closeable {
 		return sb.toString();
 	}
 
-	@SuppressWarnings("unchecked")
 	public Set<String> getWebpageUrls() {
 		Set<String> webpageUrls = new LinkedHashSet<>();
 		webpageUrls.addAll(webpages.keySet());
 		return webpageUrls;
 	}
-	@SuppressWarnings("unchecked")
 	public Set<String> getDocUrls() {
 		Set<String> docUrls = new LinkedHashSet<>();
 		docUrls.addAll(docs.keySet());

@@ -8,7 +8,7 @@ title,content,license,language,webpage
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54383,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+23,54398,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
 69,29699,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
@@ -16,10 +16,10 @@ title,content,license,language,webpage
 
 # github.com
 7,942,0,4,https://github.com/sgoodswe/vacceed
-9,15148,0,6,https://github.com/quwubin/MFEprimer
-4,5874,0,16,https://github.com/SciLifeLab/facs/
+9,15188,0,6,https://github.com/quwubin/MFEprimer
+4,5887,0,16,https://github.com/SciLifeLab/facs/
 10,10673,7,6,https://github.com/petmri/ROCKETSHIP
-4,1849,3,1,https://github.com/pschorderet/NEAT
+4,1863,3,1,https://github.com/pschorderet/NEAT
 
 # github.com user
 7,1242,0,0,https://github.com/SeqWare
@@ -30,8 +30,8 @@ title,content,license,language,webpage
 4,3245,0,0,https://github.com/synergy-zju/gips/wiki
 6,842,0,0,https://github.com/KorfLab/DupHMM/wiki
 6,1897,0,0,https://github.com/ollyburren/vseams/wiki
-11,1617,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,8924,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+11,1597,0,0,https://github.com/PALMsiever/palm-siever/wiki
+6,8903,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -49,13 +49,13 @@ title,content,license,language,webpage
 4,489,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
 # galaxy.pasteur.fr
-83,1058,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
-119,1796,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
-85,1401,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
-50,183,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
-88,2338,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
-94,1160,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr/repos/khillion/salmonella_crispr_typing/salmonella_crispr_typing/1.0.0
-75,766,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
+0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
+0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
+0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
+0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
+0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
+0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr/repos/khillion/salmonella_crispr_typing/salmonella_crispr_typing/1.0.0
+0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
 0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=CONVERTER_genbank_to_fasta
 
 # emboss.open-bio.org
@@ -134,7 +134,7 @@ title,content,license,language,webpage
 
 # zhanglab.ccmb.med.umich.edu
 47,769,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3511,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+79,3557,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
 13,3718,0,9,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
@@ -157,8 +157,13 @@ title,content,license,language,webpage
 10,2287,0,0,http://www.uea.ac.uk/computing/my-closure
 
 # rna.informatik.uni-freiburg.de
-25,2818,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
-27,1902,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+25,3376,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+27,2185,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+
+# gitlab.com
+11,200,31,0,https://gitlab.com/CarlBrunius/sampleDrift
+6,134,9,0,https://gitlab.com/Gustafsson-lab/lassim
+7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe
@@ -175,7 +180,7 @@ title,content,license,language,webpage
 
 # omics.pnl.gov
 60,962,0,0,https://omics.pnl.gov/software/concatenated-dta-mascot-generic-file-mgf-file-converter
-27,2287,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
+27,2288,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
 
 # en.wikipedia.org
 5,1254,0,0,https://en.wikipedia.org/wiki/CLIPZ

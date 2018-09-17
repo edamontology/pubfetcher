@@ -396,7 +396,7 @@ public class Fetcher {
 		} catch (IOException e) {
 			// if a connection or read error occurs
 			logger.warn(e);
-		} catch (Exception | org.jsoup.UncheckedIOException e) {
+		} catch (Exception e) {
 			logger.warn("Exception!", e);
 			setFetchException(webpage, publication, null);
 		} finally {
@@ -2480,10 +2480,10 @@ public class Fetcher {
 	}
 
 	public boolean getWebpage(Webpage webpage, FetcherArgs fetcherArgs) {
-		return getWebpage(webpage, null, null, null, fetcherArgs);
+		return getWebpage(webpage, null, null, null, fetcherArgs, true);
 	}
 
-	public boolean getWebpage(Webpage webpage, String title, String content, Boolean javascript, FetcherArgs fetcherArgs) {
+	public boolean getWebpage(Webpage webpage, String title, String content, Boolean javascript, FetcherArgs fetcherArgs, boolean yaml) {
 		if (webpage == null) {
 			logger.error("null webpage given for getting webpage");
 			return false;
@@ -2492,10 +2492,17 @@ public class Fetcher {
 			logger.error("Webpage with no start URL given for getting webpage");
 			return false;
 		}
-		if (title != null && !title.isEmpty() || content != null && !content.isEmpty()) {
-			logger.info("Get {}{} (with title selector '{}' and content selector '{}')", (javascript != null && javascript.equals(Boolean.valueOf(true))) ? "JavaScript " : "", webpage.getStartUrl(), title, content);
+
+		if (yaml) {
+			title = null;
+			content = null;
+			javascript = null;
+		}
+
+		if (yaml) {
+			logger.info("Get {}", webpage.getStartUrl());
 		} else {
-			logger.info("Get {}{}", (javascript != null && javascript.equals(Boolean.valueOf(true))) ? "JavaScript " : "", webpage.getStartUrl());
+			logger.info("Get {}{} (with title selector '{}' and content selector '{}')", (javascript != null && javascript.equals(Boolean.valueOf(true))) ? "JavaScript " : "", webpage.getStartUrl(), title, content);
 		}
 
 		if (webpage.canFetch(fetcherArgs)) {
@@ -2504,7 +2511,7 @@ public class Fetcher {
 			Webpage newWebpage = new Webpage();
 			newWebpage.setStartUrl(webpage.getStartUrl());
 
-			if (javascript == null) {
+			if (yaml) {
 				Map<String, String> startWebpage = scrape.getWebpage(newWebpage.getStartUrl());
 				if (startWebpage != null) {
 					String webpageJavascriptString = startWebpage.get(ScrapeWebpageKey.javascript.toString());
@@ -2518,65 +2525,84 @@ public class Fetcher {
 
 			Document doc = getDoc(newWebpage, javascript != null && javascript.equals(Boolean.valueOf(true)), fetcherArgs);
 
-			if (doc != null && javascript == null && scrape.getWebpage(newWebpage.getFinalUrl()) == null) {
-				int textLength = doc.text().length();
-				if (textLength < fetcherArgs.getWebpageMinLengthJavascript() || !doc.select("noscript").isEmpty()) {
-					String reason = null;
-					if (textLength < fetcherArgs.getWebpageMinLengthJavascript()) {
-						reason = "length " + textLength + " is less than min required " + fetcherArgs.getWebpageMinLengthJavascript();
-					} else {
-						reason = "webpage contains noscript tag";
-					}
-					logger.info("Refetching {} with JavaScript enabled as {}", newWebpage.getStartUrl(), reason);
-					Webpage newWebpageJavascript = new Webpage();
-					newWebpageJavascript.setStartUrl(newWebpage.getStartUrl());
-					Document docJavascript = getDoc(newWebpageJavascript, true, fetcherArgs);
-					if (docJavascript != null) {
-						doc = docJavascript;
-						newWebpage = newWebpageJavascript;
-						int textLengthAfter = doc.text().length();
-						if (textLength != textLengthAfter) {
-							logger.info("Content length changed from {} to {}", textLength, textLengthAfter);
+			if (doc != null && javascript == null) {
+				boolean finalJavascript = !yaml;
+				if (!finalJavascript) {
+					Map<String, String> finalWebpage = scrape.getWebpage(newWebpage.getFinalUrl());
+					finalJavascript = finalWebpage == null || finalWebpage.get(ScrapeWebpageKey.javascript.toString()) != null && Boolean.valueOf(finalWebpage.get(ScrapeWebpageKey.javascript.toString()));
+				}
+				if (finalJavascript) {
+					int textLength = doc.text().length();
+					if (textLength < fetcherArgs.getWebpageMinLengthJavascript() || !doc.select("noscript").isEmpty()) {
+						String reason = null;
+						if (textLength < fetcherArgs.getWebpageMinLengthJavascript()) {
+							reason = "length " + textLength + " is less than min required " + fetcherArgs.getWebpageMinLengthJavascript();
 						} else {
-							logger.info("Content length did not change with JavaScript");
+							reason = "webpage contains noscript tag";
 						}
-					} else {
-						logger.warn("Discarding failed JavaScript webpage");
+						logger.info("Refetching {} with JavaScript enabled as {}", newWebpage.getStartUrl(), reason);
+						Webpage newWebpageJavascript = new Webpage();
+						newWebpageJavascript.setStartUrl(newWebpage.getStartUrl());
+						Document docJavascript = getDoc(newWebpageJavascript, true, fetcherArgs);
+						if (docJavascript != null) {
+							doc = docJavascript;
+							newWebpage = newWebpageJavascript;
+							int textLengthAfter = doc.text().length();
+							if (textLength != textLengthAfter) {
+								logger.info("Content length changed from {} to {}", textLength, textLengthAfter);
+							} else {
+								logger.info("Content length did not change with JavaScript");
+							}
+						} else {
+							logger.warn("Discarding failed JavaScript webpage");
+						}
 					}
 				}
 			}
 
 			if (doc != null) {
-				Map<String, String> finalWebpage = scrape.getWebpage(newWebpage.getFinalUrl());
-				if (finalWebpage == null) {
-					logger.warn("No scrape rules for final webpage {}", newWebpage.getFinalUrl());
-				}
-				if (finalWebpage != null && (title == null || title.isEmpty()) && (content == null || content.isEmpty())) {
-					if (finalWebpage.get(ScrapeWebpageKey.title.toString()) != null) {
-						title = finalWebpage.get(ScrapeWebpageKey.title.toString());
+				if (yaml) {
+					Map<String, String> finalWebpage = scrape.getWebpage(newWebpage.getFinalUrl());
+					if (finalWebpage == null) {
+						logger.warn("No scrape rules for final webpage {}", newWebpage.getFinalUrl());
+					} else {
+						if (finalWebpage.get(ScrapeWebpageKey.title.toString()) != null) {
+							title = finalWebpage.get(ScrapeWebpageKey.title.toString());
+						}
+						if (finalWebpage.get(ScrapeWebpageKey.content.toString()) != null) {
+							content = finalWebpage.get(ScrapeWebpageKey.content.toString());
+						}
 					}
-					if (finalWebpage.get(ScrapeWebpageKey.content.toString()) != null) {
-						content = finalWebpage.get(ScrapeWebpageKey.content.toString());
+					if (title != null && !title.isEmpty()) {
+						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true));
+					} else if (finalWebpage != null) {
+						newWebpage.setTitle("");
 					}
-				}
-				if (title != null && !title.isEmpty()) {
-					newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true));
-				}
-				if (content != null && !content.isEmpty()) {
-					newWebpage.setContent(text(doc, content, doc.location(), true));
-				} else if (finalWebpage == null) {
-					newWebpage.setContent(doc.text());
+					if (content != null && !content.isEmpty()) {
+						newWebpage.setContent(text(doc, content, doc.location(), true));
+					} else if (finalWebpage != null) {
+						logger.info("Webpage content discarded");
+					} else {
+						newWebpage.setContent(doc.text());
+					}
+					if (finalWebpage != null) {
+						String license = finalWebpage.get(ScrapeWebpageKey.license.toString());
+						if (license != null) {
+							newWebpage.setLicense(getFirstTrimmed(doc, license, doc.location(), true));
+						}
+						String language = finalWebpage.get(ScrapeWebpageKey.language.toString());
+						if (language != null) {
+							newWebpage.setLanguage(getFirstTrimmed(doc, language, doc.location(), true));
+						}
+					}
 				} else {
-					logger.info("Webpage content discarded");
-				}
-				if (finalWebpage != null) {
-					String license = finalWebpage.get(ScrapeWebpageKey.license.toString());
-					if (license != null) {
-						newWebpage.setLicense(getFirstTrimmed(doc, license, doc.location(), true));
+					if (title != null && !title.isEmpty()) {
+						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true));
 					}
-					String language = finalWebpage.get(ScrapeWebpageKey.language.toString());
-					if (language != null) {
-						newWebpage.setLanguage(getFirstTrimmed(doc, language, doc.location(), true));
+					if (content != null && !content.isEmpty()) {
+						newWebpage.setContent(text(doc, content, doc.location(), true));
+					} else {
+						newWebpage.setContent(doc.text());
 					}
 				}
 			}

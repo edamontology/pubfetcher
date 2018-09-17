@@ -28,7 +28,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,11 +54,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.edamontology.pubfetcher.core.common.FetcherArgs;
 import org.edamontology.pubfetcher.core.common.IllegalRequestException;
@@ -148,18 +143,20 @@ public final class PubFetcherMethods {
 	private static void fetchDocumentJavascript(String url, Fetcher fetcher, FetcherArgs fetcherArgs) {
 		System.out.println(fetcher.getDoc(url, true, fetcherArgs));
 	}
-	private static void fetchWebpageSelector(String webpageUrl, String title, String content, Boolean javascript, boolean plain, Format format, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
+	private static void fetchWebpageSelector(String webpageUrl, String title, String content, Boolean javascript, boolean plain, Format format, Version version, String[] argv, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		Webpage webpage = fetcher.initWebpage(webpageUrl);
 		if (webpage == null) return;
-		fetcher.getWebpage(webpage, title, content, javascript, fetcherArgs);
+		fetcher.getWebpage(webpage, title, content, javascript, fetcherArgs, false);
 		if (plain) {
 			switch (format) {
 				case text: System.out.println(webpage.toStringPlain()); break;
 				case html: System.out.println(webpage.toStringPlainHtml("")); break;
 				case json:
 					StringWriter writer = new StringWriter();
-					JsonGenerator generator = getJsonGenerator(null, writer);
+					JsonGenerator generator = PubFetcher.getJsonGenerator(null, writer);
+					PubFetcher.jsonBegin(generator, version, argv);
 					webpage.toStringPlainJson(generator);
+					PubFetcher.jsonEnd(generator);
 					generator.close();
 					System.out.println(writer.toString());
 					break;
@@ -170,8 +167,10 @@ public final class PubFetcherMethods {
 				case html: System.out.println(webpage.toStringHtml("")); break;
 				case json:
 					StringWriter writer = new StringWriter();
-					JsonGenerator generator = getJsonGenerator(null, writer);
+					JsonGenerator generator = PubFetcher.getJsonGenerator(null, writer);
+					PubFetcher.jsonBegin(generator, version, argv);
 					webpage.toStringJson(generator, fetcherArgs, true);
+					PubFetcher.jsonEnd(generator);
 					generator.close();
 					System.out.println(writer.toString());
 					break;
@@ -533,31 +532,6 @@ public final class PubFetcherMethods {
 		logger.info("Removed {} {}s (based on {})", ids.size() - fail, type, getIdString(type));
 	}
 
-	private static JsonGenerator getJsonGenerator(String path, StringWriter writer) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		mapper.enable(SerializationFeature.CLOSE_CLOSEABLE);
-		JsonFactory factory = mapper.getFactory();
-		JsonGenerator generator;
-		if (path == null) {
-			generator = factory.createGenerator(writer);
-		} else {
-			generator = factory.createGenerator(Paths.get(path).toFile(), JsonEncoding.UTF8);
-		}
-		generator.useDefaultPrettyPrinter();
-		return generator;
-	}
-
-	private static void jsonBegin(JsonGenerator generator, Version version, String[] argv) throws IOException {
-		generator.writeStartObject();
-		generator.writeObjectField("version", version);
-		generator.writeObjectField("argv", argv);
-	}
-
-	private static void jsonEnd(JsonGenerator generator) throws IOException {
-		generator.writeEndObject();
-	}
-
 	private static void printIdsPub(PrintStream ps, Set<PublicationIds> pubIds, boolean plain, Format format, JsonGenerator generator) throws IOException {
 		if (format == Format.html) {
 			if (plain) ps.println("<table border=\"1\">");
@@ -625,13 +599,13 @@ public final class PubFetcherMethods {
 	private static void txtIds(Set<? extends Object> ids, boolean plain, Format format, Version version, String[] argv, String txt, DatabaseEntryType type) throws IOException {
 		logger.info("Output {} {} {}s to file {} in {}", ids.size(), type, getIdString(type), txt, format.getName());
 		if (format == Format.json) {
-			try (JsonGenerator generator = getJsonGenerator(txt, null)) {
-				jsonBegin(generator, version, argv);
+			try (JsonGenerator generator = PubFetcher.getJsonGenerator(txt, null)) {
+				PubFetcher.jsonBegin(generator, version, argv);
 				switch (type) {
 					case publication: printIdsPub(null, (Set<PublicationIds>) ids, plain, format, generator); break;
 					case webpage: case doc: printIdsWeb(null, (Set<String>) ids, format, generator, type); break;
 				}
-				jsonEnd(generator);
+				PubFetcher.jsonEnd(generator);
 			}
 		} else {
 			try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(PubFetcher.outputPath(txt))), true, "UTF-8")) {
@@ -1229,10 +1203,10 @@ public final class PubFetcherMethods {
 		logger.info("Output {} {}s to file {}{}{} in {}",
 				entries.size(), type, txt, plain ? " without metadata" : "", parts != null && type == DatabaseEntryType.publication ? " with parts " + parts : "", format.getName());
 		if (format == Format.json) {
-			try (JsonGenerator generator = getJsonGenerator(txt, null)) {
-				jsonBegin(generator, version, argv);
+			try (JsonGenerator generator = PubFetcher.getJsonGenerator(txt, null)) {
+				PubFetcher.jsonBegin(generator, version, argv);
 				print(null, entries, plain, format, generator, parts, fetcherArgs, type);
-				jsonEnd(generator);
+				PubFetcher.jsonEnd(generator);
 			}
 		} else {
 			try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(PubFetcher.outputPath(txt))), true, "UTF-8")) {
@@ -1274,10 +1248,10 @@ public final class PubFetcherMethods {
 	private static void txtTopHosts(Map<String, Integer> topHosts, Format format, Version version, String[] argv, String txt, DatabaseEntryType type) throws IOException {
 		logger.info("Output {} top hosts from {}s to file {} in {}", topHosts.size(), type, txt, format.getName());
 		if (format == Format.json) {
-			try (JsonGenerator generator = getJsonGenerator(txt, null)) {
-				jsonBegin(generator, version, argv);
+			try (JsonGenerator generator = PubFetcher.getJsonGenerator(txt, null)) {
+				PubFetcher.jsonBegin(generator, version, argv);
 				printTopHosts(null, topHosts, format, generator, type);
-				jsonEnd(generator);
+				PubFetcher.jsonEnd(generator);
 			}
 		} else {
 			try (PrintStream ps = new PrintStream(new BufferedOutputStream(Files.newOutputStream(PubFetcher.outputPath(txt))), true, "UTF-8")) {
@@ -1792,7 +1766,7 @@ public final class PubFetcherMethods {
 		}
 		if (args.fetchWebpageSelector != null) {
 			fetchWebpageSelector(args.fetchWebpageSelector.get(0), args.fetchWebpageSelector.get(1), args.fetchWebpageSelector.get(2),
-				(args.fetchWebpageSelector.get(3) == null || args.fetchWebpageSelector.get(3).isEmpty()) ? null : Boolean.valueOf(args.fetchWebpageSelector.get(3)), args.plain, args.format, fetcher, fetcherArgs);
+				(args.fetchWebpageSelector.get(3) == null || args.fetchWebpageSelector.get(3).isEmpty()) ? null : Boolean.valueOf(args.fetchWebpageSelector.get(3)), args.plain, args.format, version, argv, fetcher, fetcherArgs);
 		}
 
 		if (args.scrapeSite != null) scrapeSite(args.scrapeSite, fetcher);
@@ -1983,14 +1957,14 @@ public final class PubFetcherMethods {
 			StringWriter writer = null;
 			if (args.format == Format.json) {
 				writer = new StringWriter();
-				generator = getJsonGenerator(null, writer);
-				jsonBegin(generator, version, argv);
+				generator = PubFetcher.getJsonGenerator(null, writer);
+				PubFetcher.jsonBegin(generator, version, argv);
 			}
 			outIds(publicationIds, args.plain, args.format, generator, DatabaseEntryType.publication);
 			outIds(webpageUrls, args.plain, args.format, generator, DatabaseEntryType.webpage);
 			outIds(docUrls, args.plain, args.format, generator, DatabaseEntryType.doc);
 			if (args.format == Format.json) {
-				jsonEnd(generator);
+				PubFetcher.jsonEnd(generator);
 				generator.close();
 				System.out.println(writer.toString());
 			}
@@ -2166,14 +2140,14 @@ public final class PubFetcherMethods {
 			StringWriter writer = null;
 			if (args.format == Format.json) {
 				writer = new StringWriter();
-				generator = getJsonGenerator(null, writer);
-				jsonBegin(generator, version, argv);
+				generator = PubFetcher.getJsonGenerator(null, writer);
+				PubFetcher.jsonBegin(generator, version, argv);
 			}
 			out(publications, args.plain, args.format, generator, args.outPart, fetcherArgs, DatabaseEntryType.publication);
 			out(webpages, args.plain, args.format, generator, null, fetcherArgs, DatabaseEntryType.webpage);
 			out(docs, args.plain, args.format, generator, null, fetcherArgs, DatabaseEntryType.doc);
 			if (args.format == Format.json) {
-				jsonEnd(generator);
+				PubFetcher.jsonEnd(generator);
 				generator.close();
 				System.out.println(writer.toString());
 			}
@@ -2194,14 +2168,14 @@ public final class PubFetcherMethods {
 			StringWriter writer = null;
 			if (args.format == Format.json) {
 				writer = new StringWriter();
-				generator = getJsonGenerator(null, writer);
-				jsonBegin(generator, version, argv);
+				generator = PubFetcher.getJsonGenerator(null, writer);
+				PubFetcher.jsonBegin(generator, version, argv);
 			}
 			outTopHosts(topHostsPublications, args.format, generator, DatabaseEntryType.publication);
 			outTopHosts(topHostsWebpages, args.format, generator, DatabaseEntryType.webpage);
 			outTopHosts(topHostsDocs, args.format, generator, DatabaseEntryType.doc);
 			if (args.format == Format.json) {
-				jsonEnd(generator);
+				PubFetcher.jsonEnd(generator);
 				generator.close();
 				System.out.println(writer.toString());
 			}

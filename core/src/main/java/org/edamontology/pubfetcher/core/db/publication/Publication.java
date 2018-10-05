@@ -81,6 +81,8 @@ public class Publication extends DatabaseEntry<Publication> {
 	private Set<Link> visitedSites = new LinkedHashSet<>();
 
 	private static final Pattern VERSIONED = Pattern.compile("^[._-][0-9]+$");
+	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/F1000RESEARCH\\..+$");
+	private static final Pattern ZENODO = Pattern.compile("^https?://(www\\.)?zenodo\\.org/.+$");
 
 	public Publication() {
 		pmid = new PublicationPartString(PublicationPartName.pmid);
@@ -178,7 +180,9 @@ public class Publication extends DatabaseEntry<Publication> {
 				if (!part.isEmpty() && !part.getContent().equals(content)) {
 					logger.warn("Old ID {} is different from new ID {} from {} of type {}", part.getContent(), content, url, type);
 					if (part.getContent().startsWith(content) && VERSIONED.matcher(part.getContent().substring(content.length())).matches()
-							|| content.startsWith(part.getContent()) && VERSIONED.matcher(content.substring(part.getContent().length())).matches()) {
+							|| content.startsWith(part.getContent()) && VERSIONED.matcher(content.substring(part.getContent().length())).matches()
+							|| F1000_DOI.matcher(part.getContent()).matches() && F1000_DOI.matcher(content).matches()
+							|| ZENODO.matcher(url).matches()) {
 						logger.warn("Setting ID to {} (instead of {})", part.getContent(), content);
 						content = part.getContent();
 					}

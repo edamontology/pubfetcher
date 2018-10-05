@@ -447,7 +447,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 
 # researchgate
 0,0,25,89,0,1608,0,2,https://doi.org/10.13140/RG.2.1.2763.4807
-0,0,25,73,0,1435,0,2,https://doi.org/10.13140/RG.2.1.3547.6561
+0,0,0,73,0,1435,0,2,https://doi.org/10.13140/RG.2.1.3547.6561
 
 # frontiersin
 0,0,24,215,0,0,7809,2,https://doi.org/10.3389/FGENE.2014.00130

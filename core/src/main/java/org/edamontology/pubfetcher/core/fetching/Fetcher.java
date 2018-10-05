@@ -122,6 +122,7 @@ public class Fetcher {
 	private static final String SCIENCEDIRECT_LINK = "https://www.sciencedirect.com/science/article/pii/";
 
 	static final Pattern BIORXIV = Pattern.compile("^https?://(www\\.)?biorxiv\\.org/.+$");
+	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/F1000RESEARCH\\..+$");
 
 	private static Set<ActiveHost> activeHosts = new HashSet<>();
 
@@ -1295,8 +1296,12 @@ public class Fetcher {
 					mismatch = true;
 				}
 				if (!publication.getDoi().isEmpty() && doi != null && !publication.getDoi().getContent().equals(doi)) {
-					logger.error("Mismatch between current DOI {} and returned DOI {} in Europe PMC results {}", publication.getDoi().getContent(), doi, doc.location());
-					mismatch = true;
+					if (F1000_DOI.matcher(publication.getDoi().getContent()).matches() && F1000_DOI.matcher(doi).matches()) {
+						logger.warn("Mismatch between current DOI {} and returned DOI {} in Europe PMC results {}", publication.getDoi().getContent(), doi, doc.location());
+					} else {
+						logger.error("Mismatch between current DOI {} and returned DOI {} in Europe PMC results {}", publication.getDoi().getContent(), doi, doc.location());
+						mismatch = true;
+					}
 				}
 				if (mismatch) continue;
 

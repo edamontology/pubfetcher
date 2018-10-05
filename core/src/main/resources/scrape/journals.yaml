@@ -496,9 +496,9 @@ iospress:
 
 researchgate:
   doi: .publication-header .publication-meta-secondary:matchText, .publication-header .publication-meta-secondary > :first-child
-  title: .publication-header > h1
-  abstract: .publication-abstract > :not(:first-child)
-  pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text
+  title: .publication-header > h1, .publication-details__section > h1
+  abstract: .publication-abstract > :not(:first-child), .publication-details__section > div > div:matches(^Abstract$) + div
+  pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text, a.gtm-fulltext-download-btn-section
 
 frontiersin:
   doi: .abstract-container > .article-header-container > .header-bar-three > a
@@ -544,7 +544,7 @@ sagepub:
   doi: .articleMeta .doiWidgetLink
   title: .hlFld-Title > .publicationContentTitle > h1
   keywords: .abstractKeywords > .hlFld-KeywordText a
-  abstract: .contents > :not(.doNotShow) .hlFld-Abstract > .abstractSection > *
+  abstract: .hlFld-Abstract > .abstractSection > *
   fulltext_a: .showFullText > a
   pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
 

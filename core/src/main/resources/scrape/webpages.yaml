@@ -44,10 +44,14 @@
   content: body
   javascript: 'true'
 
+'git\.bioconductor\.org/+packages/':
+  title: ''
+  content: ''
+
 'github\.com/+[^/]+/+[^/]+/*$':
   title: h1 > [itemprop=name]
   content: '.repository-content [itemprop=about], #readme > .Box-body > * > *'
-  license: .numbers-summary a:has(.octicon-law)
+  license: .numbers-summary a:has(.octicon-law):not(:matches(^View license$))
   language: .repository-lang-stats-numbers .lang
 
 'github\.com/+[^/]+/*$':
@@ -226,4 +230,4 @@
 
 'mybiosoftware\.com':
   title: .title > h1
-  content: .entry > p:matches(^[:][:] DESCRIPTION$) + p, .entry > p:matches(^[:][:] DESCRIPTION$) + p + p:not(:matches(^[:][:] DEVELOPER$))
+  content: .entry > p:matches(^[:][:] DESCRIPTION$) + p, .entry > p:matches(^[:][:] DESCRIPTION$) + p + p:not(:matches(^[:][:] ?DEVELOPER$))

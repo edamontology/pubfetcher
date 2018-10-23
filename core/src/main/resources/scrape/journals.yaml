@@ -225,7 +225,7 @@ nature:
   title: 'article header h1, #article #content > .article > h2.article-title'
   keywords: div[data-component=article-subject-links] a[data-track-action=view subject]
   abstract: 'article .article-body > section > #abstract-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section) > *, article .article-body > div:not(:has(#access-options))'
+  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section) > *, article .article-body > div:not(:has(#access-options))'
   pdf_a: a[data-article-pdf]
 
 plos:
@@ -279,6 +279,7 @@ arxiv:
   pdf_src: /abs/
   pdf_dst: /pdf/
 
+# htmlunit is currently unable to execute the JavaScript
 ieee:
   pmid: div[ng-if=::vm.details.pubMedId] > a
   doi: div[ng-if=::vm.details.doi] > a
@@ -290,6 +291,7 @@ ieee:
   pdf_src: /+document/+([0-9]+).*
   pdf_dst: /stamp/stamp.jsp\?tp=&arnumber=$1
 
+# htmlunit is currently unable to execute the JavaScript
 ieee_full:
   doi: '#dt_doi'
   title: '#at-glance .text h1'
@@ -366,7 +368,7 @@ peerj_preprints:
   pdf_a: .article-download-pdf
 
 dtu:
-  doi: .digital_object_identifiers a[href^=http://dx.doi.org]
+  doi: .digital_object_identifiers a[href^=https://doi.org]
   title: .publication_view_title h2.title
   keywords_split: .keywords > li
   abstract: .abstract > *

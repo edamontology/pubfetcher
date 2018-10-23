@@ -31,7 +31,7 @@ title,content,license,language,webpage
 6,842,0,0,https://github.com/KorfLab/DupHMM/wiki
 6,1897,0,0,https://github.com/ollyburren/vseams/wiki
 11,1597,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,8903,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,8968,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -183,8 +183,8 @@ title,content,license,language,webpage
 27,2288,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
 
 # en.wikipedia.org
-5,1254,0,0,https://en.wikipedia.org/wiki/CLIPZ
-9,1174,0,0,https://en.wikipedia.org/wiki/ProRepeat
+5,1253,0,0,https://en.wikipedia.org/wiki/CLIPZ
+9,1173,0,0,https://en.wikipedia.org/wiki/ProRepeat
 
 # webchem.ncbr.muni.cz wiki
 27,1933,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
@@ -192,7 +192,7 @@ title,content,license,language,webpage
 
 # biocatalogue.org
 16,407,0,0,https://www.biocatalogue.org/services/2
-43,1492,0,0,https://www.biocatalogue.org/services/3792
+43,1493,0,0,https://www.biocatalogue.org/services/3792
 6,1136,0,0,https://www.biocatalogue.org/services/1928
 18,618,102,0,https://www.biocatalogue.org/services/1418
 5,478,26,0,https://www.biocatalogue.org/services/2059

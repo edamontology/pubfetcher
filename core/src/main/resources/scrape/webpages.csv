@@ -2,14 +2,14 @@ title,content,license,language,webpage
 
 # bioconductor.org
 9,642,5,8,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
-7,937,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
+7,845,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
 9,264,12,8,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
 8,624,5,8,http://bioconductor.org/packages/release/bioc/html/synapter.html
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54398,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,29699,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54366,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,29700,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
@@ -31,7 +31,7 @@ title,content,license,language,webpage
 6,842,0,0,https://github.com/KorfLab/DupHMM/wiki
 6,1897,0,0,https://github.com/ollyburren/vseams/wiki
 11,1597,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,8968,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,8970,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -110,7 +110,12 @@ title,content,license,language,webpage
 5,14447,0,0,https://bitbucket.org/tobiasmarschall/mosdi
 7,5758,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
 12,0,0,0,https://bitbucket.org/account/user/ipk_bit_team/projects/ED_PUB
-6,444,0,0,https://bitbucket.org/andrea/svd-phy/src/09c2ad16b082ea0775467a4d3de6d576cca52272/DESCRIPTION?at=default&fileviewer=file-view-default
+6,0,0,0,https://bitbucket.org/paiyetan/m2lite/downloads
+
+# bitbucker.org src
+21,444,0,0,https://bitbucket.org/andrea/svd-phy/src/09c2ad16b082ea0775467a4d3de6d576cca52272/DESCRIPTION?at=default&fileviewer=file-view-default
+8,741,0,0,https://bitbucket.org/paiyetan/m2lite/src
+11,0,0,0,https://bitbucket.org/paiyetan/xglycscan/src
 
 # sanger.ac.uk
 7,233,0,0,http://www.sanger.ac.uk/science/tools/artemis
@@ -134,7 +139,7 @@ title,content,license,language,webpage
 
 # zhanglab.ccmb.med.umich.edu
 47,769,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3557,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+79,3380,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
 13,3718,0,9,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
@@ -145,7 +150,7 @@ title,content,license,language,webpage
 14,2225,4,0,http://www.bcgsc.ca/platform/bioinfo/software/ds
 
 # compomics.github.io
-13,12766,0,0,https://compomics.github.io/projects/peptide-shaker.html
+13,12780,0,0,https://compomics.github.io/projects/peptide-shaker.html
 8,397,0,0,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
@@ -203,3 +208,8 @@ title,content,license,language,webpage
 94,370,0,0,http://www.mybiosoftware.com/sissrs-1-4-produce-list-peakmaxima-aligned-positions.html
 73,523,0,0,http://www.mybiosoftware.com/haddock-2-1-docking-approach-for-the-modeling-of-biomolecular-complexes.html
 77,302,0,0,http://www.mybiosoftware.com/frma-1-13-0-frmatools-1-13-0-single-microarray-preprocessing-analysis.html
+
+# apps.cytoscape.org
+90,1983,0,0,http://apps.cytoscape.org/apps/cyspanningtree
+99,1010,0,0,http://apps.cytoscape.org/apps/gasoline
+52,8102,0,0,http://apps.cytoscape.org/apps/kddn

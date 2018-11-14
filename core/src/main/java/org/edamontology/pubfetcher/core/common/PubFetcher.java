@@ -761,6 +761,7 @@ public final class PubFetcher {
 				}
 			}
 		}
+		logger.info("Loaded {} publications", publications.size());
 		return publications;
 	}
 

@@ -56,7 +56,7 @@
 
 'github\.com/+[^/]+/*$':
   title: h1
-  content: .orghead .org-description, .orghead .org-description + div, .repo-list > li > :not(.f6) > :not(.f6)
+  content: .orghead .org-description, .orghead .org-description + div, .repo-list > ul > li > :not(.f6) > :not(.f6)
 
 'github\.com/+[^/]+/+[^/]+/+wiki(/|$)':
   title: h1 > [itemprop=name]
@@ -121,7 +121,11 @@
 
 'bitbucket\.org':
   title: .app-header--breadcrumbs li:last-of-type
-  content: '#readme > :not(.blank-slate-readme), #wiki-content, #source-view .code'
+  content: '#readme > :not(.blank-slate-readme), #wiki-content'
+
+'bitbucket\.org/+[^/]+/+[^/]+/+src':
+  title: '#source-path > h1'
+  content: '#source-container .code, #source-container .readme'
 
 'sanger\.ac\.uk':
   title: '#main-content > .pagetitle'
@@ -184,8 +188,12 @@
   content: body
   javascript: 'false'
 
-# java.lang.OutOfMemoryError in htmlunit
 'dad\.fao\.org':
+  title: head > title
+  content: body
+  javascript: 'false'
+
+'snpedia\.com':
   title: head > title
   content: body
   javascript: 'false'
@@ -231,3 +239,7 @@
 'mybiosoftware\.com':
   title: .title > h1
   content: .entry > p:matches(^[:][:] DESCRIPTION$) + p, .entry > p:matches(^[:][:] DESCRIPTION$) + p + p:not(:matches(^[:][:] ?DEVELOPER$))
+
+'apps\.cytoscape\.org/+apps/':
+  title: 'body > div > div > div:has(#app-name)'
+  content: '#cy-app-details-md, #cy-app-details-tab > div:first-child a'

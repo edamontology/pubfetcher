@@ -3,23 +3,24 @@ title,content,license,language,webpage
 # bioconductor.org
 9,642,5,8,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
 7,845,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
-9,264,12,8,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
-8,624,5,8,http://bioconductor.org/packages/release/bioc/html/synapter.html
+9,264,12,18,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
+8,640,5,28,http://bioconductor.org/packages/release/bioc/html/synapter.html
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54366,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,29700,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54921,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,30039,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
 
 # github.com
-7,942,0,4,https://github.com/sgoodswe/vacceed
+7,942,0,11,https://github.com/sgoodswe/vacceed
 9,15188,0,6,https://github.com/quwubin/MFEprimer
-4,5887,0,16,https://github.com/SciLifeLab/facs/
+4,5887,0,27,https://github.com/SciLifeLab/facs/
 10,10673,7,6,https://github.com/petmri/ROCKETSHIP
-4,1863,3,1,https://github.com/pschorderet/NEAT
+4,1863,3,7,https://github.com/pschorderet/NEAT
+9,422,3,24,https://github.com/arq5x/poretools
 
 # github.com user
 7,1242,0,0,https://github.com/SeqWare
@@ -27,11 +28,11 @@ title,content,license,language,webpage
 37,2179,0,0,https://github.com/brisskit-uol/
 
 # github.com wiki
-4,3245,0,0,https://github.com/synergy-zju/gips/wiki
-6,842,0,0,https://github.com/KorfLab/DupHMM/wiki
-6,1897,0,0,https://github.com/ollyburren/vseams/wiki
-11,1597,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,8970,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+4,3259,0,0,https://github.com/synergy-zju/gips/wiki
+6,846,0,0,https://github.com/KorfLab/DupHMM/wiki
+6,1909,0,0,https://github.com/ollyburren/vseams/wiki
+11,1615,0,0,https://github.com/PALMsiever/palm-siever/wiki
+6,9107,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -45,8 +46,8 @@ title,content,license,language,webpage
 6,0,0,0,https://github.com/RGLab/ggcyto/issues
 
 # github.com blob
-10,40342,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
-4,489,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
+10,40369,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
+4,493,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
 # galaxy.pasteur.fr
 0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
@@ -60,16 +61,18 @@ title,content,license,language,webpage
 
 # emboss.open-bio.org
 # begins wrongly with "The master copies of EMBOSS documentation are available at on the EMBOSS Wiki."
-13,18650,0,0,http://emboss.open-bio.org/rel/rel6/apps/backtranambig.html
-6,82999,0,0,http://emboss.open-bio.org/rel/rel6/apps/banana.html
-8,15424,0,0,http://emboss.open-bio.org/rel/rel6/apps/btwisted.html
-4,14083,0,0,http://emboss.open-bio.org/rel/rel6/apps/yank.html
+13,18655,0,0,http://emboss.open-bio.org/rel/rel6/apps/backtranambig.html
+6,83005,0,0,http://emboss.open-bio.org/rel/rel6/apps/banana.html
+8,15429,0,0,http://emboss.open-bio.org/rel/rel6/apps/btwisted.html
+4,14085,0,0,http://emboss.open-bio.org/rel/rel6/apps/yank.html
 
 # sourceforge.net
 7,1036,0,6,https://sourceforge.net/projects/ambient-bio/?source=navbar
 7,182,0,4,https://sourceforge.net/projects/asm2ace/
 4,315,11,0,https://sourceforge.net/projects/bait/
 8,420,46,6,https://sourceforge.net/projects/basilisk-dbn/
+9,267,46,16,https://sourceforge.net/projects/cnvoffseq/
+10,220,46,23,https://sourceforge.net/projects/omicbrowse/
 
 # sourceforge.net files
 10,0,0,0,https://sourceforge.net/projects/protms/files/mres2x/
@@ -78,17 +81,17 @@ title,content,license,language,webpage
 4,7784,0,0,https://sourceforge.net/projects/plek/files/
 
 # sourceforge.net wiki
-32,5602,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
-4,5258,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
-4,972,0,0,https://sourceforge.net/p/treq/home/Home/
-6,14121,0,0,https://sourceforge.net/p/virmid/wiki/Home/
+32,5645,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
+4,5292,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
+4,974,0,0,https://sourceforge.net/p/treq/home/Home/
+6,14176,0,0,https://sourceforge.net/p/virmid/wiki/Home/
 21,3979,0,0,https://sourceforge.net/p/metabolic-network-sgl/git/ci/master/tree/
 
 # code.google.com
-6,1984,10,0,https://code.google.com/archive/p/acpype
-5,429,14,0,https://code.google.com/archive/p/aquad/
-6,2580,18,0,https://code.google.com/archive/p/tag-db
-24,2910,0,0,https://code.google.com/archive/p/ehu-bio/wikis/PAnalyzer.wiki
+6,2025,10,0,https://code.google.com/archive/p/acpype
+5,431,14,0,https://code.google.com/archive/p/aquad/
+6,2615,18,0,https://code.google.com/archive/p/tag-db
+24,2976,0,0,https://code.google.com/archive/p/ehu-bio/wikis/PAnalyzer.wiki
 
 # cran.r-project.org
 87,412,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
@@ -97,29 +100,29 @@ title,content,license,language,webpage
 0,4421,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
 
 # cran.r-project.org vignettes
-25,29622,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
+25,29820,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
 
 # bibiserv.cebitec.uni-bielefeld.de
-4,2682,0,0,https://bibiserv.cebitec.uni-bielefeld.de/acdc/
-6,670,0,0,https://bibiserv.cebitec.uni-bielefeld.de/agenda/
-6,1518,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
+4,2685,0,0,https://bibiserv.cebitec.uni-bielefeld.de/acdc/
+6,672,0,0,https://bibiserv.cebitec.uni-bielefeld.de/agenda/
+6,1530,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
 
 # bitbucket.org
 9,1796,0,0,https://bitbucket.org/mckinsel/shortfuse
 9,0,0,0,https://bitbucket.org/pchanda/hapzipper
-5,14447,0,0,https://bitbucket.org/tobiasmarschall/mosdi
-7,5758,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
+5,14529,0,0,https://bitbucket.org/tobiasmarschall/mosdi
+7,5784,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
 12,0,0,0,https://bitbucket.org/account/user/ipk_bit_team/projects/ED_PUB
 6,0,0,0,https://bitbucket.org/paiyetan/m2lite/downloads
 
 # bitbucker.org src
-21,444,0,0,https://bitbucket.org/andrea/svd-phy/src/09c2ad16b082ea0775467a4d3de6d576cca52272/DESCRIPTION?at=default&fileviewer=file-view-default
-8,741,0,0,https://bitbucket.org/paiyetan/m2lite/src
+45,0,0,0,https://bitbucket.org/dbeisser/taxmapper_supplement/src/master/databases/taxonomy/
+8,749,0,0,https://bitbucket.org/paiyetan/m2lite/src
 11,0,0,0,https://bitbucket.org/paiyetan/xglycscan/src
 
 # sanger.ac.uk
 7,233,0,0,http://www.sanger.ac.uk/science/tools/artemis
-22,886,0,0,http://www.sanger.ac.uk/science/tools/ssahasnp
+22,888,0,0,http://www.sanger.ac.uk/science/tools/ssahasnp
 
 # dna.leeds.ac.uk
 21,1465,0,0,http://dna.leeds.ac.uk/AffyErrorRate/
@@ -127,10 +130,10 @@ title,content,license,language,webpage
 12,1762,0,0,http://dna.leeds.ac.uk/methylviewer/
 
 # tools.proteomecenter.org
-14,999,0,0,http://tools.proteomecenter.org/Libra.php
-0,545,0,0,http://tools.proteomecenter.org/mzStar.php
-0,2567,0,0,http://tools.proteomecenter.org/XLink.php
-18,9985,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
+14,1004,0,0,http://tools.proteomecenter.org/Libra.php
+0,549,0,0,http://tools.proteomecenter.org/mzStar.php
+0,2588,0,0,http://tools.proteomecenter.org/XLink.php
+18,10143,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
 
 # genome.sph.umich.edu
 3,3949,0,0,https://genome.sph.umich.edu/wiki/Arf
@@ -138,66 +141,66 @@ title,content,license,language,webpage
 # getting timeout
 
 # zhanglab.ccmb.med.umich.edu
-47,769,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3380,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+47,776,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
+79,3439,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
-13,3718,0,9,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
-10,1390,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
+13,3746,0,9,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
+10,1416,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
 
 # bcgsc.ca platform
 6,305,19,0,http://www.bcgsc.ca/platform/bioinfo/software/anchor
 14,2225,4,0,http://www.bcgsc.ca/platform/bioinfo/software/ds
 
 # compomics.github.io
-13,12780,0,0,https://compomics.github.io/projects/peptide-shaker.html
+13,12795,0,0,https://compomics.github.io/projects/peptide-shaker.html
 8,397,0,0,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
-7,8015,0,0,https://rostlab.org/owiki/index.php/CHOPPER
+7,8025,0,0,https://rostlab.org/owiki/index.php/CHOPPER
 10,1450,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
 
 # uea.ac.uk
-5,3023,0,0,https://www.uea.ac.uk/computing/psiko
-10,2287,0,0,http://www.uea.ac.uk/computing/my-closure
+5,3042,0,0,https://www.uea.ac.uk/computing/psiko
+10,2306,0,0,http://www.uea.ac.uk/computing/my-closure
 
 # rna.informatik.uni-freiburg.de
-25,3376,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
-27,2185,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+25,3423,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+27,2217,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
 
 # gitlab.com
-11,200,31,0,https://gitlab.com/CarlBrunius/sampleDrift
+11,201,31,0,https://gitlab.com/CarlBrunius/sampleDrift
 6,134,9,0,https://gitlab.com/Gustafsson-lab/lassim
 7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
-16,779,26,6,https://pypi.python.org/pypi/omics_pipe
-13,1955,35,13,http://pypi.python.org/pypi/plastid
-17,69,48,11,https://pypi.org/project/bio-apricot/
+16,779,26,14,https://pypi.python.org/pypi/omics_pipe
+13,1963,35,28,http://pypi.python.org/pypi/plastid
+17,69,48,24,https://pypi.org/project/bio-apricot/
 
 # bioinformatics.org wiki
-32,2062,0,0,http://www.bioinformatics.org/bna/wiki/
-10,19130,0,0,https://www.bioinformatics.org/chemchains/wiki/Main/Tutorial
+32,2120,0,0,http://www.bioinformatics.org/bna/wiki/
+10,19464,0,0,https://www.bioinformatics.org/chemchains/wiki/Main/Tutorial
 
 # bioinformatics.org groups/project
 18,179,35,0,http://www.bioinformatics.org/groups/?group_id=493
 47,252,35,0,http://www.bioinformatics.org/project/?group_id=39
 
 # omics.pnl.gov
-60,962,0,0,https://omics.pnl.gov/software/concatenated-dta-mascot-generic-file-mgf-file-converter
-27,2288,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
+60,973,0,0,https://omics.pnl.gov/software/concatenated-dta-mascot-generic-file-mgf-file-converter
+27,2305,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
 
 # en.wikipedia.org
-5,1253,0,0,https://en.wikipedia.org/wiki/CLIPZ
-9,1173,0,0,https://en.wikipedia.org/wiki/ProRepeat
+5,1269,0,0,https://en.wikipedia.org/wiki/CLIPZ
+9,1187,0,0,https://en.wikipedia.org/wiki/ProRepeat
 
 # webchem.ncbr.muni.cz wiki
-27,1933,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
-26,1430,0,0,http://webchem.ncbr.muni.cz/Wiki/MotiveValidator:UserManual
+27,1991,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
+26,1466,0,0,http://webchem.ncbr.muni.cz/Wiki/MotiveValidator:UserManual
 
 # biocatalogue.org
 16,407,0,0,https://www.biocatalogue.org/services/2
-43,1493,0,0,https://www.biocatalogue.org/services/3792
+43,1492,0,0,https://www.biocatalogue.org/services/3792
 6,1136,0,0,https://www.biocatalogue.org/services/1928
 18,618,102,0,https://www.biocatalogue.org/services/1418
 5,478,26,0,https://www.biocatalogue.org/services/2059
@@ -210,6 +213,6 @@ title,content,license,language,webpage
 77,302,0,0,http://www.mybiosoftware.com/frma-1-13-0-frmatools-1-13-0-single-microarray-preprocessing-analysis.html
 
 # apps.cytoscape.org
-90,1983,0,0,http://apps.cytoscape.org/apps/cyspanningtree
-99,1010,0,0,http://apps.cytoscape.org/apps/gasoline
-52,8102,0,0,http://apps.cytoscape.org/apps/kddn
+92,1983,0,0,http://apps.cytoscape.org/apps/cyspanningtree
+101,1010,0,0,http://apps.cytoscape.org/apps/gasoline
+54,8102,0,0,http://apps.cytoscape.org/apps/kddn

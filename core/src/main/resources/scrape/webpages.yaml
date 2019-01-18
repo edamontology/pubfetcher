@@ -52,7 +52,7 @@
   title: h1 > [itemprop=name]
   content: '.repository-content [itemprop=about], #readme > .Box-body > * > *'
   license: .numbers-summary a:has(.octicon-law):not(:matches(^View license$))
-  language: .repository-lang-stats-numbers .lang
+  language: .repository-lang-stats-numbers a:has(.percent:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > .lang # only take languages with percentage >= 5%
 
 'github\.com/+[^/]+/*$':
   title: h1
@@ -89,7 +89,7 @@
   title: .title > h1
   content: .title > .summary, article > :first-child .description, article .features, article a[itemprop=ApplicationCategory]
   license: .project-info > :matchesOwn(^License$) + a
-  language: .project-info > :matchesOwn(^Programming Language$) + a
+  language: .project-info > :matchesOwn(^Programming Language$) ~ a
 
 'sourceforge\.net/+projects/+[^/]+/+files/':
   title: .title > h1
@@ -202,7 +202,7 @@
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.project-title
   content: '.project-home-panel .project-description > :not(button), #readme .file-content > *'
-  license: .project-home-panel .project-license
+  license: .project-home-panel .project-stats ul > li:first-child
 
 'pypi\.(python\.)?org':
   title: h1.package-header__name

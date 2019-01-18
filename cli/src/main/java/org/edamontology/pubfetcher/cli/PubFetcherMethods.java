@@ -1598,31 +1598,6 @@ public final class PubFetcherMethods {
 			filter(docs, w -> w.getContentTime() <= args.contentTimeLess, "docs", "content time less than or equal to " + timeHuman(args.contentTimeLess), true, !preFilter);
 		}
 
-		if (args.titleAndContent != null) {
-			filterRegex(webpages, w -> w.getTitleAndContent(), args.titleAndContent, "webpages", "title and content", true, !preFilter);
-			filterRegex(docs, w -> w.getTitleAndContent(), args.titleAndContent, "docs", "title and content", true, !preFilter);
-		}
-		if (args.notTitleAndContent != null) {
-			filterRegex(webpages, w -> w.getTitleAndContent(), args.notTitleAndContent, "webpages", "title and content", false, !preFilter);
-			filterRegex(docs, w -> w.getTitleAndContent(), args.notTitleAndContent, "docs", "title and content", false, !preFilter);
-		}
-		if (args.titleAndContentSize != null) {
-			filter(webpages, w -> args.titleAndContentSize.contains(w.getTitleAndContent().length()), "webpages", "title and content length " + args.titleAndContentSize, true, !preFilter);
-			filter(docs, w -> args.titleAndContentSize.contains(w.getTitleAndContent().length()), "docs", "title and content length " + args.titleAndContentSize, true, !preFilter);
-		}
-		if (args.notTitleAndContentSize != null) {
-			filter(webpages, w -> args.notTitleAndContentSize.contains(w.getTitleAndContent().length()), "webpages", "title and content length " + args.notTitleAndContentSize, false, !preFilter);
-			filter(docs, w -> args.notTitleAndContentSize.contains(w.getTitleAndContent().length()), "docs", "title and content length " + args.notTitleAndContentSize, false, !preFilter);
-		}
-		if (args.titleAndContentSizeMore != null) {
-			filter(webpages, w -> w.getTitleAndContent().length() > args.titleAndContentSizeMore, "webpages", "title and content length more than " + args.titleAndContentSizeMore, true, !preFilter);
-			filter(docs, w -> w.getTitleAndContent().length() > args.titleAndContentSizeMore, "docs", "title and content length more than " + args.titleAndContentSizeMore, true, !preFilter);
-		}
-		if (args.titleAndContentSizeLess != null) {
-			filter(webpages, w -> w.getTitleAndContent().length() < args.titleAndContentSizeLess, "webpages", "title and content length less than " + args.titleAndContentSizeLess, true, !preFilter);
-			filter(docs, w -> w.getTitleAndContent().length() < args.titleAndContentSizeLess, "docs", "title and content length less than " + args.titleAndContentSizeLess, true, !preFilter);
-		}
-
 		if (args.license != null) {
 			filterRegex(webpages, w -> w.getLicense(), args.license, "webpages", "license", true, !preFilter);
 			filterRegex(docs, w -> w.getLicense(), args.license, "docs", "license", true, !preFilter);

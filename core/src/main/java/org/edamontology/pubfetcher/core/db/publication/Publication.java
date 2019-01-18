@@ -242,7 +242,9 @@ public class Publication extends DatabaseEntry<Publication> {
 		return doi;
 	}
 	public boolean setDoi(String doi, PublicationPartType type, String url, FetcherArgs fetcherArgs) {
-		doi = PubFetcher.normaliseDoi(doi);
+		if (doi != null) {
+			doi = PubFetcher.normaliseDoi(doi.trim());
+		}
 		return setId(doi, type, url, fetcherArgs, PubFetcher::isDoi, this.doi);
 	}
 

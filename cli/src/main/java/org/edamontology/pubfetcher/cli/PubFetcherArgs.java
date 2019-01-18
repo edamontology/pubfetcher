@@ -745,24 +745,6 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-content-time-less" }, converter = ISO8601Converter.class, description = "Only keep webpages and docs whose content time is less than or equal to the given time")
 	Long contentTimeLess = null;
 
-	@Parameter(names = { "-title-and-content" }, description = "Only keep webpages and docs whose combined title and content has a match with the given regular expression")
-	String titleAndContent = null;
-
-	@Parameter(names = { "-not-title-and-content" }, description = "Only keep webpages and docs whose combined title and content does not have a match with the given regular expression")
-	String notTitleAndContent = null;
-
-	@Parameter(names = { "-title-and-content-size" }, variableArity = true, validateWith = PositiveInteger.class, description = "Only keep webpages and docs whose combined title and content has a length equal to one of given lengths")
-	List<Integer> titleAndContentSize = null;
-
-	@Parameter(names = { "-not-title-and-content-size" }, variableArity = true, validateWith = PositiveInteger.class, description = "Only keep webpages and docs whose combined title and content does not have a length equal to any of given lengths")
-	List<Integer> notTitleAndContentSize = null;
-
-	@Parameter(names = { "-title-and-content-size-more" }, variableArity = true, validateWith = PositiveInteger.class, description = "Only keep webpages and docs whose combined title and content has a length more than the given length")
-	Integer titleAndContentSizeMore = null;
-
-	@Parameter(names = { "-title-and-content-size-less" }, variableArity = true, validateWith = PositiveInteger.class, description = "Only keep webpages and docs whose combined title and content has a length less than the given length")
-	Integer titleAndContentSizeLess = null;
-
 	@Parameter(names = { "-license" }, description = "Only keep webpages and docs whose software license has a match with the given regular expression")
 	String license = null;
 

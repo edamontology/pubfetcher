@@ -71,7 +71,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public boolean isEmpty() {
-		return getTitleAndContent().isEmpty();
+		return title.isEmpty() && content.isEmpty();
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public boolean isFinal(FetcherArgs fetcherArgs) {
-		return getTitleAndContent().length() >= fetcherArgs.getWebpageMinLength();
+		return title.length() + content.length() >= fetcherArgs.getWebpageMinLength();
 	}
 
 	public boolean isBroken() {
@@ -154,14 +154,6 @@ public class Webpage extends DatabaseEntry<Webpage> {
 	}
 	public String getContentTimeHuman() {
 		return Instant.ofEpochMilli(contentTime).toString();
-	}
-
-	public String getTitleAndContent() {
-		if (content.startsWith(title)) {
-			return content;
-		} else {
-			return title + "\n" + content;
-		}
 	}
 
 	public String getLicense() {

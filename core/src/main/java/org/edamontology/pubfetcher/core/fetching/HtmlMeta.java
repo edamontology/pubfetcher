@@ -99,7 +99,7 @@ public final class HtmlMeta {
 		}
 	}
 
-	private static String selectorCombinations(String selector) {
+	static String selectorCombinations(String selector) {
 		List<String> combinations = new ArrayList<>();
 		addCombinations("", selector.split("[.:]", -1), 0, combinations);
 		return combinations.stream()

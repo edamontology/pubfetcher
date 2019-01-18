@@ -300,7 +300,7 @@ public class Fetcher {
 
 			if (webpage != null) {
 				webpage.setFinalUrl(doc.location());
-				webpage.setTitle(doc.title());
+				webpage.setTitle(getFirstTrimmed(doc, "title", doc.location(), false, true));
 				logger.info("        final url: {}", webpage.getFinalUrl());
 				logger.info("        content type: {}", webpage.getContentType());
 				logger.info("        status code: {}", webpage.getStatusCode());
@@ -605,7 +605,7 @@ public class Fetcher {
 		}
 	}
 
-	private static String getFirstTrimmed(Element element, String selector, String location, boolean logMissing) {
+	private static String getFirstTrimmed(Element element, String selector, String location, boolean logMissing, boolean formatText) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
 			logger.error("Empty selector given for {}", location);
@@ -613,7 +613,7 @@ public class Fetcher {
 		}
 		Element tag = element.select(selector).first();
 		if (tag != null) {
-			String firstTrimmed = tag.text();
+			String firstTrimmed = formatText ? CleanWebpage.formattedText(tag) : tag.text();
 			if (logMissing && firstTrimmed.isEmpty()) {
 				logger.warn("Empty content in element selected by {} in {}", selector, location);
 			}
@@ -639,7 +639,7 @@ public class Fetcher {
 		return all;
 	}
 
-	private static String text(Element element, String selector, String location, boolean logMissing) {
+	private static String text(Element element, String selector, String location, boolean logMissing, boolean formatText) {
 		selector = selector.trim();
 		if (selector.isEmpty()) {
 			logger.error("Empty selector given for {}", location);
@@ -647,7 +647,7 @@ public class Fetcher {
 		}
 		String text = getAll(element, selector, location, false).stream()
 			.filter(e -> e.hasText())
-			.map(e -> e.text())
+			.map(e -> formatText ? CleanWebpage.formattedText(e) : e.text())
 			.collect(Collectors.joining("\n\n"));
 		if (logMissing && text.isEmpty()) {
 			logger.warn("No text found for selector {} in {}", selector, location);
@@ -657,7 +657,7 @@ public class Fetcher {
 
 	private void setIds(Publication publication, Element element, PublicationPartType type, String pmid, String pmcid, String doi, boolean prependPMC, String location, boolean errorIfInvalid, FetcherArgs fetcherArgs) {
 		if (pmid != null && !pmid.trim().isEmpty()) {
-			String pmidText = getFirstTrimmed(element, pmid, location, false);
+			String pmidText = getFirstTrimmed(element, pmid, location, false, false);
 			if (PubFetcher.isPmid(pmidText)) {
 				publication.setPmid(pmidText, type, location, fetcherArgs);
 			} else if (!pmidText.isEmpty()) {
@@ -678,7 +678,7 @@ public class Fetcher {
 			}
 		}
 		if (pmcid != null && !pmcid.trim().isEmpty()) {
-			String pmcidText = getFirstTrimmed(element, pmcid, location, false);
+			String pmcidText = getFirstTrimmed(element, pmcid, location, false, false);
 			if (prependPMC) pmcidText = "PMC" + pmcidText;
 			if (PubFetcher.isPmcid(pmcidText)) {
 				publication.setPmcid(pmcidText, type, location, fetcherArgs);
@@ -703,7 +703,7 @@ public class Fetcher {
 			}
 		}
 		if (doi != null && !doi.trim().isEmpty()) {
-			String doiText = getFirstTrimmed(element, doi, location, false);
+			String doiText = getFirstTrimmed(element, doi, location, false, false);
 			if (PubFetcher.isDoi(doiText) && doiText.indexOf(" ") < 0) {
 				publication.setDoi(doiText, type, location, fetcherArgs);
 			} else if (!doiText.isEmpty()) {
@@ -726,9 +726,9 @@ public class Fetcher {
 	}
 
 	private String getTitleText(Element element, String title, String subtitle, String location) {
-		String titleText = getFirstTrimmed(element, title, location, true);
+		String titleText = getFirstTrimmed(element, title, location, true, false);
 		if (subtitle != null && !subtitle.trim().isEmpty()) {
-			String subtitleText = getFirstTrimmed(element, subtitle, location, false);
+			String subtitleText = getFirstTrimmed(element, subtitle, location, false, false);
 			if (!subtitleText.isEmpty()) {
 				titleText += " : " + subtitleText;
 			}
@@ -769,7 +769,7 @@ public class Fetcher {
 	private void setAbstract(Publication publication, Element element, PublicationPartType type, String theAbstract, String location, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.theAbstract) != null && parts.get(PublicationPartName.theAbstract))) {
 			if (!publication.getAbstract().isFinal(fetcherArgs) && theAbstract != null && !theAbstract.trim().isEmpty()) {
-				publication.setAbstract(text(element, theAbstract, location, true), type, location, fetcherArgs, false);
+				publication.setAbstract(text(element, theAbstract, location, true, false), type, location, fetcherArgs, false);
 			}
 		}
 	}
@@ -777,7 +777,7 @@ public class Fetcher {
 	private void setFulltext(Publication publication, Element element, PublicationPartType type, String title, String subtitle, String theAbstract, String fulltext, String location, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
 		if (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext))) {
 			if (!publication.getFulltext().isFinal(fetcherArgs) && fulltext != null && !fulltext.trim().isEmpty()) {
-				String fulltextText = text(element, fulltext, location, true);
+				String fulltextText = text(element, fulltext, location, true, false);
 				if (!fulltextText.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					if (title != null && !title.trim().isEmpty()) {
@@ -785,7 +785,7 @@ public class Fetcher {
 						sb.append("\n\n");
 					}
 					if (theAbstract != null && !theAbstract.trim().isEmpty()) {
-						sb.append(text(element, theAbstract, location, true));
+						sb.append(text(element, theAbstract, location, true, false));
 						sb.append("\n\n");
 					}
 					sb.append(fulltextText);
@@ -1542,12 +1542,12 @@ public class Fetcher {
 					".article > div > [id^=idm].sec.headless > :not(.sec):not(.goto)" + notFigTable + ", " +
 					".article > div > [id^=idm].sec.headless .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
 					".article > div > [id^=idm].sec:has(h2:matchesOwn((?i)^(Glossary|Abbreviations|Notes|Supplementary Materials?))) > :not(.sec):not(.goto), " +
-					".article > div > [id^=idm].sec:has(h2:matchesOwn((?i)^(Glossary|Abbreviations|Notes|Supplementary Materials?))) .sec > :not(.sec):not(.goto)")), doc.location(), true);
+					".article > div > [id^=idm].sec:has(h2:matchesOwn((?i)^(Glossary|Abbreviations|Notes|Supplementary Materials?))) .sec > :not(.sec):not(.goto)")), doc.location(), true, false);
 				if (!fulltext.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					sb.append(getTitleText(doc, titleSelector, subtitleSelector, doc.location()));
 					sb.append("\n\n");
-					sb.append(text(doc, abstractSelector, doc.location(), true));
+					sb.append(text(doc, abstractSelector, doc.location(), true, false));
 					sb.append("\n\n");
 					sb.append(fulltext);
 					if (europepmc) {
@@ -1558,7 +1558,7 @@ public class Fetcher {
 								Document docFigTable = getDoc(figTableHref, publication, fetcherArgs);
 								if (docFigTable != null) {
 									for (Element displayNone : docFigTable.select(displayNoneSelector)) displayNone.remove();
-									String figTableText = getFirstTrimmed(docFigTable, ".article > .fig, .article > .table-wrap, .table-wrap", doc.location(), true);
+									String figTableText = getFirstTrimmed(docFigTable, ".article > .fig, .article > .table-wrap, .table-wrap", doc.location(), true, false);
 									if (!figTableText.isEmpty()) {
 										sb.append("\n\n");
 										sb.append(figTableText);
@@ -2121,10 +2121,10 @@ public class Fetcher {
 			} else {
 				logger.warn("No scrape rules for {}", finalUrl);
 				if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {
-					publication.setTitle(doc.title().split("\\|", 2)[0], PublicationPartType.webpage, finalUrl, fetcherArgs, false);
+					publication.setTitle(getFirstTrimmed(doc, "title", doc.location(), false, true), PublicationPartType.webpage, finalUrl, fetcherArgs, false);
 				}
 				if (parts == null || (parts.get(PublicationPartName.fulltext) != null && parts.get(PublicationPartName.fulltext))) {
-					publication.setFulltext(doc.text(), PublicationPartType.webpage, finalUrl, fetcherArgs);
+					publication.setFulltext(CleanWebpage.cleanedBody(doc, true), PublicationPartType.webpage, finalUrl, fetcherArgs);
 				}
 			}
 
@@ -2579,35 +2579,35 @@ public class Fetcher {
 						}
 					}
 					if (title != null && !title.isEmpty()) {
-						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true));
+						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true, true));
 					} else if (finalWebpage != null) {
 						newWebpage.setTitle("");
 					}
 					if (content != null && !content.isEmpty()) {
-						newWebpage.setContent(text(doc, content, doc.location(), true));
+						newWebpage.setContent(text(doc, content, doc.location(), true, true));
 					} else if (finalWebpage != null) {
 						logger.info("Webpage content discarded");
 					} else {
-						newWebpage.setContent(doc.text());
+						newWebpage.setContent(CleanWebpage.cleanedBody(doc, false));
 					}
 					if (finalWebpage != null) {
 						String license = finalWebpage.get(ScrapeWebpageKey.license.toString());
 						if (license != null) {
-							newWebpage.setLicense(getFirstTrimmed(doc, license, doc.location(), true));
+							newWebpage.setLicense(getFirstTrimmed(doc, license, doc.location(), true, false));
 						}
 						String language = finalWebpage.get(ScrapeWebpageKey.language.toString());
 						if (language != null) {
-							newWebpage.setLanguage(getFirstTrimmed(doc, language, doc.location(), true));
+							newWebpage.setLanguage(text(doc, language, doc.location(), true, false).replaceAll("\n\n", ", "));
 						}
 					}
 				} else {
 					if (title != null && !title.isEmpty()) {
-						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true));
+						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true, true));
 					}
 					if (content != null && !content.isEmpty()) {
-						newWebpage.setContent(text(doc, content, doc.location(), true));
+						newWebpage.setContent(text(doc, content, doc.location(), true, true));
 					} else {
-						newWebpage.setContent(doc.text());
+						newWebpage.setContent(CleanWebpage.cleanedBody(doc, false));
 					}
 				}
 			}

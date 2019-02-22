@@ -416,6 +416,31 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof Publication)) return false;
+		Publication other = (Publication) obj;
+		if (!pmid.getContent().equals(other.pmid.getContent())) return false;
+		if (!pmcid.getContent().equals(other.pmcid.getContent())) return false;
+		if (!doi.getContent().equals(other.doi.getContent())) return false;
+		return other.canEqual(this);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + pmid.getContent().hashCode();
+		result = prime * result + pmcid.getContent().hashCode();
+		result = prime * result + doi.getContent().hashCode();
+		return result;
+	}
+
+	public boolean canEqual(Object other) {
+		return (other instanceof Publication);
+	}
+
+	@Override
 	public String toStringId() {
 		return "[" + PublicationIds.toString(pmid.getContent(), pmcid.getContent(), doi.getContent(), false) + "]";
 	}

@@ -86,7 +86,6 @@
 'digital-library\.theiet\.org': theiet
 '[a-zA-Z0-9.-]*bmj\.com': bmj
 'nrcresearchpress\.com': nrcresearchpress
-'inderscience\.com': inderscience
 'genetics\.org': highwire2
 'plantphysiol\.org': highwire2
 'plantcell\.org': highwire2
@@ -192,7 +191,7 @@ springer:
   keywords: .Keyword
   abstract: 'section.Abstract > p, #book-description > *'
   fulltext: '#body > section > *'
-  pdf_a: .test-pdf-link .gtm-pdf-link
+  pdf_a: '.test-pdf-link > :not([id$=no_access_banner]) > a'
 
 springer_ref:
   doi: .FulltextWrapper .ChapterDOI
@@ -224,8 +223,8 @@ nature:
   doi: 'h3:has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi]'
   title: 'article header h1, #article #content > .article > h2.article-title'
   keywords: div[data-component=article-subject-links] a[data-track-action=view subject]
-  abstract: 'article .article-body > section > #abstract-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article .article-body > section > :not(#abstract-section):not(#references-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section) > *, article .article-body > div:not(:has(#access-options))'
+  abstract: 'article .article-body > section > #abstract-section > div > *, article .article-body > section > #Abs1-section > div > *, #article #content > .article > #Summary + p'
+  fulltext: 'article .article-body > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section) > *, article .article-body > div:not(:has(#access-options))'
   pdf_a: a[data-article-pdf]
 
 plos:
@@ -273,7 +272,7 @@ acs_full:
   pdf_dst: /doi/pdf/10
 
 arxiv:
-  doi: .metatable .doi
+  doi: .metatable .msc_classes
   title: h1.title:matchText, h1.title > :not(.descriptor)
   abstract: .abstract:matchText, .abstract > :not(.descriptor)
   pdf_src: /abs/
@@ -338,7 +337,7 @@ iucr:
   abstract: .ica_abstract
 
 f1000research_articles:
-  doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=http://dx.doi.org]
+  doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=https://doi.org]
   #title: '#anchor-title' # has non-excludable information about approval as part of the title
   abstract: .abstract-text
   fulltext: '#article-context > .generated-article-body > *, #article-context > .generated-article-footer > :has(h2:containsOwn(Supplementary materials))'
@@ -497,10 +496,10 @@ iospress:
   abstract: '#contentcolumn .metadata > .abstract > p'
 
 researchgate:
-  doi: .publication-header .publication-meta-secondary:matchText, .publication-header .publication-meta-secondary > :first-child
+  #doi: .publication-details__section > .publication-meta > div:first-child + div
   title: .publication-header > h1, .publication-details__section > h1
   abstract: .publication-abstract > :not(:first-child), .publication-details__section > div > div:matches(^Abstract$) + div
-  pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text, a.gtm-fulltext-download-btn-section
+  #pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text, a.gtm-fulltext-download-btn-section
 
 frontiersin:
   doi: .abstract-container > .article-header-container > .header-bar-three > a
@@ -524,10 +523,6 @@ nrcresearchpress:
   title: '#content h1.article-title'
   keywords: '#content .keywordsLabel ~ a'
   abstract: '#content .abstractInFull'
-
-inderscience:
-  title: '#main table td > p:first-child > b > font > a'
-  abstract: '#main table td > font'
 
 zenodo:
   doi: .col-right h4:matchesOwn(^Versions$) + table .info > td:first-child > small

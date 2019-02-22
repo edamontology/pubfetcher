@@ -225,7 +225,7 @@ public final class FetcherTest {
 			Publication publication = (Publication) FetcherTest.class.getDeclaredMethod(fetchMethod, test[0].getClass(), fetcher.getClass(), EnumMap.class, fetcherArgs.getClass())
 				.invoke(null, test[0], fetcher, parts, fetcherArgs);
 			if (publication != null) {
-				mismatch += (Integer) FetcherTest.class.getDeclaredMethod(testMethod, test.getClass(), publication.getClass())
+				mismatch += (Integer) FetcherTest.class.getDeclaredMethod(testMethod, test.getClass(), publication.getClass(), EnumMap.class)
 					.invoke(null, test, publication, parts);
 			} else ++mismatch;
 		}

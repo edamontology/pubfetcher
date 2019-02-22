@@ -5,7 +5,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,31,71,0,0,0,2,https://doi.org/10.1093/BIOINFORMATICS/13.5.555
 0,0,29,40,0,696,0,2,https://doi.org/10.1093/BIOINFORMATICS/BTG334
 0,0,29,45,0,1079,9269,2,https://doi.org/10.1093/BIOINFORMATICS/BTX116
-0,0,28,95,0,1104,32857,2,https://doi.org/10.1093/BIOSTATISTICS/KXJ032
+0,0,28,95,0,1104,33086,2,https://doi.org/10.1093/BIOSTATISTICS/KXJ032
 0,0,23,68,5,1069,0,2,https://doi.org/10.1093/CZOOLO/61.5.854
 0,0,23,35,0,1240,29516,2,https://doi.org/10.1093/DATABASE/BAP020
 0,0,18,82,0,1265,26491,2,https://doi.org/10.1093/HMG/DDT384
@@ -36,21 +36,21 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,28,83,0,511,0,3,https://doi.org/10.1002/0471140864.ps1605s14
 0,0,29,41,0,0,0,2,https://doi.org/10.1002/9780471650126.dob0949
 0,0,59,75,0,2214,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/1097-0134(20001001)41:1%3C108::AID-PROT130%3E3.0.CO;2-S
-0,0,52,129,0,1123,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/1098-2272(2000)19:1%2B<::AID-GEPI15>3.0.CO;2-1
+0,0,52,129,0,1123,0,2,https://onlinelibrary.wiley.com/doi/abs/10.1002/1098-2272(2000)19:1%2B<::AID-GEPI15>3.0.CO;2-1
 0,0,56,98,0,1236,0,2,https://doi.org/10.1002/1615-9861(200102)1:2%3C340::AID-PROT340%3E3.0.CO;2-B
 0,0,22,84,0,809,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/ange.201507047
 0,0,20,73,0,1579,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/cyto.a.20531
 0,0,18,58,0,1484,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/humu.21438
 0,0,17,93,0,1088,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/jcc.10386
-0,0,22,110,0,1452,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.200300402
-0,0,22,166,0,459,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.200300483
+0,0,22,110,0,1452,0,2,https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.200300402
+0,0,22,166,0,459,0,2,https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.200300483
 0,0,22,49,0,1972,0,2,https://doi.org/10.1002/pro.5560020302
 0,0,18,28,0,828,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/prot.10146
 0,0,64,71,0,1332,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1002/(SICI)1097-0061(20000130)16:2%3C177::AID-YEA516%3E3.0.CO;2-9
 0,0,28,94,0,653,0,2,https://doi.org/10.1016/0014-5793(87)80439-8
 0,0,20,52,0,694,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1038/clpt.2012.96
 0,0,32,198,0,2188,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1469-1809.2003.00030.x
-0,0,21,59,0,1779,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1055/s-2004-817909
+0,0,21,59,0,1779,0,2,https://onlinelibrary.wiley.com/doi/abs/10.1055/s-2004-817909
 0,0,16,48,0,992,0,2,https://doi.org/10.1087/20120404
 0,0,18,107,0,932,0,2,https://doi.org/10.1110/ps.8.5.978
 0,0,25,55,0,1052,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1111/1755-0998.12009.x
@@ -60,21 +60,21 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 # wiley_full
 0,0,28,83,0,511,0,2,https://currentprotocols.onlinelibrary.wiley.com/doi/full/10.1002/0471140864.ps1605s14
 0,0,29,41,0,0,0,1,https://onlinelibrary.wiley.com/doi/full/10.1002/9780471650126.dob0949
-0,0,59,75,0,2214,54873,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1097-0134(20001001)41:1<108::AID-PROT130>3.0.CO;2-S
+0,0,59,75,0,2214,48563,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1097-0134(20001001)41:1<108::AID-PROT130>3.0.CO;2-S
 0,0,52,129,0,1123,0,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1098-2272(2000)19:1%2B<::AID-GEPI15>3.0.CO;2-1
-0,0,22,84,0,809,20537,2,https://onlinelibrary.wiley.com/doi/full/10.1002/ange.201507047
-0,0,20,73,0,1579,47122,2,https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20531
-0,0,18,58,0,1484,31098,2,https://onlinelibrary.wiley.com/doi/full/10.1002/humu.21438
+0,0,22,84,0,809,18751,2,https://onlinelibrary.wiley.com/doi/full/10.1002/ange.201507047
+0,0,20,73,0,1579,43145,2,https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20531
+0,0,18,58,0,1484,29518,2,https://onlinelibrary.wiley.com/doi/full/10.1002/humu.21438
 0,0,17,93,0,1088,24465,2,https://onlinelibrary.wiley.com/doi/full/10.1002/jcc.10386
 0,0,22,110,0,1452,0,2,https://onlinelibrary.wiley.com/doi/full/10.1002/pmic.200300402
 0,0,22,166,0,459,0,2,https://onlinelibrary.wiley.com/doi/full/10.1002/pmic.200300483
-0,0,18,28,0,828,51300,2,https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146
-0,0,64,71,0,1332,31659,2,https://onlinelibrary.wiley.com/doi/full/10.1002/(SICI)1097-0061(20000130)16:2<177::AID-YEA516>3.0.CO;2-9
-0,0,20,52,0,694,10230,2,https://onlinelibrary.wiley.com/doi/full/10.1038/clpt.2012.96
+0,0,18,28,0,828,49480,2,https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146
+0,0,64,71,0,1332,30808,2,https://onlinelibrary.wiley.com/doi/full/10.1002/(SICI)1097-0061(20000130)16:2<177::AID-YEA516>3.0.CO;2-9
+0,0,20,52,0,694,10006,2,https://onlinelibrary.wiley.com/doi/full/10.1038/clpt.2012.96
 0,0,32,198,0,2188,33157,2,https://onlinelibrary.wiley.com/doi/full/10.1046/j.1469-1809.2003.00030.x
 0,0,21,59,0,1779,0,2,https://onlinelibrary.wiley.com/doi/full/10.1055/s-2004-817909
-0,0,25,55,0,1052,35311,2,https://onlinelibrary.wiley.com/doi/full/10.1111/1755-0998.12009.x
-0,0,23,123,0,1294,32736,2,https://onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12628
+0,0,25,55,0,1052,33768,2,https://onlinelibrary.wiley.com/doi/full/10.1111/1755-0998.12009.x
+0,0,23,123,0,1294,29792,2,https://onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12628
 
 # sciencedirect
 # fulltext not working
@@ -204,7 +204,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,28,55,8,3525,62198,2,https://doi.org/10.1371/journal.ppat.1000376
 
 # biorxiv
-0,0,14,42,0,1136,0,2,https://doi.org/10.1101/003905
+0,0,14,42,0,1137,0,2,https://doi.org/10.1101/003905
 0,0,14,65,0,1376,0,2,https://doi.org/10.1101/027227
 0,0,14,89,0,1631,0,2,https://doi.org/10.1101/042903
 0,0,14,104,0,1195,0,2,https://doi.org/10.1101/152579
@@ -250,7 +250,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 # pnas
 0,0,23,52,0,1128,0,2,https://doi.org/10.1073/pnas.81.11.3443
 0,0,23,41,0,1601,33530,2,https://doi.org/10.1073/pnas.0136893100
-0,0,23,117,0,1669,35171,2,https://doi.org/10.1073/pnas.0400301101
+0,0,23,117,0,1669,35176,2,https://doi.org/10.1073/pnas.0400301101
 0,0,23,67,0,2390,36463,2,https://doi.org/10.1073/pnas.1305823110
 
 # ieee
@@ -288,13 +288,11 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 
 # rsc
 0,0,18,125,0,1214,0,3,https://doi.org/10.1039/C1MB05241A
-0,0,18,111,0,1742,0,3,https://doi.org/10.1039/C2IB00132B
 0,0,18,109,0,1233,0,3,https://doi.org/10.1039/C5MB00883B
 0,0,18,155,0,856,0,3,https://doi.org/10.1039/C5JA00451A
 
 # rsc_full
 0,0,18,129,0,1214,41906,2,http://pubs.rsc.org/en/Content/ArticleHTML/2011/MB/c1mb05241a
-0,0,18,115,0,1742,25510,2,http://pubs.rsc.org/en/Content/ArticleHTML/2012/IB/c2ib00132b
 0,0,18,109,0,1233,21737,2,http://pubs.rsc.org/en/Content/ArticleHTML/2016/MB/C5MB00883B
 0,0,18,157,0,856,33006,2,http://pubs.rsc.org/en/Content/ArticleHTML/2016/JA/C5JA00451A
 
@@ -311,8 +309,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 
 # f1000research_articles
 # can't extract title
-0,0,31,0,0,1283,15079,2,https://doi.org/10.12688/f1000research.2-192.v1
-0,0,29,0,0,1216,20714,2,https://doi.org/10.12688/f1000research.5165.2
+0,0,31,0,0,1283,15075,2,https://doi.org/10.12688/f1000research.2-192.v1
+0,0,29,0,0,1216,20712,2,https://doi.org/10.12688/f1000research.5165.2
 0,0,30,0,0,837,8968,2,https://doi.org/10.12688/f1000research.11223.1
 
 # f1000research_posters
@@ -345,8 +343,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 
 # tandfonline_full
 0,0,21,68,0,0,0,1,http://www.tandfonline.com/doi/full/10.1081/CNV-120016428
-0,0,28,133,6,1515,33330,2,http://www.tandfonline.com/doi/full/10.1080/07391102.2014.968875
-0,0,29,164,6,1817,41654,2,http://www.tandfonline.com/doi/full/10.1080/07391102.2015.1095116
+0,0,28,133,6,1515,33334,2,http://www.tandfonline.com/doi/full/10.1080/07391102.2014.968875
+0,0,29,164,6,1817,41664,2,http://www.tandfonline.com/doi/full/10.1080/07391102.2015.1095116
 0,0,22,117,0,0,7094,2,http://www.tandfonline.com/doi/full/10.1586/14789450.3.1.1
 
 # asm
@@ -392,7 +390,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 
 # karger_full
 # can't correctly get fulltext
-0,0,17,112,6,1094,18065,2,https://www.karger.com/Article/FullText/365895
+0,0,17,112,6,1094,18084,2,https://www.karger.com/Article/FullText/365895
 
 # eurekaselect
 0,0,26,118,6,554,0,1,https://doi.org/10.2174/138161206777585274
@@ -448,8 +446,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,29,86,0,496,0,1,https://doi.org/10.3233/978-1-61499-769-6-182
 
 # researchgate
-0,0,25,89,0,1608,0,2,https://doi.org/10.13140/RG.2.1.2763.4807
-0,0,25,73,0,1435,0,2,https://doi.org/10.13140/RG.2.1.3547.6561
+0,0,0,89,0,1608,0,1,https://doi.org/10.13140/RG.2.1.2763.4807
+0,0,0,73,0,1435,0,1,https://doi.org/10.13140/RG.2.1.3547.6561
 
 # frontiersin
 0,0,24,215,0,0,7809,2,https://doi.org/10.3389/FGENE.2014.00130
@@ -467,10 +465,6 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 # nrcresearchpress
 0,0,15,77,0,1583,0,1,https://doi.org/10.1139/G06-038
 0,0,15,154,6,1443,0,1,https://doi.org/10.1139/G10-006
-
-# inderscience
-0,0,0,69,0,754,0,1,https://doi.org/10.1504/IJBRA.2009.029045
-0,0,0,80,0,747,0,1,https://doi.org/10.1504/IJDMB.2009.024849
 
 # genetics
 0,0,27,86,0,843,18212,2,https://doi.org/10.1534/GENETICS.104.026500

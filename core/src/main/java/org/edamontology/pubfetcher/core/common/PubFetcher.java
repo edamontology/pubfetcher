@@ -165,7 +165,7 @@ public final class PubFetcher {
 	 * @return the normalised DOI; or some invalid DOI if an invalid DOI was supplied
 	 */
 	public static String normaliseDoi(String s) {
-		if (s == null) return "";
+		if (s == null || s.isEmpty()) return "";
 
 		// http://www.doi.org/doi_handbook/2_Numbering.html#2.4
 		// DOI names are case insensitive, using ASCII case folding for comparison of text.

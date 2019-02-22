@@ -334,7 +334,7 @@ public class Fetcher {
 			if (e.getStatusCode() == 503) {
 				setFetchException(webpage, publication, null);
 			} else {
-				if (e.getStatusCode() == 404 && host != null && host.equals("biorxiv.org")) {
+				if (e.getStatusCode() == 404 && host != null && host.equals("biorxiv.org") && links != null) {
 					String urlPdf = e.getUrl();
 					if (urlPdf.endsWith(".full")) {
 						urlPdf = urlPdf.substring(0, urlPdf.length() - 5);
@@ -2580,12 +2580,12 @@ public class Fetcher {
 					}
 					if (title != null && !title.isEmpty()) {
 						newWebpage.setTitle(getFirstTrimmed(doc, title, doc.location(), true, true));
-					} else if (finalWebpage != null) {
+					} else if (finalWebpage != null && title != null && title.isEmpty()) {
 						newWebpage.setTitle("");
 					}
 					if (content != null && !content.isEmpty()) {
 						newWebpage.setContent(text(doc, content, doc.location(), true, true));
-					} else if (finalWebpage != null) {
+					} else if (finalWebpage != null && content != null && content.isEmpty()) {
 						logger.info("Webpage content discarded");
 					} else {
 						newWebpage.setContent(CleanWebpage.cleanedBody(doc, false));

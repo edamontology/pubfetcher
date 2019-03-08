@@ -63,7 +63,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,59,75,0,2214,48563,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1097-0134(20001001)41:1<108::AID-PROT130>3.0.CO;2-S
 0,0,52,129,0,1123,0,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1098-2272(2000)19:1%2B<::AID-GEPI15>3.0.CO;2-1
 0,0,22,84,0,809,18751,2,https://onlinelibrary.wiley.com/doi/full/10.1002/ange.201507047
-0,0,20,73,0,1579,43145,2,https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20531
+0,0,20,73,0,1579,43185,2,https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20531
 0,0,18,58,0,1484,29518,2,https://onlinelibrary.wiley.com/doi/full/10.1002/humu.21438
 0,0,17,93,0,1088,24465,2,https://onlinelibrary.wiley.com/doi/full/10.1002/jcc.10386
 0,0,22,110,0,1452,0,2,https://onlinelibrary.wiley.com/doi/full/10.1002/pmic.200300402
@@ -280,10 +280,10 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,21,74,0,0,0,3,http://www.liebertpub.com/doi/abs/10.1089/bio.2016.0088
 
 # liebertpub_full
-0,0,21,57,0,1350,22481,2,http://www.liebertpub.com/doi/full/10.1089/cmb.2012.0283
+0,0,21,57,0,1350,22531,2,http://www.liebertpub.com/doi/full/10.1089/cmb.2012.0283
 #0,0,0,0,0,0,0,1,http://www.liebertpub.com/doi/full/10.1089/gen.32.15.12
 0,0,21,77,5,1236,0,3,http://www.liebertpub.com/doi/10.1089/cmb.2016.0024
-0,0,21,76,5,1512,35887,2,http://www.liebertpub.com/doi/10.1089/cmb.2014.0157
+0,0,21,76,5,1512,36169,2,http://www.liebertpub.com/doi/10.1089/cmb.2014.0157
 0,0,21,74,0,0,11776,2,http://www.liebertpub.com/doi/10.1089/bio.2016.0088
 
 # rsc
@@ -505,8 +505,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,0,46,0,46,0,2,https://zenodo.org/record/1233395
 
 # future-science
-0,0,0,101,4,1334,37006,2,https://doi.org/10.2144/000113999
-0,0,0,126,5,724,10940,2,https://doi.org/10.2144/000113978
+0,0,0,101,4,1334,37114,2,https://doi.org/10.2144/000113999
+0,0,0,126,5,724,10989,2,https://doi.org/10.2144/000113978
 
 # jstatsoft
 0,0,21,68,0,1302,0,2,https://doi.org/10.18637/JSS.V046.I11

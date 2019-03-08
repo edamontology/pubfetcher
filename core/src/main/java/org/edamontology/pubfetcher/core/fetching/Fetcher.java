@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,9 +114,12 @@ public class Fetcher {
 	private static final Pattern ID_ESCAPE = Pattern.compile("[^\\p{L}\\p{N}._:-]");
 	private static final String PHONE_ALLOWED = "[\\p{N} /.ext()+-]";
 	private static final String PHONE_ALLOWED_END = "[\\p{N})]";
-	private static final Pattern PHONE1 = Pattern.compile("(?i)tel[:.e]*[\\p{Z}\\p{Cc}]*(phone[:.]*)?[\\p{Z}\\p{Cc}]*(" + PHONE_ALLOWED + "+" + PHONE_ALLOWED_END + ")");
-	private static final Pattern PHONE2 = Pattern.compile("(?i)phone[:.]*[\\p{Z}\\p{Cc}]*(" + PHONE_ALLOWED + "+" + PHONE_ALLOWED_END + ")");
+	private static final Pattern PHONE = Pattern.compile("(?i)(tel[:.e]*[\\p{Z}\\p{Cc}]*(phone[:.]*)?|phone[:.]*)[\\p{Z}\\p{Cc}]*(" + PHONE_ALLOWED + "+" + PHONE_ALLOWED_END + ")");
 	private static final Pattern EMAIL = Pattern.compile("(?i)e-?mail[:.]*[\\p{Z}\\p{Cc}]*([a-zA-Z0-9+._-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,})");
+	private static final Pattern WHITESPACE = Pattern.compile("[\\p{Z}\\p{Cc}\\p{Cf}]+");
+	private static final Pattern PUNCTUATION_NUMBERS = Pattern.compile("[\\p{P}\\p{S}\\p{N}]+");
+	private static final Pattern NAME_SEPARATOR = Pattern.compile("[ \\u002D\\u2010]+");
+	private static final Pattern NAME_INITIAL_PERIOD = Pattern.compile("[.]");
 
 	private static final Pattern ELSEVIER_REDIRECT = Pattern.compile("^https?://linkinghub\\.elsevier\\.com/retrieve/pii/(.+)$");
 	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
@@ -945,19 +949,9 @@ public class Fetcher {
 
 	private void addPhone(String text, CorrespAuthor ca) {
 		if (ca.getPhone().isEmpty()) {
-			Matcher phone1Matcher = PHONE1.matcher(text);
-			while (phone1Matcher.find()) {
-				String phone = phone1Matcher.group(2).trim();
-				if (!phone.isEmpty()) {
-					ca.setPhone(phone);
-					break;
-				}
-			}
-		}
-		if (ca.getPhone().isEmpty()) {
-			Matcher phone2Matcher = PHONE2.matcher(text);
-			while (phone2Matcher.find()) {
-				String phone = phone2Matcher.group(1).trim();
+			Matcher phoneMatcher = PHONE.matcher(text);
+			while (phoneMatcher.find()) {
+				String phone = phoneMatcher.group(3).trim();
 				if (!phone.isEmpty()) {
 					ca.setPhone(phone);
 					break;
@@ -966,16 +960,156 @@ public class Fetcher {
 		}
 	}
 
+	boolean matchEmail(String name, String email, int pass) {
+		int emailAt = email.indexOf("@");
+		if (emailAt > -1) {
+			email = email.substring(0, emailAt);
+		}
+		email = email.toLowerCase(Locale.ROOT);
+		email = Normalizer.normalize(email, Normalizer.Form.NFKD);
+		email = WHITESPACE.matcher(email).replaceAll("");
+		email = PUNCTUATION_NUMBERS.matcher(email).replaceAll("");
+		if (email.isEmpty()) {
+			return false;
+		}
+
+		name = name.toLowerCase(Locale.ROOT);
+		name = Normalizer.normalize(name, Normalizer.Form.NFKD);
+		if (pass == 0) {
+			name = WHITESPACE.matcher(name).replaceAll("");
+			name = PUNCTUATION_NUMBERS.matcher(name).replaceAll("");
+			return name.equals(email);
+		} else if (pass == 1) {
+			name = NAME_INITIAL_PERIOD.matcher(name).replaceAll(". ");
+			name = WHITESPACE.matcher(name).replaceAll(" ").trim();
+			for (String namePart : NAME_SEPARATOR.split(name)) {
+				namePart = PUNCTUATION_NUMBERS.matcher(namePart).replaceAll("");
+				if (namePart.length() > 1 && email.contains(namePart)) {
+					return true;
+				}
+			}
+			return false;
+		} else if (pass == 2) {
+			name = NAME_INITIAL_PERIOD.matcher(name).replaceAll(". ");
+			name = WHITESPACE.matcher(name).replaceAll(" ").trim();
+			name = PUNCTUATION_NUMBERS.matcher(name).replaceAll("");
+			StringBuilder acronym = new StringBuilder();
+			if (name.length() > 0) {
+				acronym.append(name.charAt(0));
+			}
+			int from = 0;
+			int current = -1;
+			while ((current = name.indexOf(" ", from)) > -1) {
+				if (current + 1 < name.length()) {
+					acronym.append(name.charAt(current + 1));
+				}
+				from = current + 1;
+			}
+			return acronym.length() > 1 && acronym.toString().equals(email);
+		} else {
+			name = NAME_INITIAL_PERIOD.matcher(name).replaceAll(". ");
+			name = WHITESPACE.matcher(name).replaceAll(" ").trim();
+			for (String namePart : NAME_SEPARATOR.split(name)) {
+				namePart = PUNCTUATION_NUMBERS.matcher(namePart).replaceAll("");
+				if (namePart.length() - pass + 2 > 0) {
+					namePart = namePart.substring(0, namePart.length() - pass + 2);
+				} else {
+					namePart = "";
+				}
+				if (namePart.length() > 1 && email.contains(namePart)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	private void setCorrespAuthor(Publication publication, Element element, String location, boolean xml) {
 		List<CorrespAuthor> correspAuthor = new ArrayList<>();
 
 		if (xml) {
-			List<String> rids = new ArrayList<>();
-
 			Elements contribCorrespAll = element.select("contrib[corresp=yes], contrib:has(xref[ref-type=corresp])");
 			if (contribCorrespAll.isEmpty()) {
 				contribCorrespAll = element.select("contrib:has(xref[ref-type=author-notes]):has(xref[rid~=(?i)fn[0-9]+]), contrib:has(xref[ref-type=author-notes]):has(xref[rid~=(?i)^N[0-9a-fx.]+$])");
 			}
+			if (contribCorrespAll.isEmpty()) {
+				for (Element contrib : element.select("contrib")) {
+					for (Element corresp : element.select("author-notes > corresp")) {
+						String surname = getContribSurname(contrib);
+						if (!surname.isEmpty() && corresp.text().indexOf(surname) > -1) {
+							contribCorrespAll.add(contrib);
+							break;
+						}
+						String id = corresp.attr("id");
+						if (id != null && !id.isEmpty()) {
+							boolean found = false;
+							for (Element xref : contrib.select("xref")) {
+								String rid = xref.attr("rid");
+								if (rid != null && !rid.isEmpty() && id.equals(rid)) {
+									contribCorrespAll.add(contrib);
+									found = true;
+									break;
+								}
+							}
+							if (found) {
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			List<String> emails = new ArrayList<>();
+			List<String> phones = new ArrayList<>();
+			List<String> uris = new ArrayList<>();
+			List<Boolean> taken = new ArrayList<>();
+
+			for (Element corresp : element.select("author-notes > corresp")) {
+				List<String> emailsCorresp = new ArrayList<>();
+				List<String> phonesCorresp = new ArrayList<>();
+				List<String> urisCorresp = new ArrayList<>();
+
+				for (Element emailTag : corresp.select("email")) {
+					emailsCorresp.add(emailTag.text());
+					emailTag.remove();
+				}
+				Matcher emailMatcher = EMAIL.matcher(corresp.text());
+				while (emailMatcher.find()) {
+					emailsCorresp.add(emailMatcher.group(1).trim());
+				}
+
+				for (Element phoneTag : corresp.select("phone")) {
+					phonesCorresp.add(phoneTag.text());
+					phoneTag.remove();
+				}
+				Matcher phoneMatcher = PHONE.matcher(corresp.text());
+				while (phoneMatcher.find()) {
+					phonesCorresp.add(phoneMatcher.group(3).trim());
+				}
+
+				for (Element uriTag : corresp.select("uri, ext-link[ext-link-type=uri]")) {
+					urisCorresp.add(uriTag.text());
+					uriTag.remove();
+				}
+
+				emails.addAll(emailsCorresp);
+				for (int i = 0; i < emailsCorresp.size() && i < phonesCorresp.size(); ++i) {
+					phones.add(phonesCorresp.get(i));
+				}
+				for (int i = phonesCorresp.size(); i < emailsCorresp.size(); ++i) {
+					phones.add("");
+				}
+				for (int i = 0; i < emailsCorresp.size() && i < urisCorresp.size(); ++i) {
+					uris.add(urisCorresp.get(i));
+				}
+				for (int i = urisCorresp.size(); i < emailsCorresp.size(); ++i) {
+					uris.add("");
+				}
+				for (int i = 0; i < emailsCorresp.size(); ++i) {
+					taken.add(false);
+				}
+			}
+
 			for (Element contribCorresp : contribCorrespAll) {
 				CorrespAuthor ca = new CorrespAuthor();
 
@@ -991,12 +1125,24 @@ public class Fetcher {
 
 				addEmailPhoneUriXml(contribCorresp, ca);
 
+				if (contribCorrespAll.size() == 1 && emails.size() == 1) {
+					if (ca.getEmail().isEmpty()) {
+						ca.setEmail(emails.get(0));
+					}
+					if (ca.getPhone().isEmpty()) {
+						ca.setPhone(phones.get(0));
+					}
+					if (ca.getUri().isEmpty()) {
+						ca.setUri(uris.get(0));
+					}
+					taken.set(0, true);
+				}
+
 				for (Element xref : contribCorresp.select("xref[ref-type=corresp], xref[ref-type=author-notes]")) {
 					String rid = xref.attr("rid");
 					if (rid != null && !rid.isEmpty()) {
-						rids.add(rid);
 						rid = ID_ESCAPE.matcher(rid).replaceAll("_");
-						for (Element authorNotes : element.select("author-notes > corresp[id=" + rid + "], author-notes > fn[id=" + rid + "]")) {
+						for (Element authorNotes : element.select("author-notes > fn[id=" + rid + "]")) {
 							addEmailPhoneUriXml(authorNotes, ca);
 						}
 					}
@@ -1007,52 +1153,43 @@ public class Fetcher {
 				}
 			}
 
-			for (Element authorNotes : element.select("author-notes > corresp")) {
-				String id = authorNotes.attr("id");
-				if (!rids.contains(id)) {
-					String authorNotesText = authorNotes.text();
-					if (authorNotesText != null && !authorNotesText.isEmpty()) {
-						for (Element contrib : element.select("contrib")) {
-							String name = getContribName(contrib);
+			int longestLength = 0;
+			for (CorrespAuthor ca : correspAuthor) {
+				String name = ca.getName();
+				name = NAME_INITIAL_PERIOD.matcher(name).replaceAll(". ");
+				name = WHITESPACE.matcher(name).replaceAll(" ").trim();
+				for (String namePart : NAME_SEPARATOR.split(name)) {
+					namePart = PUNCTUATION_NUMBERS.matcher(namePart).replaceAll("");
+					if (namePart.length() > longestLength) {
+						longestLength = namePart.length();
+					}
+				}
+			}
+			if (longestLength > 100) {
+				longestLength = 100;
+			}
 
-							boolean surnameMatch = false;
-							String surname = getContribSurname(contrib);
-							if (!surname.isEmpty() && authorNotesText.indexOf(surname) > -1) {
-								surnameMatch = true;
+			for (int i = 0; i <= longestLength; ++i) {
+				for (CorrespAuthor ca : correspAuthor) {
+					if (!ca.getEmail().isEmpty()) continue;
+					for (int j = 0; j < emails.size(); ++j) {
+						if (taken.get(j)) continue;
+						if (matchEmail(ca.getName(), emails.get(j), i)) {
+							ca.setEmail(emails.get(j));
+							if (ca.getPhone().isEmpty()) {
+								ca.setPhone(phones.get(j));
 							}
-
-							boolean idMatch = false;
-							if (id != null && !id.isEmpty()) {
-								for (Element xref : contrib.select("xref")) {
-									String rid = xref.attr("rid");
-									if (rid != null && !rid.isEmpty() && id.equals(rid)) {
-										idMatch = true;
-									}
-								}
+							if (ca.getUri().isEmpty()) {
+								ca.setUri(uris.get(j));
 							}
-
-							if (!name.isEmpty() && (surnameMatch || idMatch)) {
-								boolean existingCa = false;
-								for (CorrespAuthor ca : correspAuthor) {
-									if (name.equals(ca.getName())) {
-										addEmailPhoneUriXml(authorNotes, ca);
-										existingCa = true;
-									}
-								}
-								if (!existingCa) {
-									CorrespAuthor ca = new CorrespAuthor();
-									ca.setName(name);
-									addEmailPhoneUriXml(authorNotes, ca);
-									if (!ca.isEmpty()) {
-										correspAuthor.add(ca);
-									}
-								}
-							}
+							taken.set(j, true);
+							break;
 						}
 					}
 				}
 			}
 		} else {
+			// TODO correspAuthor for html is most likely outdated
 			for (Element contribCorrespSup : element.select(".contrib-group a ~ sup:has(img[alt=corresponding author])")) {
 				Element contribCorresp = new Elements(contribCorrespSup).prevAll("a").first();
 				if (contribCorresp != null) {

@@ -58,9 +58,9 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,23,123,0,1294,0,3,https://onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12628
 
 # wiley_full
-0,0,28,83,0,511,0,2,https://currentprotocols.onlinelibrary.wiley.com/doi/full/10.1002/0471140864.ps1605s14
+0,0,28,83,0,511,0,1,https://currentprotocols.onlinelibrary.wiley.com/doi/full/10.1002/0471140864.ps1605s14
 0,0,29,41,0,0,0,1,https://onlinelibrary.wiley.com/doi/full/10.1002/9780471650126.dob0949
-0,0,59,75,0,2214,48563,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1097-0134(20001001)41:1<108::AID-PROT130>3.0.CO;2-S
+0,0,59,75,0,2214,48472,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1097-0134(20001001)41:1<108::AID-PROT130>3.0.CO;2-S
 0,0,52,129,0,1123,0,2,https://onlinelibrary.wiley.com/doi/full/10.1002/1098-2272(2000)19:1%2B<::AID-GEPI15>3.0.CO;2-1
 0,0,22,84,0,809,18751,2,https://onlinelibrary.wiley.com/doi/full/10.1002/ange.201507047
 0,0,20,73,0,1579,43185,2,https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20531
@@ -162,12 +162,12 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,21,49,0,814,37524,2,http://genome.cshlp.org/content/19/9/1646.full
 
 # nature
-0,0,16,82,0,1030,32363,2,https://doi.org/10.1038/35023079
+0,0,16,82,0,1030,32414,2,https://doi.org/10.1038/35023079
 0,0,15,38,3,0,940,2,https://doi.org/10.1038/549031c
 0,0,21,135,2,1872,36217,2,https://doi.org/10.1038/ejhg.2014.216
 0,0,23,44,2,1492,36780,2,https://doi.org/10.1038/hortres.2016.56
 0,0,19,73,2,984,33106,2,https://doi.org/10.1038/jhg.2011.43
-0,0,19,56,0,832,30007,2,https://doi.org/10.1038/nature02026
+0,0,19,56,0,832,30031,2,https://doi.org/10.1038/nature02026
 0,0,19,92,0,1098,40614,2,https://doi.org/10.1038/nbt0303-247
 0,0,15,86,0,1220,35500,2,https://doi.org/10.1038/nbt1414
 0,0,16,71,0,1174,35368,2,https://doi.org/10.1038/nbt.1505
@@ -517,8 +517,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,24,52,4,1194,0,3,http://journals.sagepub.com/doi/abs/10.1177/1094342015594678
 
 # sagepub_full
-0,0,24,72,4,943,43264,2,http://journals.sagepub.com/doi/10.1177/1087057114548853
-0,0,24,52,4,1194,55968,2,http://journals.sagepub.com/doi/full/10.1177/1094342015594678
+0,0,24,72,4,943,42961,2,http://journals.sagepub.com/doi/10.1177/1087057114548853
+0,0,24,52,4,1194,54589,2,http://journals.sagepub.com/doi/full/10.1177/1094342015594678
 
 # springeropen
 0,0,22,36,5,1778,48142,2,https://doi.org/10.1186/1758-2946-3-33

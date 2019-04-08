@@ -358,7 +358,9 @@ public final class CleanWebpage {
 			text += "\n\n";
 		}
 		if (doc.body() != null) {
-			clean(doc.body(), publication);
+			for (Element child : doc.body().children()) {
+				clean(child, publication);
+			}
 			text += formattedText(doc.body());
 		} else {
 			logger.warn("Webpage " + doc.location() + " is missing a body");

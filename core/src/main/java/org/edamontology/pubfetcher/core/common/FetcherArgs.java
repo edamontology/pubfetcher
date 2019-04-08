@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Erik Jaaniso
+ * Copyright © 2018, 2019 Erik Jaaniso
  *
  * This file is part of PubFetcher.
  *
@@ -23,140 +23,190 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.beust.jcommander.validators.PositiveInteger;
 
-public class FetcherArgs {
+public class FetcherArgs extends Args {
 
-	public static final String EMPTY_COOLDOWN = "emptyCooldown";
-	@Parameter(names = { "--" + EMPTY_COOLDOWN }, description = "If that many minutes have passed since last fetching attempt of an empty publication or empty webpage, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of empty database entries will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry is empty.")
-	private int emptyCooldown = 720; // 12 h
+	private static final String emptyCooldownId = "emptyCooldown";
+	private static final String emptyCooldownDescription = "If that many minutes have passed since last fetching attempt of an empty publication or empty webpage, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of empty database entries will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry is empty.";
+	private static final Integer emptyCooldownDefault = 720; // 12 h
+	@Parameter(names = { "--" + emptyCooldownId }, description = emptyCooldownDescription)
+	private Integer emptyCooldown = emptyCooldownDefault;
 
-	public static final String NON_FINAL_COOLDOWN = "nonFinalCooldown";
-	@Parameter(names = { "--" + NON_FINAL_COOLDOWN }, description = "If that many minutes have passed since last fetching attempt of a non-final publication or non-final webpage (which are not empty), then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of non-final database entries will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry is non-final.")
-	private int nonFinalCooldown = 10080; // a week
+	private static final String nonFinalCooldownId = "nonFinalCooldown";
+	private static final String nonFinalCooldownDescription = "If that many minutes have passed since last fetching attempt of a non-final publication or non-final webpage (which are not empty), then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of non-final database entries will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the entry is non-final.";
+	private static final Integer nonFinalCooldownDefault = 10080; // a week
+	@Parameter(names = { "--" + nonFinalCooldownId }, description = nonFinalCooldownDescription)
+	private Integer nonFinalCooldown = nonFinalCooldownDefault;
 
-	public static final String FETCH_EXCEPTION_COOLDOWN = "fetchExceptionCooldown";
-	@Parameter(names = { "--" + FETCH_EXCEPTION_COOLDOWN }, description = "If that many minutes have passed since last fetching attempt of a publication or webpage with a fetching exception, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of database entries with fetching exception will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the fetching exception of the entry is \"true\".")
-	private int fetchExceptionCooldown = 1440; // a day
+	private static final String fetchExceptionCooldownId = "fetchExceptionCooldown";
+	private static final String fetchExceptionCooldownDescription = "If that many minutes have passed since last fetching attempt of a publication or webpage with a fetching exception, then fetching can be attempted again, resetting the retry counter. Setting to 0 means fetching of database entries with fetching exception will always be attempted again. Setting to a negative value means refetching will never be done (and retry counter never reset) only because the fetching exception of the entry is \"true\".";
+	private static final Integer fetchExceptionCooldownDefault = 1440; // a day
+	@Parameter(names = { "--" + fetchExceptionCooldownId }, description = fetchExceptionCooldownDescription)
+	private Integer fetchExceptionCooldown = fetchExceptionCooldownDefault;
 
-	public static final String RETRY_LIMIT = "retryLimit";
-	@Parameter(names = { "--" + RETRY_LIMIT }, description = "How many times can fetching be retried for an entry that is still empty, non-final or has a fetching exception after the initial attempt. Setting to 0 will disable retrying, unless the retry counter is reset by a cooldown in which case one initial attempt is allowed again. Setting to a negative value will disable this upper limit.")
-	private int retryLimit = 3;
+	private static final String retryLimitId = "retryLimit";
+	private static final String retryLimitDescription = "How many times can fetching be retried for an entry that is still empty, non-final or has a fetching exception after the initial attempt. Setting to 0 will disable retrying, unless the retry counter is reset by a cooldown in which case one initial attempt is allowed again. Setting to a negative value will disable this upper limit.";
+	private static final Integer retryLimitDefault = 3;
+	@Parameter(names = { "--" + retryLimitId }, description = retryLimitDescription)
+	private Integer retryLimit = retryLimitDefault;
 
-	public static final String TITLE_MIN_LENGTH = "titleMinLength";
-	@Parameter(names = { "--" + TITLE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a usable publication title")
-	private int titleMinLength = 4;
+	private static final String titleMinLengthId = "titleMinLength";
+	private static final String titleMinLengthDescription = "Minimum length of a usable publication title";
+	private static final Integer titleMinLengthDefault = 4;
+	@Parameter(names = { "--" + titleMinLengthId }, validateWith = PositiveInteger.class, description = titleMinLengthDescription)
+	private Integer titleMinLength = titleMinLengthDefault;
 
-	public static final String KEYWORDS_MIN_SIZE = "keywordsMinSize";
-	@Parameter(names = { "--" + KEYWORDS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "Minimum size of a usable publication keywords/MeSH list")
-	private int keywordsMinSize = 2;
+	private static final String keywordsMinSizeId = "keywordsMinSize";
+	private static final String keywordsMinSizeDescription = "Minimum size of a usable publication keywords/MeSH list";
+	private static final Integer keywordsMinSizeDefault = 2;
+	@Parameter(names = { "--" + keywordsMinSizeId }, validateWith = PositiveInteger.class, description = keywordsMinSizeDescription)
+	private Integer keywordsMinSize = keywordsMinSizeDefault;
 
-	public static final String MINED_TERMS_MIN_SIZE = "minedTermsMinSize";
-	@Parameter(names = { "--" + MINED_TERMS_MIN_SIZE }, validateWith = PositiveInteger.class, description = "Minimum size of a usable publication EFO/GO terms list")
-	private int minedTermsMinSize = 1;
+	private static final String minedTermsMinSizeId = "minedTermsMinSize";
+	private static final String minedTermsMinSizeDescription = "Minimum size of a usable publication EFO/GO terms list";
+	private static final Integer minedTermsMinSizeDefault = 1;
+	@Parameter(names = { "--" + minedTermsMinSizeId }, validateWith = PositiveInteger.class, description = minedTermsMinSizeDescription)
+	private Integer minedTermsMinSize = minedTermsMinSizeDefault;
 
-	public static final String ABSTRACT_MIN_LENGTH = "abstractMinLength";
-	@Parameter(names = { "--" + ABSTRACT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a usable publication abstract")
-	private int abstractMinLength = 200;
+	private static final String abstractMinLengthId = "abstractMinLength";
+	private static final String abstractMinLengthDescription = "Minimum length of a usable publication abstract";
+	private static final Integer abstractMinLengthDefault = 200;
+	@Parameter(names = { "--" + abstractMinLengthId }, validateWith = PositiveInteger.class, description = abstractMinLengthDescription)
+	private Integer abstractMinLength = abstractMinLengthDefault;
 
-	public static final String FULLTEXT_MIN_LENGTH = "fulltextMinLength";
-	@Parameter(names = { "--" + FULLTEXT_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a usable publication fulltext")
-	private int fulltextMinLength = 2000;
+	private static final String fulltextMinLengthId = "fulltextMinLength";
+	private static final String fulltextMinLengthDescription = "Minimum length of a usable publication fulltext";
+	private static final Integer fulltextMinLengthDefault = 2000;
+	@Parameter(names = { "--" + fulltextMinLengthId }, validateWith = PositiveInteger.class, description = fulltextMinLengthDescription)
+	private Integer fulltextMinLength = fulltextMinLengthDefault;
 
-	public static final String WEBPAGE_MIN_LENGTH = "webpageMinLength";
-	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH }, validateWith = PositiveInteger.class, description = "Minimum length of a final webpage combined title and content")
-	private int webpageMinLength = 50;
+	private static final String webpageMinLengthId = "webpageMinLength";
+	private static final String webpageMinLengthDescription = "Minimum length of a final webpage combined title and content";
+	private static final Integer webpageMinLengthDefault = 50;
+	@Parameter(names = { "--" + webpageMinLengthId }, validateWith = PositiveInteger.class, description = webpageMinLengthDescription)
+	private Integer webpageMinLength = webpageMinLengthDefault;
 
-	public static final String WEBPAGE_MIN_LENGTH_JAVASCRIPT = "webpageMinLengthJavascript";
-	@Parameter(names = { "--" + WEBPAGE_MIN_LENGTH_JAVASCRIPT }, validateWith = PositiveInteger.class, description = "If the length of a whole web page content fetched without JavaScript is below the specified limit and no scraping rules are found for the corresponding URL, then refetching using JavaScript support will be attempted")
-	private int webpageMinLengthJavascript = 200;
+	private static final String webpageMinLengthJavascriptId = "webpageMinLengthJavascript";
+	private static final String webpageMinLengthJavascriptDescription = "If the length of a whole web page content fetched without JavaScript is below the specified limit and no scraping rules are found for the corresponding URL, then refetching using JavaScript support will be attempted";
+	private static final Integer webpageMinLengthJavascriptDefault = 200;
+	@Parameter(names = { "--" + webpageMinLengthJavascriptId }, validateWith = PositiveInteger.class, description = webpageMinLengthJavascriptDescription)
+	private Integer webpageMinLengthJavascript = webpageMinLengthJavascriptDefault;
 
-	public static final String TIMEOUT = "timeout";
-	@Parameter(names = { "--" + TIMEOUT }, validateWith = PositiveInteger.class, description = "Connect and read timeout of connections, in milliseconds")
-	private int timeout = 15000; // ms
+	private static final String timeoutId = "timeout";
+	private static final String timeoutDescription = "Connect and read timeout of connections, in milliseconds";
+	private static final Integer timeoutDefault = 15000; // ms
+	@Parameter(names = { "--" + timeoutId }, validateWith = PositiveInteger.class, description = timeoutDescription)
+	private Integer timeout = timeoutDefault;
+
+	@Override
+	protected void addArgs() {
+		args.add(new Arg<>(this::getEmptyCooldown, this::setEmptyCooldown, emptyCooldownDefault, emptyCooldownId, "Empty cooldown", emptyCooldownDescription, null));
+		args.add(new Arg<>(this::getNonFinalCooldown, this::setNonFinalCooldown, nonFinalCooldownDefault, nonFinalCooldownId, "Non-final cooldown", nonFinalCooldownDescription, null));
+		args.add(new Arg<>(this::getFetchExceptionCooldown, this::setFetchExceptionCooldown, fetchExceptionCooldownDefault, fetchExceptionCooldownId, "Fetching exception cooldown", fetchExceptionCooldownDescription, null));
+		args.add(new Arg<>(this::getRetryLimit, this::setRetryLimit, retryLimitDefault, retryLimitId, "Retry limit", retryLimitDescription, null));
+		args.add(new Arg<>(this::getTitleMinLength, this::setTitleMinLength, titleMinLengthDefault, 0, null, titleMinLengthId, "Title min. length", titleMinLengthDescription, null));
+		args.add(new Arg<>(this::getKeywordsMinSize, this::setKeywordsMinSize, keywordsMinSizeDefault, 0, null, keywordsMinSizeId, "Keywords min. size", keywordsMinSizeDescription, null));
+		args.add(new Arg<>(this::getMinedTermsMinSize, this::setMinedTermsMinSize, minedTermsMinSizeDefault, 0, null, minedTermsMinSizeId, "Mined terms min. size", minedTermsMinSizeDescription, null));
+		args.add(new Arg<>(this::getAbstractMinLength, this::setAbstractMinLength, abstractMinLengthDefault, 0, null, abstractMinLengthId, "Abstract min. length", abstractMinLengthDescription, null));
+		args.add(new Arg<>(this::getFulltextMinLength, this::setFulltextMinLength, fulltextMinLengthDefault, 0, null, fulltextMinLengthId, "Fulltext min. length", fulltextMinLengthDescription, null));
+		args.add(new Arg<>(this::getWebpageMinLength, this::setWebpageMinLength, webpageMinLengthDefault, 0, null, webpageMinLengthId, "Webpage min. length", webpageMinLengthDescription, null));
+		args.add(new Arg<>(this::getWebpageMinLengthJavascript, this::setWebpageMinLengthJavascript, webpageMinLengthJavascriptDefault, 0, null, webpageMinLengthJavascriptId, "Webpage min. length JS", webpageMinLengthJavascriptDescription, null));
+		args.add(new Arg<>(this::getTimeout, this::setTimeout, timeoutDefault, 0, null, timeoutId, "Timeout", timeoutDescription, null));
+	}
 
 	@ParametersDelegate
 	private FetcherPrivateArgs privateArgs = new FetcherPrivateArgs();
 
-	public int getEmptyCooldown() {
+	@Override
+	public String getId() {
+		return "fetcherArgs";
+	}
+
+	@Override
+	public String getLabel() {
+		return "Fetching";
+	}
+
+	public Integer getEmptyCooldown() {
 		return emptyCooldown;
 	}
-	public void setEmptyCooldown(int emptyCooldown) {
+	public void setEmptyCooldown(Integer emptyCooldown) {
 		this.emptyCooldown = emptyCooldown;
 	}
 
-	public int getNonFinalCooldown() {
+	public Integer getNonFinalCooldown() {
 		return nonFinalCooldown;
 	}
-	public void setNonFinalCooldown(int nonFinalCooldown) {
+	public void setNonFinalCooldown(Integer nonFinalCooldown) {
 		this.nonFinalCooldown = nonFinalCooldown;
 	}
 
-	public int getFetchExceptionCooldown() {
+	public Integer getFetchExceptionCooldown() {
 		return fetchExceptionCooldown;
 	}
-	public void setFetchExceptionCooldown(int fetchExceptionCooldown) {
+	public void setFetchExceptionCooldown(Integer fetchExceptionCooldown) {
 		this.fetchExceptionCooldown = fetchExceptionCooldown;
 	}
 
-	public int getRetryLimit() {
+	public Integer getRetryLimit() {
 		return retryLimit;
 	}
-	public void setRetryLimit(int retryLimit) {
+	public void setRetryLimit(Integer retryLimit) {
 		this.retryLimit = retryLimit;
 	}
 
-	public int getTitleMinLength() {
+	public Integer getTitleMinLength() {
 		return titleMinLength;
 	}
-	public void setTitleMinLength(int titleMinLength) {
+	public void setTitleMinLength(Integer titleMinLength) {
 		this.titleMinLength = titleMinLength;
 	}
 
-	public int getKeywordsMinSize() {
+	public Integer getKeywordsMinSize() {
 		return keywordsMinSize;
 	}
-	public void setKeywordsMinSize(int keywordsMinSize) {
+	public void setKeywordsMinSize(Integer keywordsMinSize) {
 		this.keywordsMinSize = keywordsMinSize;
 	}
 
-	public int getMinedTermsMinSize() {
+	public Integer getMinedTermsMinSize() {
 		return minedTermsMinSize;
 	}
-	public void setMinedTermsMinSize(int minedTermsMinSize) {
+	public void setMinedTermsMinSize(Integer minedTermsMinSize) {
 		this.minedTermsMinSize = minedTermsMinSize;
 	}
 
-	public int getAbstractMinLength() {
+	public Integer getAbstractMinLength() {
 		return abstractMinLength;
 	}
-	public void setAbstractMinLength(int abstractMinLength) {
+	public void setAbstractMinLength(Integer abstractMinLength) {
 		this.abstractMinLength = abstractMinLength;
 	}
 
-	public int getFulltextMinLength() {
+	public Integer getFulltextMinLength() {
 		return fulltextMinLength;
 	}
-	public void setFulltextMinLength(int fulltextMinLength) {
+	public void setFulltextMinLength(Integer fulltextMinLength) {
 		this.fulltextMinLength = fulltextMinLength;
 	}
 
-	public int getWebpageMinLength() {
+	public Integer getWebpageMinLength() {
 		return webpageMinLength;
 	}
-	public void setWebpageMinLength(int webpageMinLength) {
+	public void setWebpageMinLength(Integer webpageMinLength) {
 		this.webpageMinLength = webpageMinLength;
 	}
 
-	public int getWebpageMinLengthJavascript() {
+	public Integer getWebpageMinLengthJavascript() {
 		return webpageMinLengthJavascript;
 	}
-	public void setWebpageMinLengthJavascript(int webpageMinLengthJavascript) {
+	public void setWebpageMinLengthJavascript(Integer webpageMinLengthJavascript) {
 		this.webpageMinLengthJavascript = webpageMinLengthJavascript;
 	}
 
-	public int getTimeout() {
+	public Integer getTimeout() {
 		return timeout;
 	}
-	public void setTimeout(int timeout) {
+	public void setTimeout(Integer timeout) {
 		this.timeout = timeout;
 	}
 

@@ -28,7 +28,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-public abstract class BasicArgs {
+public abstract class BasicArgs extends Args {
 
 	@Parameter(names = { "-h", "--help" }, help = true, description = "Print this help")
 	private boolean help = false;
@@ -68,5 +68,19 @@ public abstract class BasicArgs {
 			ctx.updateLoggers();
 		}
 		return args;
+	}
+
+	@Override
+	protected void addArgs() {
+	}
+
+	@Override
+	public String getId() {
+		return "";
+	}
+
+	@Override
+	public String getLabel() {
+		return "";
 	}
 }

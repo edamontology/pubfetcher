@@ -84,7 +84,8 @@ public final class HtmlMeta {
 	private static final Pattern CITESEERX = Pattern.compile("^https?://(www\\.)?citeseerx\\..+$");
 	private static final Pattern F1000 = Pattern.compile("^https?://(www\\.)?f1000research\\.com/.+$");
 	private static final Pattern NATURE = Pattern.compile("^https?://(www\\.)?nature\\.com/.+$");
-	private static final Pattern WILEY = Pattern.compile("^https?://(www\\.)?onlinelibrary\\.wiley\\.com/.+$");
+	private static final Pattern WILEY = Pattern.compile("^https?://[a-zA-Z0-9.-]*onlinelibrary\\.wiley\\.com/.+$");
+	private static final Pattern SCIENCEMAG = Pattern.compile("^https?://[a-zA-Z0-9.-]*sciencemag\\.org/.+$");
 
 	private HtmlMeta() {}
 
@@ -234,14 +235,14 @@ public final class HtmlMeta {
 		if (keywords && !BIOMEDCENTRAL.matcher(doc.location()).matches()) {
 			setKeywords(publication, doc, dcType, DC_KEYWORDS_SELECTOR, fetcherArgs, parts);
 		}
-		if (!NATURE.matcher(doc.location()).matches()) {
+		if (!NATURE.matcher(doc.location()).matches() && !SCIENCEMAG.matcher(doc.location()).matches()) {
 			setAbstract(publication, doc, dcType, DC_ABSTRACT_SELECTOR, fetcherArgs, parts);
 		}
 
 		// og
 		PublicationPartType ogType = chooseType(PublicationPartType.og, type);;
 		setTitle(publication, doc, ogType, OG_TITLE_SELECTOR, fetcherArgs, parts);
-		if (!NATURE.matcher(doc.location()).matches() && !WILEY.matcher(doc.location()).matches()) {
+		if (!NATURE.matcher(doc.location()).matches() && !WILEY.matcher(doc.location()).matches() && !SCIENCEMAG.matcher(doc.location()).matches()) {
 			setAbstract(publication, doc, ogType, OG_ABSTRACT_SELECTOR, fetcherArgs, parts);
 		}
 

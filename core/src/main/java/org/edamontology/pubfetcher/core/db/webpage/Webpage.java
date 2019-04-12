@@ -76,12 +76,12 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public boolean isUsable(FetcherArgs fetcherArgs) {
-		return !isBroken() && !isEmpty() && isFinal(fetcherArgs);
+		return title.length() + content.length() >= fetcherArgs.getWebpageMinLength();
 	}
 
 	@Override
 	public boolean isFinal(FetcherArgs fetcherArgs) {
-		return title.length() + content.length() >= fetcherArgs.getWebpageMinLength();
+		return !isBroken() && isUsable(fetcherArgs);
 	}
 
 	public boolean isBroken() {
@@ -90,8 +90,9 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public String getStatusString(FetcherArgs fetcherArgs) {
-		if (isBroken()) return "broken";
-		if (isEmpty()) return "empty";
+		if (isBroken() && !isUsable(fetcherArgs)) return "broken";
+		if (isEmpty() && !isUsable(fetcherArgs)) return "empty";
+		if (!isUsable(fetcherArgs)) return "non-usable";
 		if (!isFinal(fetcherArgs)) return "non-final";
 		return "final";
 	}

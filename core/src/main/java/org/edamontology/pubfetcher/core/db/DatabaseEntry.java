@@ -134,7 +134,7 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 		StringBuilder sb = new StringBuilder();
 		sb.append("FETCH TIME: ").append(getFetchTimeHuman()).append(" (").append(fetchTime).append(")\n");
 		sb.append("RETRY COUNTER: ").append(retryCounter).append("\n");
-		sb.append("FETCHING EXCEPTION: ").append(fetchException);
+		sb.append("FETCH EXCEPTION: ").append(fetchException);
 		return sb.toString();
 	}
 
@@ -142,7 +142,7 @@ public abstract class DatabaseEntry<T> implements Serializable, Comparable<T> {
 		StringBuilder sb = new StringBuilder();
 		sb.append(prepend).append("<div><span>Fetch time:</span> <span>").append(getFetchTimeHuman()).append(" (").append(fetchTime).append(")</span></div>\n");
 		sb.append(prepend).append("<div><span>Retry counter:</span> <span>").append(retryCounter).append("</span></div>\n");
-		sb.append(prepend).append("<div><span>Fetching exception:</span> <span>").append(fetchException).append("</span></div>");
+		sb.append(prepend).append("<div><span>Fetch exception:</span> <span>").append(fetchException).append("</span></div>");
 		return sb.toString();
 	}
 

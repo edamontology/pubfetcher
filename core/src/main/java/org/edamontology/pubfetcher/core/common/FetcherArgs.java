@@ -21,7 +21,6 @@ package org.edamontology.pubfetcher.core.common;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.beust.jcommander.validators.PositiveInteger;
 
 public class FetcherArgs extends Args {
 
@@ -80,7 +79,7 @@ public class FetcherArgs extends Args {
 	private Integer fulltextMinLength = fulltextMinLengthDefault;
 
 	private static final String webpageMinLengthId = "webpageMinLength";
-	private static final String webpageMinLengthDescription = "Minimum length of a final webpage combined title and content";
+	private static final String webpageMinLengthDescription = "Minimum length of a usable webpage combined title and content";
 	private static final Integer webpageMinLengthDefault = 50;
 	@Parameter(names = { "--" + webpageMinLengthId }, validateWith = PositiveInteger.class, description = webpageMinLengthDescription)
 	private Integer webpageMinLength = webpageMinLengthDefault;

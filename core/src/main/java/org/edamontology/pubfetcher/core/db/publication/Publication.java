@@ -134,7 +134,7 @@ public class Publication extends DatabaseEntry<Publication> {
 
 	@Override
 	public String getStatusString(FetcherArgs fetcherArgs) {
-		if (isEmpty()) return "empty";
+		if (isEmpty() && !isUsable(fetcherArgs)) return "empty";
 		if (!isUsable(fetcherArgs)) return "non-usable";
 		if (!isFinal(fetcherArgs)) return "non-final";
 		if (!isTotallyFinal(fetcherArgs)) return "final";

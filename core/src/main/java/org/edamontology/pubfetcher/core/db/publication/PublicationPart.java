@@ -92,6 +92,13 @@ public abstract class PublicationPart implements Serializable {
 		return type.isFinal() && isUsable(fetcherArgs);
 	}
 
+	public String getStatusString(FetcherArgs fetcherArgs) {
+		if (isEmpty() && !isUsable(fetcherArgs)) return "empty";
+		if (!isUsable(fetcherArgs)) return "non-usable";
+		if (!isFinal(fetcherArgs)) return "non-final";
+		return "final";
+	}
+
 	public abstract String toStringPlain();
 
 	public abstract String toStringPlainHtml();

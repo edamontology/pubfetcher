@@ -23,8 +23,8 @@ import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.beust.jcommander.validators.PositiveInteger;
 
+import org.edamontology.pubfetcher.core.common.PositiveInteger;
 import org.edamontology.pubfetcher.core.db.publication.PublicationPartName;
 import org.edamontology.pubfetcher.core.db.publication.PublicationPartType;
 import org.edamontology.pubfetcher.core.fetching.FetcherTestArgs;

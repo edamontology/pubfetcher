@@ -33,7 +33,8 @@ public abstract class BasicArgs extends Args {
 	@Parameter(names = { "-h", "--help" }, help = true, description = "Print this help")
 	private boolean help = false;
 
-	@Parameter(names = { "-l", "--log" }, description = "Log file. Records will be appended in case of existing file. Missing parent directories will be created.")
+	public static final String logDescription = "Log file. Records will be appended in case of existing file. Missing parent directories will be created.";
+	@Parameter(names = { "-l", "--log" }, description = logDescription)
 	private String log = null;
 
 	public boolean isHelp() {
@@ -76,11 +77,11 @@ public abstract class BasicArgs extends Args {
 
 	@Override
 	public String getId() {
-		return "";
+		return "mainArgs";
 	}
 
 	@Override
 	public String getLabel() {
-		return "";
+		return "Main";
 	}
 }

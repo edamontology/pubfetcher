@@ -62,6 +62,7 @@ import org.edamontology.pubfetcher.core.common.PubFetcher;
 import org.edamontology.pubfetcher.core.common.Version;
 import org.edamontology.pubfetcher.core.db.Database;
 import org.edamontology.pubfetcher.core.db.DatabaseEntry;
+import org.edamontology.pubfetcher.core.db.DatabaseEntryType;
 import org.edamontology.pubfetcher.core.db.link.Link;
 import org.edamontology.pubfetcher.core.db.publication.MeshTerm;
 import org.edamontology.pubfetcher.core.db.publication.MinedTerm;

@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -56,6 +57,21 @@ import org.apache.xmpbox.schema.AdobePDFSchema;
 import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
+
+import org.jsoup.Connection.Response;
+import org.jsoup.HttpStatusException;
+import org.jsoup.Jsoup;
+import org.jsoup.UnsupportedMimeTypeException;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.jsoup.select.Selector.SelectorParseException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+
 import org.edamontology.pubfetcher.core.common.FetcherArgs;
 import org.edamontology.pubfetcher.core.common.FetcherPrivateArgs;
 import org.edamontology.pubfetcher.core.common.PubFetcher;
@@ -71,30 +87,14 @@ import org.edamontology.pubfetcher.core.db.webpage.Webpage;
 import org.edamontology.pubfetcher.core.scrape.Scrape;
 import org.edamontology.pubfetcher.core.scrape.ScrapeSiteKey;
 import org.edamontology.pubfetcher.core.scrape.ScrapeWebpageKey;
-import org.jsoup.Connection.Response;
-import org.jsoup.HttpStatusException;
-import org.jsoup.Jsoup;
-import org.jsoup.UnsupportedMimeTypeException;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.jsoup.select.Selector.SelectorParseException;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 public class Fetcher {
 
 	private static final Logger logger = LogManager.getLogger();
 
 	private static int LINKS_LIMIT = 10;
+	private static long MAX_PDF_SIZE = 104857600; // 1 MiB
+	private static long JAVASCRIPT_HARD_TIMEOUT = 120000; // 2 minutes
 
 	private static final String EUROPEPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/";
 	private static final String EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
@@ -225,6 +225,7 @@ public class Fetcher {
 		return getDoc(url, null, publication, type, from, links, parts, javascript, false, fetcherArgs);
 	}
 
+	@SuppressWarnings("deprecation")
 	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout, FetcherArgs fetcherArgs) {
 		Document doc = null;
 
@@ -239,47 +240,36 @@ public class Fetcher {
 			}
 
 			if (javascript) {
-				try (WebClient webClient = new WebClient()) {
-					webClient.getOptions().setUseInsecureSSL(true);
-					webClient.getOptions().setRedirectEnabled(true);
-					webClient.getOptions().setJavaScriptEnabled(true);
-					webClient.getOptions().setCssEnabled(true);
-					webClient.getOptions().setGeolocationEnabled(false);
-					webClient.getOptions().setDoNotTrackEnabled(false);
-					webClient.getOptions().setPrintContentOnFailingStatusCode(false);
-					webClient.getOptions().setThrowExceptionOnFailingStatusCode(true);
-					webClient.getOptions().setThrowExceptionOnScriptError(false);
-					webClient.getOptions().setActiveXNative(false);
-					webClient.getOptions().setTimeout(fetcherArgs.getTimeout());
-					webClient.getOptions().setDownloadImages(false);
+				JavascriptThread javascriptThread = new JavascriptThread(url, webpage, fetcherArgs);
 
-					URL u = new URL(url);
-					webClient.addRequestHeader("User-Agent", fetcherArgs.getPrivateArgs().getUserAgent());
-					webClient.addRequestHeader("Referer", u.getProtocol() + "://" + u.getAuthority());
+				Thread t = new Thread(javascriptThread);
+				t.setDaemon(true);
+				t.start();
 
-					webClient.setAjaxController(new NicelyResynchronizingAjaxController());
-					webClient.setCssErrorHandler(new SilentCssErrorHandler());
+				long start = System.currentTimeMillis();
 
-					Page page = webClient.getPage(url);
-
-					String contentType = page.getWebResponse().getContentType();
-					int statusCode = page.getWebResponse().getStatusCode();
-					String finalUrl = page.getWebResponse().getWebRequest().getUrl().toString();
-
-					if (webpage != null) {
-						webpage.setContentType(contentType);
-						webpage.setStatusCode(statusCode);
+				while (!javascriptThread.isFinished()) {
+					try {
+						Thread.sleep(100);
+						long elapsed = System.currentTimeMillis() - start;
+						// 2 * timeout is expected timeout if htmlunit behaves, give twice that amount plus a fixed 1 second independent of timeout arg value
+						// but cap max timeout for javascript at 2 minutes, because letting stuck htmlunit code run beyond that will start to cause errors for other fetching threads 
+						if (elapsed > 2 * 2 * fetcherArgs.getTimeout() + 1000 || elapsed > JAVASCRIPT_HARD_TIMEOUT) { 
+							t.stop(); // alternative is to call stop0(new ThreadDeath()) directly with Thread.class.getDeclaredMethod("stop0") and setAccessible(true)
+							break;
+						}
+					} catch (InterruptedException e) {
+						logger.error("Exception!", e);
+						break;
 					}
+				}
 
-					if (page.isHtmlPage()) {
-						HtmlPage htmlPage = (HtmlPage) page;
-
-						webClient.waitForBackgroundJavaScript(fetcherArgs.getTimeout());
-
-						doc = Jsoup.parse(htmlPage.asXml(), finalUrl);
-					} else {
-						throw new UnsupportedMimeTypeException("Not a HTML page", contentType, finalUrl);
-					}
+				if (javascriptThread.getException() != null) {
+					throw javascriptThread.getException();
+				} else if (javascriptThread.getDoc() == null) {
+					throw new NullPointerException("JavascriptThread has not created a Document!");
+				} else {
+					doc = javascriptThread.getDoc();
 				}
 			} else {
 				URL u = new URL(url);
@@ -310,7 +300,7 @@ public class Fetcher {
 				logger.info("        status code: {}", webpage.getStatusCode());
 				logger.info("        title: {}", webpage.getTitle());
 				logger.info("        content length: {}", doc.text().length());
-			} else {
+			} else if (!javascript) {
 				logger.info("    GOT {}", doc.location());
 			}
 
@@ -447,7 +437,7 @@ public class Fetcher {
 				webpage.setFinalUrl(finalUrl);
 			}
 
-			try (PDDocument doc = PDDocument.load(con.getInputStream())) {
+			try (PDDocument doc = PDDocument.load(con.getInputStream(), MemoryUsageSetting.setupMainMemoryOnly(MAX_PDF_SIZE))) {
 				logger.info("    GOT PDF {}", finalUrl);
 				if (webpage != null) {
 					if (con instanceof HttpURLConnection) {

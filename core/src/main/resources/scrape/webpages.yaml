@@ -177,29 +177,6 @@
   content: .content > :not(h1):not(.footer)
   javascript: 'true'
 
-# otherwise will get stuck because of some bug in htmlunit (for http://labs.genetics.ucla.edu/horvath/htdocs/RGLM/)
-'labs\.genetics\.ucla\.edu':
-  javascript: 'false'
-
-# java.lang.OutOfMemoryError in htmlunit
-'strmix\.esr\.cri\.nz':
-  javascript: 'false'
-
-'(dad\.)?fao\.org':
-  javascript: 'false'
-
-'snpedia\.com':
-  javascript: 'false'
-
-# https://www.hsph.harvard.edu/alkes-price/software/
-# https://www.hsph.harvard.edu/skat/metaskat/
-'hsph\.harvard\.edu':
-  javascript: 'false'
-
-# http://www.genecards.org/Guide
-'genecards\.org':
-  javascript: 'false'
-
 # can only get the short description and not the whole readme
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.home-panel-title
@@ -245,3 +222,30 @@
 'apps\.cytoscape\.org/+apps/':
   title: 'body > div > div > div:has(#app-name)'
   content: '#cy-app-details-md, #cy-app-details-tab > div:first-child a'
+
+# Explicitly disable JavaScript for URLs that cause htmlunit code getting stuck at 100% CPU
+
+# http://labs.genetics.ucla.edu/horvath/htdocs/RGLM/
+'labs\.genetics\.ucla\.edu':
+  javascript: 'false'
+
+'(dad\.)?fao\.org':
+  javascript: 'false'
+
+# http://www.SNPedia.com/
+# http://www.snpedia.com/index.php/Genomes
+'snpedia\.com':
+  javascript: 'false'
+
+# https://www.hsph.harvard.edu/alkes-price/software/
+# https://www.hsph.harvard.edu/skat/metaskat/
+'hsph\.harvard\.edu':
+  javascript: 'false'
+
+# http://www.genecards.org/Guide
+'genecards\.org':
+  javascript: 'false'
+
+# Results in java.lang.StackOverflowError after ~1.5 minutes
+'seltarbase\.org':
+  javascript: 'false'

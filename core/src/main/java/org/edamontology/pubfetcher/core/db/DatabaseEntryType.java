@@ -17,10 +17,10 @@
  * along with PubFetcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.edamontology.pubfetcher.cli;
+package org.edamontology.pubfetcher.core.db;
 
 public enum DatabaseEntryType {
 	publication,
 	webpage,
-	doc;
+	doc
 }

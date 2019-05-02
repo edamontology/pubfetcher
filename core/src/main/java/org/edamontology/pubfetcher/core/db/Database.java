@@ -508,14 +508,22 @@ public class Database implements Closeable {
 			logger.error("No start URL given for getting webpage from database");
 			return null;
 		}
-		return webpages.get(webpageUrl);
+		Webpage webpage = webpages.get(webpageUrl);
+		if (webpage == null) {
+			logger.warn("No webpage found for URL {} in database", webpageUrl);
+		}
+		return webpage;
 	}
 	public Webpage getDoc(String docUrl) {
 		if (docUrl == null) {
 			logger.error("No start URL given for getting doc from database");
 			return null;
 		}
-		return docs.get(docUrl);
+		Webpage doc = docs.get(docUrl);
+		if (doc == null) {
+			logger.warn("No doc found for URL {} in database", docUrl);
+		}
+		return doc;
 	}
 
 	public long getPublicationsSize() {

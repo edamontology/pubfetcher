@@ -35,7 +35,7 @@ public final class Cli {
 	public static void main(String[] argv) throws IOException, ReflectiveOperationException {
 		Version version = new Version(Cli.class);
 
-		CliArgs args = BasicArgs.parseArgs(argv, CliArgs.class, version);
+		CliArgs args = BasicArgs.parseArgs(argv, CliArgs.class, version, false);
 
 		// logger must be called only after configuration changes have been made in BasicArgs.parseArgs()
 		// otherwise invalid.log will be created if arg --log is null
@@ -47,6 +47,7 @@ public final class Cli {
 			PubFetcherMethods.run(args.pubFetcherArgs, new Fetcher(args.fetcherArgs.getPrivateArgs()), args.fetcherArgs, null, null, null, version, argv);
 		} catch (Throwable e) {
 			logger.error("Exception!", e);
+			System.exit(1);
 		}
 	}
 }

@@ -62,13 +62,14 @@ public class DbFetch implements Runnable {
 	private final FetcherArgs fetcherArgs;
 	private final boolean end;
 	private final int databaseEntriesLimit;
+	private final boolean stderr;
 
 	private static LinkedList<Integer> exceptionIndexes;
 
 	private static List<DatabaseEntry<?>> databaseEntries;
 	private static int databaseEntriesCount;
 
-	DbFetch(PubFetcherArgs args, Database db, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, boolean end, int limit) {
+	DbFetch(PubFetcherArgs args, Database db, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, boolean end, int limit, boolean stderr) {
 		this.args = args;
 		this.db = db;
 		this.fetcher = fetcher;
@@ -76,6 +77,7 @@ public class DbFetch implements Runnable {
 		this.fetcherArgs = fetcherArgs;
 		this.end = end;
 		this.databaseEntriesLimit = limit;
+		this.stderr = stderr;
 	}
 
 	static List<? extends DatabaseEntry<?>> init(DatabaseEntryType type, Set<? extends Object> ids, long start) {
@@ -112,8 +114,9 @@ public class DbFetch implements Runnable {
 				Object id;
 				int localIndex;
 				boolean exceptionIndex = false;
-				String progress = null;
+				long progressStart;
 				synchronized(databaseEntryIds) {
+					progressStart = startMillis;
 					if (index >= databaseEntryIds.size()) {
 						synchronized(exceptionIndexes) {
 							if (exceptionIndexes.isEmpty()) {
@@ -124,25 +127,27 @@ public class DbFetch implements Runnable {
 								exceptionIndex = true;
 							}
 						}
-						progress = PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), startMillis);
 					} else {
 						localIndex = index;
 						id = databaseEntryIds.get(localIndex);
 						++index;
-						progress = PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), startMillis);
 						if (index >= databaseEntryIds.size()) {
 							startMillis = System.currentTimeMillis();
 						}
 					}
 				}
 
-				logger.info((exceptionIndex ? "Refetch" : "Fetch") + " {} {}", databaseEntryType, progress);
+				logger.info((exceptionIndex ? "Refetch" : "Fetch") + " {} {}", databaseEntryType, PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), progressStart));
 
 				DatabaseEntry<?> databaseEntry = null;
 				switch (databaseEntryType) {
 					case publication: databaseEntry = PubFetcher.getPublication((PublicationIds) id, db, fetcher, parts, fetcherArgs); break;
 					case webpage: databaseEntry = PubFetcher.getWebpage((String) id, db, fetcher, fetcherArgs); break;
 					case doc: databaseEntry = PubFetcher.getDoc((String) id, db, fetcher, fetcherArgs); break;
+				}
+
+				if (stderr) {
+					System.err.print((exceptionIndex ? "Refetch" : "Fetch") + " " + databaseEntryType + " " + PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), progressStart) + "  \r");
 				}
 
 				if (databaseEntry != null) {

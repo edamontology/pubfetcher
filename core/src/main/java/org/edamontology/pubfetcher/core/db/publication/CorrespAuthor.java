@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 public class CorrespAuthor implements Serializable {
@@ -40,6 +41,7 @@ public class CorrespAuthor implements Serializable {
 
 	private String uri = "";
 
+	@JsonIgnore
 	public boolean isEmpty() {
 		return name.isEmpty() && orcid.isEmpty() && email.isEmpty() && phone.isEmpty() && uri.isEmpty();
 	}

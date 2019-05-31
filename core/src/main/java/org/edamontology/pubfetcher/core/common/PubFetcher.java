@@ -618,7 +618,7 @@ public final class PubFetcher {
 		try {
 			Webpage webpage = null;
 			if (database != null) {
-				webpage = database.getWebpage(webpageUrl);
+				webpage = database.getWebpage(webpageUrl, true);
 			}
 			if (fetcher != null) {
 				if (webpage == null) {
@@ -687,7 +687,7 @@ public final class PubFetcher {
 		try {
 			Webpage doc = null;
 			if (database != null) {
-				doc = database.getDoc(docUrl);
+				doc = database.getDoc(docUrl, true);
 			}
 			if (fetcher != null) {
 				if (doc == null) {

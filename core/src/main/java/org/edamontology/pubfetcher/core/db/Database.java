@@ -503,24 +503,24 @@ public class Database implements Closeable {
 		return null;
 	}
 
-	public Webpage getWebpage(String webpageUrl) {
+	public Webpage getWebpage(String webpageUrl, boolean logMissing) {
 		if (webpageUrl == null) {
 			logger.error("No start URL given for getting webpage from database");
 			return null;
 		}
 		Webpage webpage = webpages.get(webpageUrl);
-		if (webpage == null) {
+		if (webpage == null && logMissing) {
 			logger.warn("No webpage found for URL {} in database", webpageUrl);
 		}
 		return webpage;
 	}
-	public Webpage getDoc(String docUrl) {
+	public Webpage getDoc(String docUrl, boolean logMissing) {
 		if (docUrl == null) {
 			logger.error("No start URL given for getting doc from database");
 			return null;
 		}
 		Webpage doc = docs.get(docUrl);
-		if (doc == null) {
+		if (doc == null && logMissing) {
 			logger.warn("No doc found for URL {} in database", docUrl);
 		}
 		return doc;

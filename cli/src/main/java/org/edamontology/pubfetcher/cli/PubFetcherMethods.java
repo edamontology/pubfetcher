@@ -619,7 +619,7 @@ public final class PubFetcherMethods {
 	}
 
 	static boolean preFilter(PubFetcherArgs args, Fetcher fetcher, FetcherArgs fetcherArgs, DatabaseEntry<?> entry, DatabaseEntryType type) {
-		if (args.preFilter) {
+		if (args != null && args.preFilter) {
 			boolean filter = false;
 			switch (type) {
 				case publication: filter = contentFilter(args, fetcher, fetcherArgs, Stream.of((Publication) entry).collect(Collectors.toList()), null, null, args.preFilter); break;
@@ -655,8 +655,8 @@ public final class PubFetcherMethods {
 				T entry = null;
 				switch (type) {
 					case publication: entry = (T) db.getPublication((PublicationIds) id); break;
-					case webpage: entry = (T) db.getWebpage((String) id); break;
-					case doc: entry = (T) db.getDoc((String) id); break;
+					case webpage: entry = (T) db.getWebpage((String) id, true); break;
+					case doc: entry = (T) db.getDoc((String) id, true); break;
 				}
 				if (entry != null) {
 					if (preFilter(args, fetcher, fetcherArgs, entry, type)) {
@@ -701,7 +701,7 @@ public final class PubFetcherMethods {
 		return entry;
 	}
 
-	private static <T extends DatabaseEntry<T>> List<T> fetch(PubFetcherArgs args, Set<? extends Object> ids, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, int limit, DatabaseEntryType type) throws IOException {
+	private static <T extends DatabaseEntry<T>> List<T> fetch(PubFetcherArgs args, Set<? extends Object> ids, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, int limit, boolean stderr, DatabaseEntryType type) throws IOException {
 		if (ids.isEmpty() || limit <= 0) {
 			return Collections.emptyList();
 		}
@@ -719,6 +719,9 @@ public final class PubFetcherMethods {
 		for (Object id : ids) {
 			logger.info("Fetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
 			T entry = fetchDatabaseEntry(id, null, fetcher, parts, fetcherArgs, false, type);
+			if (stderr) {
+				System.err.print("Fetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
+			}
 			if (entry != null) {
 				if (entry.isFetchException()) {
 					exceptionIndexes.add(i);
@@ -742,6 +745,9 @@ public final class PubFetcherMethods {
 				i = exceptionIndexes.get(j);
 				logger.info("Refetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
 				T entry = fetchDatabaseEntry(exceptionIds.get(j), null, fetcher, parts, fetcherArgs, false, type);
+				if (stderr) {
+					System.err.print("Refetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
+				}
 				if (entry != null) {
 					if (preFilter(args, fetcher, fetcherArgs, entry, type)) {
 						entries.set(i, entry);
@@ -758,7 +764,7 @@ public final class PubFetcherMethods {
 		return entries;
 	}
 
-	private static <T extends DatabaseEntry<T>> List<T> fetchPut(PubFetcherArgs args, Set<? extends Object> ids, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, int limit, DatabaseEntryType type) throws IOException {
+	private static <T extends DatabaseEntry<T>> List<T> fetchPut(PubFetcherArgs args, Set<? extends Object> ids, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, int limit, boolean stderr, DatabaseEntryType type) throws IOException {
 		if (ids.isEmpty() || limit <= 0) {
 			return Collections.emptyList();
 		}
@@ -777,6 +783,9 @@ public final class PubFetcherMethods {
 			for (Object id : ids) {
 				logger.info("Fetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
 				T entry = fetchDatabaseEntry(id, db, fetcher, parts, fetcherArgs, true, type);
+				if (stderr) {
+					System.err.print("Fetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
+				}
 				if (entry != null) {
 					if (entry.isFetchException()) {
 						exceptionIndexes.add(i);
@@ -800,6 +809,9 @@ public final class PubFetcherMethods {
 					i = exceptionIndexes.get(j);
 					logger.info("Refetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
 					T entry = fetchDatabaseEntry(exceptionIds.get(j), db, fetcher, parts, fetcherArgs, true, type);
+					if (stderr) {
+						System.err.print("Refetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
+					}
 					if (entry != null) {
 						if (preFilter(args, fetcher, fetcherArgs, entry, type)) {
 							entries.set(i, entry);
@@ -818,15 +830,15 @@ public final class PubFetcherMethods {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T extends DatabaseEntry<T>> List<T> dbFetch(PubFetcherArgs args, Set<? extends Object> ids, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, boolean end, int limit, DatabaseEntryType type) throws IOException {
+	public static <T extends DatabaseEntry<T>> List<T> dbFetch(PubFetcherArgs args, int threads, Set<? extends Object> ids, String database, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, boolean end, int limit, boolean stderr, DatabaseEntryType type) throws IOException {
 		if (ids.isEmpty() || limit <= 0) {
 			return Collections.emptyList();
 		}
 		List<T> entries = (List<T>) DbFetch.init(type, ids, System.currentTimeMillis());
 		logger.info("Get {} {}s from database: {} (or fetch if not present)", ids.size(), type, database);
 		try (Database db = new Database(database)) {
-			for (int i = 0; i < args.threads; ++i) {
-				Thread t = new Thread(new DbFetch(args, db, fetcher, parts, fetcherArgs, end, limit));
+			for (int i = 0; i < threads; ++i) {
+				Thread t = new Thread(new DbFetch(args, db, fetcher, parts, fetcherArgs, end, limit, stderr));
 				t.setDaemon(true);
 				t.start();
 			}
@@ -953,7 +965,7 @@ public final class PubFetcherMethods {
 		}
 	}
 
-	private static void updateCitationsCount(List<Publication> publications, String database, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
+	private static void updateCitationsCount(List<Publication> publications, String database, Fetcher fetcher, FetcherArgs fetcherArgs, boolean stderr) throws IOException {
 		if (publications.isEmpty()) return;
 		logger.info("Update citations count of {} publications and put successfully updated to database: {}", publications.size(), database);
 		long start = System.currentTimeMillis();
@@ -967,6 +979,9 @@ public final class PubFetcherMethods {
 					db.commit();
 				} else {
 					++fail;
+				}
+				if (stderr) {
+					System.err.print("Update citations count " + PubFetcher.progress(i + 1, publications.size(), start) + "  \r");
 				}
 			}
 		}
@@ -1993,27 +2008,27 @@ public final class PubFetcherMethods {
 		}
 
 		if (args.fetch) {
-			publications.addAll(fetch(args, publicationIds, fetcher, parts, fetcherArgs, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), DatabaseEntryType.publication));
-			webpages.addAll(fetch(args, webpageUrls, fetcher, null, fetcherArgs, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), DatabaseEntryType.webpage));
-			docs.addAll(fetch(args, docUrls, fetcher, null, fetcherArgs, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), DatabaseEntryType.doc));
+			publications.addAll(fetch(args, publicationIds, fetcher, parts, fetcherArgs, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), false, DatabaseEntryType.publication));
+			webpages.addAll(fetch(args, webpageUrls, fetcher, null, fetcherArgs, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), false, DatabaseEntryType.webpage));
+			docs.addAll(fetch(args, docUrls, fetcher, null, fetcherArgs, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), false, DatabaseEntryType.doc));
 		}
 
 		if (args.fetchPut != null) {
-			publications.addAll(fetchPut(args, publicationIds, args.fetchPut, fetcher, parts, fetcherArgs, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), DatabaseEntryType.publication));
-			webpages.addAll(fetchPut(args, webpageUrls, args.fetchPut, fetcher, null, fetcherArgs, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), DatabaseEntryType.webpage));
-			docs.addAll(fetchPut(args, docUrls, args.fetchPut, fetcher, null, fetcherArgs, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), DatabaseEntryType.doc));
+			publications.addAll(fetchPut(args, publicationIds, args.fetchPut, fetcher, parts, fetcherArgs, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), false, DatabaseEntryType.publication));
+			webpages.addAll(fetchPut(args, webpageUrls, args.fetchPut, fetcher, null, fetcherArgs, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), false, DatabaseEntryType.webpage));
+			docs.addAll(fetchPut(args, docUrls, args.fetchPut, fetcher, null, fetcherArgs, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), false, DatabaseEntryType.doc));
 		}
 
 		if (args.dbFetch != null) {
-			publications.addAll(dbFetch(args, publicationIds, args.dbFetch, fetcher, parts, fetcherArgs, false, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), DatabaseEntryType.publication));
-			webpages.addAll(dbFetch(args, webpageUrls, args.dbFetch, fetcher, null, fetcherArgs, false, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), DatabaseEntryType.webpage));
-			docs.addAll(dbFetch(args, docUrls, args.dbFetch, fetcher, null, fetcherArgs, false, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), DatabaseEntryType.doc));
+			publications.addAll(dbFetch(args, args.threads, publicationIds, args.dbFetch, fetcher, parts, fetcherArgs, false, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), false, DatabaseEntryType.publication));
+			webpages.addAll(dbFetch(args, args.threads, webpageUrls, args.dbFetch, fetcher, null, fetcherArgs, false, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), false, DatabaseEntryType.webpage));
+			docs.addAll(dbFetch(args, args.threads, docUrls, args.dbFetch, fetcher, null, fetcherArgs, false, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), false, DatabaseEntryType.doc));
 		}
 
 		if (args.dbFetchEnd != null) {
-			dbFetch(args, publicationIds, args.dbFetchEnd, fetcher, parts, fetcherArgs, true, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), DatabaseEntryType.publication);
-			dbFetch(args, webpageUrls, args.dbFetchEnd, fetcher, null, fetcherArgs, true, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), DatabaseEntryType.webpage);
-			dbFetch(args, docUrls, args.dbFetchEnd, fetcher, null, fetcherArgs, true, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), DatabaseEntryType.doc);
+			dbFetch(args, args.threads, publicationIds, args.dbFetchEnd, fetcher, parts, fetcherArgs, true, args.limit <= 0 ? publicationIds.size() : args.limit - publications.size(), false, DatabaseEntryType.publication);
+			dbFetch(args, args.threads, webpageUrls, args.dbFetchEnd, fetcher, null, fetcherArgs, true, args.limit <= 0 ? webpageUrls.size() : args.limit - webpages.size(), false, DatabaseEntryType.webpage);
+			dbFetch(args, args.threads, docUrls, args.dbFetchEnd, fetcher, null, fetcherArgs, true, args.limit <= 0 ? docUrls.size() : args.limit - docs.size(), false, DatabaseEntryType.doc);
 		}
 
 		// filter content
@@ -2091,7 +2106,7 @@ public final class PubFetcherMethods {
 
 		// update citations count
 
-		if (args.updateCitationsCount != null) updateCitationsCount(publications, args.updateCitationsCount, fetcher, fetcherArgs);
+		if (args.updateCitationsCount != null) updateCitationsCount(publications, args.updateCitationsCount, fetcher, fetcherArgs, false);
 
 		// put to database
 

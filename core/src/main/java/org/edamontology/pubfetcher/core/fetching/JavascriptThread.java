@@ -109,9 +109,11 @@ public class JavascriptThread implements Runnable {
 				HtmlPage htmlPage = (HtmlPage) page;
 
 				webClient.waitForBackgroundJavaScript(fetcherArgs.getTimeout());
+				webClient.close(); // explicit closing after waiting may help in avoiding hung threads (background JavaScript tasks)?
 
 				doc = Jsoup.parse(htmlPage.asXml(), finalUrl);
 			} else {
+				webClient.close();
 				throw new UnsupportedMimeTypeException("Not a HTML page", contentType, finalUrl);
 			}
 		} catch (Exception e) {
@@ -127,6 +129,8 @@ public class JavascriptThread implements Runnable {
 
 			if (doc != null) {
 				logger.info("    GOT {} (with JavaScript)", doc.location());
+			} else {
+				logger.error("Failed to get Document!");
 			}
 		}
 	}

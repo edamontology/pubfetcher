@@ -45,7 +45,15 @@ public abstract class BasicArgs extends Args {
 		return log;
 	}
 
-	public static <T extends BasicArgs> T parseArgs(String[] argv, Class<T> clazz, Version version) throws ReflectiveOperationException {
+	private static void removeFileLog() {
+		final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		final Configuration config = ctx.getConfiguration();
+		config.getLoggerConfig("org.edamontology").removeAppender("Log");
+		// TODO org.biotools
+		ctx.updateLoggers();
+	}
+
+	public static <T extends BasicArgs> T parseArgs(String[] argv, Class<T> clazz, Version version, boolean externalLogPath) throws ReflectiveOperationException {
 		T args = clazz.getConstructor().newInstance();
 		JCommander jcommander = new JCommander(args);
 		try {
@@ -61,14 +69,22 @@ public abstract class BasicArgs extends Args {
 			jcommander.usage();
 			System.exit(0);
 		}
-		MainMapLookup.setMainArguments(new String[] { args.getLog() });
-		if (args.getLog() == null) {
-			final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-			final Configuration config = ctx.getConfiguration();
-			config.removeLogger("org.edamontology");
-			ctx.updateLoggers();
+		if (args.getLog() != null) {
+			MainMapLookup.setMainArguments(new String[] { args.getLog() });
+		} else if (!externalLogPath) {
+			removeFileLog();
 		}
 		return args;
+	}
+
+	public static <T extends BasicArgs> void setExternalLogPath(T args, String logPath) {
+		if (args.getLog() == null) {
+			if (logPath != null) {
+				MainMapLookup.setMainArguments(new String[] { logPath });
+			} else {
+				removeFileLog();
+			}
+		}
 	}
 
 	@Override

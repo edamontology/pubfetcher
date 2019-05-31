@@ -34,82 +34,82 @@ public class PubFetcherArgs {
 	@ParametersDelegate
 	FetcherTestArgs fetcherTestArgs = new FetcherTestArgs();
 
-	@Parameter(names = { "--db-init" }, description = "Create an empty database file. This is the only way to make new databases.")
+	@Parameter(names = { "-db-init" }, description = "Create an empty database file. This is the only way to make new databases.")
 	String dbInit = null;
 
-	@Parameter(names = { "--db-commit" }, description = "Commit all pending changes by merging all WAL files to the main database file. This has only an effect if WAL files are present beside the database file after an abrupt termination of the program, as normally committing is done in code where required.")
+	@Parameter(names = { "-db-commit" }, description = "Commit all pending changes by merging all WAL files to the main database file. This has only an effect if WAL files are present beside the database file after an abrupt termination of the program, as normally committing is done in code where required.")
 	String dbCommit = null;
 
-	@Parameter(names = { "--db-compact" }, description = "Compaction reclaims space by removing deprecated records (left over after database updates)")
+	@Parameter(names = { "-db-compact" }, description = "Compaction reclaims space by removing deprecated records (left over after database updates)")
 	String dbCompact = null;
 
-	@Parameter(names = { "--db-publications-size" }, description = "Output the number of publications stored in the database to stdout")
+	@Parameter(names = { "-db-publications-size" }, description = "Output the number of publications stored in the database to stdout")
 	String dbPublicationsSize = null;
 
-	@Parameter(names = { "--db-webpages-size" }, description = "Output the number of webpages stored in the database to stdout")
+	@Parameter(names = { "-db-webpages-size" }, description = "Output the number of webpages stored in the database to stdout")
 	String dbWebpagesSize = null;
 
-	@Parameter(names = { "--db-docs-size" }, description = "Output the number of docs stored in the database to stdout")
+	@Parameter(names = { "-db-docs-size" }, description = "Output the number of docs stored in the database to stdout")
 	String dbDocsSize = null;
 
-	@Parameter(names = { "--db-publications-map" }, description = "Output all PMID to primary ID, PMCID to primary ID and DOI to primary ID mapping pairs stored in the database to stdout")
+	@Parameter(names = { "-db-publications-map" }, description = "Output all PMID to primary ID, PMCID to primary ID and DOI to primary ID mapping pairs stored in the database to stdout")
 	String dbPublicationsMap = null;
 
-	@Parameter(names = { "--db-publications-map-reverse" }, description = "Output all mappings from primary ID to the triple [PMID, PMCID, DOI] stored in the database to stdout")
+	@Parameter(names = { "-db-publications-map-reverse" }, description = "Output all mappings from primary ID to the triple [PMID, PMCID, DOI] stored in the database to stdout")
 	String dbPublicationsMapReverse = null;
 
-	@Parameter(names = { "--fetch-document" }, description = "Fetch a web page (without JavaScript support, i.e. using jsoup) and output its raw HTML to stdout")
+	@Parameter(names = { "-fetch-document" }, description = "Fetch a web page (without JavaScript support, i.e. using jsoup) and output its raw HTML to stdout")
 	String fetchDocument = null;
 
-	@Parameter(names = { "--fetch-document-javascript" }, description = "Fetch a web page (with JavaScript support, i.e. using HtmlUnit) and output its raw HTML to stdout")
+	@Parameter(names = { "-fetch-document-javascript" }, description = "Fetch a web page (with JavaScript support, i.e. using HtmlUnit) and output its raw HTML to stdout")
 	String fetchDocumentJavascript = null;
 
-	@Parameter(names = { "--fetch-webpage-selector" }, arity = 4, description = "Fetch a webpage and output it to stdout in the format specified by the output modifiers --plain and --format. Works also for PDF files. \"Title\" and \"content\" args are CSS selectors as supported by jsoup. If the \"title selector\" is an empty string, then the page title will be the text content of the document's <title> element. If the \"content selector\" is an empty string, then content will be the whole text content parsed from the HTML/XML. If javascript arg is \"true\", then fetching will be done using JavaScript support (HtmlUnit), if \"false\", then without JavaScript (jsoup). If javascript arg is empty, then fetching will be done without JavaScript and if the text length of the returned document is less than --webpageMinLengthJavascript or if a <noscript> tag is found in it, a second fetch will happen with JavaScript support.")
+	@Parameter(names = { "-fetch-webpage-selector" }, arity = 4, description = "Fetch a webpage and output it to stdout in the format specified by the output modifiers --plain and --format. Works also for PDF files. \"Title\" and \"content\" args are CSS selectors as supported by jsoup. If the \"title selector\" is an empty string, then the page title will be the text content of the document's <title> element. If the \"content selector\" is an empty string, then content will be the whole text content parsed from the HTML/XML. If javascript arg is \"true\", then fetching will be done using JavaScript support (HtmlUnit), if \"false\", then without JavaScript (jsoup). If javascript arg is empty, then fetching will be done without JavaScript and if the text length of the returned document is less than --webpageMinLengthJavascript or if a <noscript> tag is found in it, a second fetch will happen with JavaScript support.")
 	List<String> fetchWebpageSelector = null;
 
-	@Parameter(names = { "--scrape-site" }, description = "Output found journal site name for the given URL to stdout (or \"null\" if not found or URL invalid)")
+	@Parameter(names = { "-scrape-site" }, description = "Output found journal site name for the given URL to stdout (or \"null\" if not found or URL invalid)")
 	String scrapeSite = null;
 
-	@Parameter(names = { "--scrape-selector" }, arity = 2, description = "Output the CSS selector used for extracting the publication part represented by ScrapeSiteKey from the given URL")
+	@Parameter(names = { "-scrape-selector" }, arity = 2, description = "Output the CSS selector used for extracting the publication part represented by ScrapeSiteKey from the given URL")
 	List<String> scrapeSelector = null;
 
-	@Parameter(names = { "--scrape-javascript" }, description = "Output \"true\" or \"false\" depending on whether JavaScript will be used or not for fetching the given publication URL")
+	@Parameter(names = { "-scrape-javascript" }, description = "Output \"true\" or \"false\" depending on whether JavaScript will be used or not for fetching the given publication URL")
 	String scrapeJavascript = null;
 
-	@Parameter(names = { "--scrape-webpage" }, description = "Output all CSS selectors used for extracting webpage content and metadata from the given URL (or \"null\" if not found or URL invalid)")
+	@Parameter(names = { "-scrape-webpage" }, description = "Output all CSS selectors used for extracting webpage content and metadata from the given URL (or \"null\" if not found or URL invalid)")
 	String scrapeWebpage = null;
 
-	@Parameter(names = { "--is-pmid" }, description = "Output \"true\" or \"false\" depending on whether the given string is a valid PMID or not")
+	@Parameter(names = { "-is-pmid" }, description = "Output \"true\" or \"false\" depending on whether the given string is a valid PMID or not")
 	String isPmid = null;
 
-	@Parameter(names = { "--is-pmcid" }, description = "Output \"true\" or \"false\" depending on whether the given string is a valid PMCID or not")
+	@Parameter(names = { "-is-pmcid" }, description = "Output \"true\" or \"false\" depending on whether the given string is a valid PMCID or not")
 	String isPmcid = null;
 
-	@Parameter(names = { "--extract-pmcid" }, description = "Remove the prefix \"PMC\" from a PMCID and output the rest. Output an empty string if the given string is not a valid PMCID.")
+	@Parameter(names = { "-extract-pmcid" }, description = "Remove the prefix \"PMC\" from a PMCID and output the rest. Output an empty string if the given string is not a valid PMCID.")
 	String extractPmcid = null;
 
-	@Parameter(names = { "--is-doi" }, description = "Output \"true\" or \"false\" depending on whether the given string is a valid DOI or not")
+	@Parameter(names = { "-is-doi" }, description = "Output \"true\" or \"false\" depending on whether the given string is a valid DOI or not")
 	String isDoi = null;
 
-	@Parameter(names = { "--normalise-doi" }, description = "Remove any valid prefix (e.g. \"https://doi.org/\", \"doi:\") from a DOI and output the rest, converting letters from the 7-bit ASCII set to uppercase. The validity of the input DOI is not checked.")
+	@Parameter(names = { "-normalise-doi" }, description = "Remove any valid prefix (e.g. \"https://doi.org/\", \"doi:\") from a DOI and output the rest, converting letters from the 7-bit ASCII set to uppercase. The validity of the input DOI is not checked.")
 	String normaliseDoi = null;
 
-	@Parameter(names = { "--extract-doi-registrant" }, description = "Output the registrant ID of a DOI (the substring after \"10.\" and before \"/\"). Output an empty string if the given string is not a valid DOI.")
+	@Parameter(names = { "-extract-doi-registrant" }, description = "Output the registrant ID of a DOI (the substring after \"10.\" and before \"/\"). Output an empty string if the given string is not a valid DOI.")
 	String extractDoiRegistrant = null;
 
-	@Parameter(names = { "--escape-html" }, description = "Output the result of escaping necessary characters in the given string such that it can safely by used as text in a HTML document (without the string interacting with the document's markup)")
+	@Parameter(names = { "-escape-html" }, description = "Output the result of escaping necessary characters in the given string such that it can safely by used as text in a HTML document (without the string interacting with the document's markup)")
 	String escapeHtml = null;
 
-	@Parameter(names = { "--escape-html-attribute" }, description = "Output the result of escaping necessary characters in the given string such that it can safely by used as an HTML attribute value (without the string interacting with the document's markup)")
+	@Parameter(names = { "-escape-html-attribute" }, description = "Output the result of escaping necessary characters in the given string such that it can safely by used as an HTML attribute value (without the string interacting with the document's markup)")
 	String escapeHtmlAttribute = null;
 
-	@Parameter(names = { "--check-publication-id" }, description = "Given one publication ID, output it in publication IDs form (\"<pmid>\\t<pmcid>\\t<doi>\") if it is a valid PMID, PMCID or DOI, or throw an exception if it is an invalid publication ID")
+	@Parameter(names = { "-check-publication-id" }, description = "Given one publication ID, output it in publication IDs form (\"<pmid>\\t<pmcid>\\t<doi>\") if it is a valid PMID, PMCID or DOI, or throw an exception if it is an invalid publication ID")
 	String checkPublicationId = null;
 
-	@Parameter(names = { "--check-publication-ids" }, arity = 3, description = "Given a PMID, a PMCID and a DOI, output them in publication IDs form (\"<pmid>\\t<pmcid>\\t<doi>\") if given IDs are a valid PMID, PMCID and DOI, or throw an exception if at least one is invalid")
+	@Parameter(names = { "-check-publication-ids" }, arity = 3, description = "Given a PMID, a PMCID and a DOI, output them in publication IDs form (\"<pmid>\\t<pmcid>\\t<doi>\") if given IDs are a valid PMID, PMCID and DOI, or throw an exception if at least one is invalid")
 	List<String> checkPublicationIds = null;
 
-	@Parameter(names = { "--check-url" }, description = "Given a webpage ID (i.e. a URL), output the parsed URL, or throw an exception if it is an invalid URL")
+	@Parameter(names = { "-check-url" }, description = "Given a webpage ID (i.e. a URL), output the parsed URL, or throw an exception if it is an invalid URL")
 	String checkUrl = null;
 
 	@Parameter(names = { "-pub" }, variableArity = true, description = "A space-separated list of publication IDs (either PMID, PMCID or DOI) to add")

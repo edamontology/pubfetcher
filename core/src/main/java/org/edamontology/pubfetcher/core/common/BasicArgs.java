@@ -45,11 +45,13 @@ public abstract class BasicArgs extends Args {
 		return log;
 	}
 
-	private static void removeFileLog() {
+	private static void removeFileLog(String externalLoggerName) {
 		final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
 		final Configuration config = ctx.getConfiguration();
 		config.getLoggerConfig("org.edamontology").removeAppender("Log");
-		// TODO org.biotools
+		if (externalLoggerName != null) {
+			config.getLoggerConfig(externalLoggerName).removeAppender("Log");
+		}
 		ctx.updateLoggers();
 	}
 
@@ -72,17 +74,17 @@ public abstract class BasicArgs extends Args {
 		if (args.getLog() != null) {
 			MainMapLookup.setMainArguments(new String[] { args.getLog() });
 		} else if (!externalLogPath) {
-			removeFileLog();
+			removeFileLog(null);
 		}
 		return args;
 	}
 
-	public static <T extends BasicArgs> void setExternalLogPath(T args, String logPath) {
+	public static <T extends BasicArgs> void setExternalLogPath(T args, String logPath, String loggerName) {
 		if (args.getLog() == null) {
 			if (logPath != null) {
 				MainMapLookup.setMainArguments(new String[] { logPath });
 			} else {
-				removeFileLog();
+				removeFileLog(loggerName);
 			}
 		}
 	}

@@ -57,7 +57,8 @@ import org.apache.xmpbox.schema.AdobePDFSchema;
 import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
-
+import org.jsoup.Connection;
+import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -209,27 +210,31 @@ public class Fetcher {
 		}
 	}
 
+	public Document postDoc(String url, Map<String, String> data, FetcherArgs fetcherArgs) {
+		return getDoc(url, null, null, null, null, null, null, false, false, Method.POST, data, fetcherArgs);
+	}
+
 	public Document getDoc(String url, boolean javascript, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, null, null, null, null, null, javascript, false, fetcherArgs);
+		return getDoc(url, null, null, null, null, null, null, javascript, false, Method.GET, null, fetcherArgs);
 	}
 
 	private Document getDoc(String url, Publication publication, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, publication, null, null, null, null, false, false, fetcherArgs);
+		return getDoc(url, null, publication, null, null, null, null, false, false, Method.GET, null, fetcherArgs);
 	}
 
 	private Document getDoc(Webpage webpage, boolean javascript, FetcherArgs fetcherArgs) {
-		return getDoc(webpage.getStartUrl(), webpage, null, null, null, null, null, javascript, false, fetcherArgs);
+		return getDoc(webpage.getStartUrl(), webpage, null, null, null, null, null, javascript, false, Method.GET, null, fetcherArgs);
 	}
 
 	private Document getDoc(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, publication, type, from, links, parts, javascript, false, fetcherArgs);
+		return getDoc(url, null, publication, type, from, links, parts, javascript, false, Method.GET, null, fetcherArgs);
 	}
 
 	@SuppressWarnings("deprecation")
-	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout, FetcherArgs fetcherArgs) {
+	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout, Method method, Map<String, String> data, FetcherArgs fetcherArgs) {
 		Document doc = null;
 
-		logger.info("    GET {}{}", url, javascript ? " (with JavaScript)" : "");
+		logger.info("    {} {}{}{}", method, url, javascript ? " (with JavaScript)" : "", data != null ? (" (with data " + data + ")") : "");
 
 		ActiveHost activeHost = activateHost(getHost(url));
 		if (Thread.currentThread().isInterrupted()) return null;
@@ -274,14 +279,19 @@ public class Fetcher {
 			} else {
 				URL u = new URL(url);
 
-				Response res = Jsoup.connect(url)
+				Connection con = Jsoup.connect(url)
 					.userAgent(fetcherArgs.getPrivateArgs().getUserAgent())
 					.referrer(u.getProtocol() + "://" + u.getAuthority())
 					.timeout(fetcherArgs.getTimeout() * 2)
 					.followRedirects(true)
 					.ignoreHttpErrors(false)
 					.ignoreContentType(false)
-					.execute();
+					.method(method);
+				if (data != null) {
+					con.data(data);
+				}
+
+				Response res = con.execute();
 
 				if (webpage != null) {
 					webpage.setContentType(res.contentType());
@@ -301,7 +311,7 @@ public class Fetcher {
 				logger.info("        title: {}", webpage.getTitle());
 				logger.info("        content length: {}", doc.text().length());
 			} else if (!javascript) {
-				logger.info("    GOT {}", doc.location());
+				logger.info("    {} {}", method == Method.GET ? "GOT" : (method == Method.POST ? "POSTED" : method), doc.location());
 			}
 
 			if (links != null) {
@@ -377,7 +387,7 @@ public class Fetcher {
 			// if the connection times out
 			logger.warn(e);
 			if (!timeout) {
-				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true, fetcherArgs);
+				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true, method, data, fetcherArgs);
 			} else {
 				setFetchException(webpage, publication, null);
 			}
@@ -385,8 +395,8 @@ public class Fetcher {
 			logger.warn(e);
 			// jsoup has deprecated validateTLSCertificates(false), so try with htmlunit and setUseInsecureSSL(true)
 			// in jsoup, Connection.sslSocketFactory(SSLSocketFactory sslSocketFactory) provides a path to implement a workaround
-			if (!javascript) {
-				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout, fetcherArgs);
+			if (!javascript && method == Method.GET) {
+				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout, method, data, fetcherArgs);
 			}
 		} catch (IOException e) {
 			// if a connection or read error occurs

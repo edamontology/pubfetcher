@@ -144,6 +144,18 @@ public final class PubFetcherMethods {
 	private static void fetchDocumentJavascript(String url, Fetcher fetcher, FetcherArgs fetcherArgs) {
 		System.out.println(fetcher.getDoc(url, true, fetcherArgs));
 	}
+	private static void postDocument(List<String> urlData, Fetcher fetcher, FetcherArgs fetcherArgs) {
+		String url = urlData.get(0);
+		Map<String, String> data = new LinkedHashMap<>();
+		for (int i = 1; i < urlData.size(); i += 2) {
+			if (i + 1 < urlData.size()) {
+				data.put(urlData.get(i), urlData.get(i + 1));
+			} else {
+				data.put(urlData.get(i), "");
+			}
+		}
+		System.out.println(fetcher.postDoc(url, data, fetcherArgs));
+	}
 	private static void fetchWebpageSelector(String webpageUrl, String title, String content, Boolean javascript, boolean plain, Format format, Version version, String[] argv, Fetcher fetcher, FetcherArgs fetcherArgs) throws IOException {
 		Webpage webpage = fetcher.initWebpage(webpageUrl);
 		if (webpage == null) return;
@@ -1754,6 +1766,9 @@ public final class PubFetcherMethods {
 		}
 		if (args.fetchDocumentJavascript != null) {
 			fetchDocumentJavascript(args.fetchDocumentJavascript, fetcher, fetcherArgs);
+		}
+		if (args.postDocument != null) {
+			postDocument(args.postDocument, fetcher, fetcherArgs);
 		}
 		if (args.fetchWebpageSelector != null) {
 			fetchWebpageSelector(args.fetchWebpageSelector.get(0), args.fetchWebpageSelector.get(1), args.fetchWebpageSelector.get(2),

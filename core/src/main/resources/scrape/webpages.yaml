@@ -124,9 +124,12 @@
   title: .app-header--breadcrumbs li:last-of-type
   content: '#readme > :not(.blank-slate-readme), #wiki-content'
 
+# HtmlUnit currently can't execute the JavaScript
 'bitbucket\.org/+[^/]+/+[^/]+/+src':
-  title: '#source-path > h1'
-  content: '#source-container .code, #source-container .readme'
+#  title: div[class^=Page__PageContent] header h1
+#  content: div[class^=Page__PageContent] header + div > div > div > p, div[class^=Page__PageContent] article
+  title: ''
+  content: ''
 
 'sanger\.ac\.uk':
   title: '#main-content > .pagetitle'

@@ -2,14 +2,14 @@ title,content,license,language,webpage
 
 # bioconductor.org
 9,642,5,8,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
-7,845,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
+7,835,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
 9,264,12,18,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
 8,640,5,28,http://bioconductor.org/packages/release/bioc/html/synapter.html
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54921,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,30039,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54863,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,30052,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
@@ -23,16 +23,16 @@ title,content,license,language,webpage
 9,422,3,24,https://github.com/arq5x/poretools
 
 # github.com user
-7,1242,0,0,https://github.com/SeqWare
-28,1239,0,0,https://github.com/BeatsonLab-MicrobialGenomics
-37,2179,0,0,https://github.com/brisskit-uol/
+7,1281,0,0,https://github.com/SeqWare
+28,1355,0,0,https://github.com/BeatsonLab-MicrobialGenomics
+37,2198,0,0,https://github.com/brisskit-uol/
 
 # github.com wiki
 4,3259,0,0,https://github.com/synergy-zju/gips/wiki
 6,846,0,0,https://github.com/KorfLab/DupHMM/wiki
 6,1909,0,0,https://github.com/ollyburren/vseams/wiki
 11,1615,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,9486,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,9558,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -108,17 +108,17 @@ title,content,license,language,webpage
 6,1530,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
 
 # bitbucket.org
-9,1796,0,0,https://bitbucket.org/mckinsel/shortfuse
-9,0,0,0,https://bitbucket.org/pchanda/hapzipper
-5,14529,0,0,https://bitbucket.org/tobiasmarschall/mosdi
 7,5784,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
 12,0,0,0,https://bitbucket.org/account/user/ipk_bit_team/projects/ED_PUB
 6,0,0,0,https://bitbucket.org/paiyetan/m2lite/downloads
 
 # bitbucker.org src
-45,0,0,0,https://bitbucket.org/dbeisser/taxmapper_supplement/src/master/databases/taxonomy/
-8,749,0,0,https://bitbucket.org/paiyetan/m2lite/src
-11,0,0,0,https://bitbucket.org/paiyetan/xglycscan/src
+0,0,0,0,https://bitbucket.org/mckinsel/shortfuse
+0,0,0,0,https://bitbucket.org/pchanda/hapzipper
+0,0,0,0,https://bitbucket.org/tobiasmarschall/mosdi
+0,0,0,0,https://bitbucket.org/dbeisser/taxmapper_supplement/src/master/databases/taxonomy/
+0,0,0,0,https://bitbucket.org/paiyetan/m2lite/src
+0,0,0,0,https://bitbucket.org/paiyetan/xglycscan/src
 
 # sanger.ac.uk
 7,233,0,0,http://www.sanger.ac.uk/science/tools/artemis
@@ -142,10 +142,9 @@ title,content,license,language,webpage
 
 # zhanglab.ccmb.med.umich.edu
 47,776,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3439,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+79,3514,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
-13,3746,0,9,http://bioinformatics.mdanderson.org/main/ResultViewer:Overview
 10,1261,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
 
 # bcgsc.ca platform
@@ -191,8 +190,8 @@ title,content,license,language,webpage
 27,2305,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
 
 # en.wikipedia.org
-5,1269,0,0,https://en.wikipedia.org/wiki/CLIPZ
-9,1187,0,0,https://en.wikipedia.org/wiki/ProRepeat
+5,1268,0,0,https://en.wikipedia.org/wiki/CLIPZ
+9,1186,0,0,https://en.wikipedia.org/wiki/ProRepeat
 
 # webchem.ncbr.muni.cz wiki
 27,1991,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual

@@ -100,7 +100,6 @@
 'journals\.sagepub\.com/+doi/+abs/+10': sagepub
 'journals\.sagepub\.com/+doi/+(full/+)?10': sagepub_full
 '[a-zA-Z0-9.-]*springeropen\.com': biomedcentral
-'omicsonline\.org': omicsonline
 
 ---
 
@@ -177,12 +176,12 @@ sciencedirect:
   pdf_a: .PdfDropDownMenu a:matchesOwn(^Article$)
 
 biomedcentral:
-  doi: .ContextInformation > .ArticleDOI
-  title: .ArticleTitle
-  keywords: .FullTextWrapper > section.KeywordGroup li
-  abstract: .Abstract > div > div, .Abstract > div > p
-  fulltext: .FullTextWrapper > section[id^=Sec] > *, .FullTextWrapper > section:not([id]):not(.KeywordGroup) > *, .FullTextWrapper > p.Para
-  pdf_a: '#articlePdf'
+  doi: '#article-info-content [data-track-action=view doi]'
+  title: article > h1
+  keywords: '#article-info-content li.c-article-subject-list__subject'
+  abstract: '#Abs1-content > *'
+  fulltext: 'article > section > :not(#Abs1-section):not(#Bib1-section):not(#Ack1-section):not(#author-information-section):not(#additional-information-section):not(#rightslink-section):not(#article-info-section) > *, article > div.c-article-section__content'
+  pdf_a: .c-pdf-download > [data-track-action=download pdf]
 
 springer:
   doi: '#doi-url'
@@ -224,7 +223,7 @@ nature:
   title: 'article header h1, #article #content > .article > h2.article-title'
   keywords: div[data-component=article-subject-links] a[data-track-action=view subject]
   abstract: 'article div[data-article-body=true] > section > #abstract-section > div > *, article div[data-article-body=true] > section > #Abs1-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section) > *, article div[data-article-body=true] > div:not(:has(#access-options)):not([aria-hidden=true])'
+  fulltext: 'article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *, article div[data-article-body=true] > div:not(:has(#access-options)):not([aria-hidden=true])'
   pdf_a: a[data-article-pdf]
 
 plos:
@@ -347,7 +346,7 @@ f1000research_articles:
   pdf_dst: /pdf
 
 f1000research_posters:
-  title: .asset-title > h2
+  title: .asset-title > h1
   keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
   abstract: .abstract__content
 
@@ -554,13 +553,6 @@ sagepub_full:
   abstract: .hlFld-Abstract > .abstractSection > *
   fulltext: .hlFld-Fulltext > :not(.acknowledgement):not(.fn-group):not(.sectionInfo):not(.references)
   pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
-
-omicsonline:
-  title: .full-text > h1.fulltext_h1heading
-  keywords_split: .full-text > h4:matchesOwn(^Keywords$) + p
-  abstract: .full-text > h4:matchesOwn(^Abstract$) + p + p
-  fulltext: .full-text > h4:matchesOwn(^Introduction$), .full-text > h4:matchesOwn(^Introduction$) ~ :not(ol):not(h4:matchesOwn(^References$)), .full-text > h4:matchesOwn(^Abbreviations$), .full-text > h4:matchesOwn(^Abbreviations$) + p
-  pdf_a: a[title=Download PDF]
 
 ---
 

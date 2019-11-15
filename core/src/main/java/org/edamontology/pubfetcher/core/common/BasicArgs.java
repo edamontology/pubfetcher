@@ -61,13 +61,13 @@ public abstract class BasicArgs extends Args {
 		try {
 			jcommander.parse(argv);
 		} catch (ParameterException e) {
-			System.err.println(version.getName() + " " + version.getVersion());
+			System.err.println(version.getName() + " " + version.getVersion() + " (" + version.getUrl() + ")");
 			System.err.println(e);
 			System.err.println("Use -h or --help for listing valid options");
 			System.exit(1);
 		}
 		if (args.isHelp()) {
-			System.out.println(version.getName() + " " + version.getVersion());
+			System.out.println(version.getName() + " " + version.getVersion() + " (" + version.getUrl() + ")");
 			jcommander.usage();
 			System.exit(0);
 		}

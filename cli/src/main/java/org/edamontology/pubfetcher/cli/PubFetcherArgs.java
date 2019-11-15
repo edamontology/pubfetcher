@@ -64,7 +64,7 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-fetch-document-javascript" }, description = "Fetch a web page (with JavaScript support, i.e. using HtmlUnit) and output its raw HTML to stdout")
 	String fetchDocumentJavascript = null;
 
-	@Parameter(names = { "-post-document" }, variableArity = true, description = "TODO")
+	@Parameter(names = { "-post-document" }, variableArity = true, description = "Fetch a web resource using HTTP POST. The first parameter specifies the resource URL and is followed by the request data in the form of name/value pairs, with names and values separated by spaces.")
 	List<String> postDocument = null;
 
 	@Parameter(names = { "-fetch-webpage-selector" }, arity = 4, description = "Fetch a webpage and output it to stdout in the format specified by the output modifiers --plain and --format. Works also for PDF files. \"Title\" and \"content\" args are CSS selectors as supported by jsoup. If the \"title selector\" is an empty string, then the page title will be the text content of the document's <title> element. If the \"content selector\" is an empty string, then content will be the whole text content parsed from the HTML/XML. If javascript arg is \"true\", then fetching will be done using JavaScript support (HtmlUnit), if \"false\", then without JavaScript (jsoup). If javascript arg is empty, then fetching will be done without JavaScript and if the text length of the returned document is less than --webpageMinLengthJavascript or if a <noscript> tag is found in it, a second fetch will happen with JavaScript support.")

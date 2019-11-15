@@ -85,7 +85,7 @@ public class FetcherArgs extends Args {
 	private Integer webpageMinLength = webpageMinLengthDefault;
 
 	private static final String webpageMinLengthJavascriptId = "webpageMinLengthJavascript";
-	private static final String webpageMinLengthJavascriptDescription = "If the length of a whole web page content fetched without JavaScript is below the specified limit and no scraping rules are found for the corresponding URL, then refetching using JavaScript support will be attempted";
+	private static final String webpageMinLengthJavascriptDescription = "If the length of the whole web page text fetched without JavaScript is below the specified limit and no scraping rules are found for the corresponding URL, then refetching using JavaScript support will be attempted";
 	private static final Integer webpageMinLengthJavascriptDefault = 200;
 	@Parameter(names = { "--" + webpageMinLengthJavascriptId }, validateWith = PositiveInteger.class, description = webpageMinLengthJavascriptDescription)
 	private Integer webpageMinLengthJavascript = webpageMinLengthJavascriptDefault;

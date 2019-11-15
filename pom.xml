@@ -28,7 +28,7 @@
 
   <name>PubFetcher</name>
   <url>https://github.com/edamontology/pubfetcher</url>
-  <description></description>
+  <description>A Java command-line tool and library to download and store publications with metadata by combining content from various online resources</description>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>

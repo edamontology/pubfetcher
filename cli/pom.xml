@@ -31,8 +31,7 @@
   <packaging>jar</packaging>
 
   <name>PubFetcher-CLI</name>
-  <url>https://github.com/edamontology/pubfetcher/tree/master/cli</url>
-  <description></description>
+  <url>https://github.com/edamontology/pubfetcher</url>
 
   <dependencies>
     <dependency>

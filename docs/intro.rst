@@ -33,6 +33,13 @@ Outline
 * :ref:`future` contains ideas how to improve PubFetcher
 
 
+*******
+Install
+*******
+
+Installation instructions can be found in the project's GitHub repo at `INSTALL <https://github.com/edamontology/pubfetcher/blob/master/INSTALL.md>`_.
+
+
 **********
 Quickstart
 **********

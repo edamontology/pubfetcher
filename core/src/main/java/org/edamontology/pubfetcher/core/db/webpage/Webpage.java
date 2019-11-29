@@ -81,7 +81,7 @@ public class Webpage extends DatabaseEntry<Webpage> {
 
 	@Override
 	public boolean isFinal(FetcherArgs fetcherArgs) {
-		return !isBroken() && isUsable(fetcherArgs);
+		return !isBroken() && isUsable(fetcherArgs) && !content.isEmpty();
 	}
 
 	public boolean isBroken() {

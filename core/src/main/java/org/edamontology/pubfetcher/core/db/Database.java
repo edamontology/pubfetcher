@@ -66,6 +66,8 @@ public class Database implements Closeable {
 
 		this.webpages = db.hashMap("webpages", Serializer.STRING, Serializer.JAVA).counterEnable().open();
 		this.docs = db.hashMap("docs", Serializer.STRING, Serializer.JAVA).counterEnable().open();
+
+		logger.debug("Opened database {} with {} publications, {} webpages, {} docs", database, publications.sizeLong(), webpages.sizeLong(), docs.sizeLong());
 	}
 
 	@SuppressWarnings("unchecked")

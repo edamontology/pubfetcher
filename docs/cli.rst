@@ -25,7 +25,7 @@ Parameter            Description
 ``-l`` or ``--log``  The path of the log file
 ===================  ===========
 
-PubFetcher-CLI will output its log to the console (to stderr). With the ``--log`` parameter we can specify a text file location where this same log will be output. It will not be coloured as the console output, but will include DEBUG level messages omitted in the console (currently this includes just the first line listing all parameters the program was run with).
+PubFetcher-CLI will output its log to the console (to stderr). With the ``--log`` parameter we can specify a text file location where this same log will be output. It will not be coloured as the console output, but will include a few DEBUG level messages omitted in the console (this includes the very first line listing all parameters the program was run with).
 
 If the specified file already exists, then new log messages will be appended to its end. In case of a new log file creation, any missing parent directories will be created as necessary.
 

@@ -30,7 +30,7 @@ public final class FetcherTest {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	private static String PUB_ID_SOURCE = "PubFetcher";
+	private static String PUB_ID_SOURCE = "PubFetcherTest";
 
 	private static InputStream getResource(String name, String prefix) {
 		InputStream resource = FetcherTest.class.getResourceAsStream("/" + prefix + "/" + name);

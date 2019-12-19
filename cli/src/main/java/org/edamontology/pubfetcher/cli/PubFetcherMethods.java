@@ -234,7 +234,7 @@ public final class PubFetcherMethods {
 		System.out.println(PubFetcher.getPublicationIds(publicationId, PUB_ID_SOURCE, true).toString(true));
 	}
 	private static void checkPublicationIds(String pmid, String pmcid, String doi) throws IllegalRequestException {
-		System.out.println(PubFetcher.getPublicationIds(pmid, pmcid, doi, PUB_ID_SOURCE, true, true).toString(true));
+		System.out.println(PubFetcher.getPublicationIds(pmid, pmcid, doi, PUB_ID_SOURCE, PUB_ID_SOURCE, PUB_ID_SOURCE, true, true).toString(true));
 	}
 	private static void checkUrl(String url) throws IllegalRequestException {
 		System.out.println(PubFetcher.getUrl(url, true));
@@ -267,7 +267,7 @@ public final class PubFetcherMethods {
 						id = PubFetcher.getPublicationIds((String) s, PUB_ID_SOURCE, false);
 					} else {
 						PublicationIds pubId = (PublicationIds) s;
-						id = PubFetcher.getPublicationIds(pubId.getPmid(), pubId.getPmcid(), pubId.getDoi(), PUB_ID_SOURCE, false, true);
+						id = PubFetcher.getPublicationIds(pubId.getPmid(), pubId.getPmcid(), pubId.getDoi(), pubId.getPmidUrl(), pubId.getPmcidUrl(), pubId.getDoiUrl(), false, true);
 					}
 					break;
 				case webpage: case doc:
@@ -730,10 +730,10 @@ public final class PubFetcherMethods {
 		long start = System.currentTimeMillis();
 		for (Object id : ids) {
 			logger.info("Fetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
-			T entry = fetchDatabaseEntry(id, null, fetcher, parts, fetcherArgs, false, type);
 			if (stderr) {
 				System.err.print("Fetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
 			}
+			T entry = fetchDatabaseEntry(id, null, fetcher, parts, fetcherArgs, false, type);
 			if (entry != null) {
 				if (entry.isFetchException()) {
 					exceptionIndexes.add(i);
@@ -756,10 +756,10 @@ public final class PubFetcherMethods {
 			for (int j = 0; j < exceptionIndexes.size(); ++j) {
 				i = exceptionIndexes.get(j);
 				logger.info("Refetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
-				T entry = fetchDatabaseEntry(exceptionIds.get(j), null, fetcher, parts, fetcherArgs, false, type);
 				if (stderr) {
 					System.err.print("Refetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
 				}
+				T entry = fetchDatabaseEntry(exceptionIds.get(j), null, fetcher, parts, fetcherArgs, false, type);
 				if (entry != null) {
 					if (preFilter(args, fetcher, fetcherArgs, entry, type)) {
 						entries.set(i, entry);
@@ -794,10 +794,10 @@ public final class PubFetcherMethods {
 			long start = System.currentTimeMillis();
 			for (Object id : ids) {
 				logger.info("Fetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
-				T entry = fetchDatabaseEntry(id, db, fetcher, parts, fetcherArgs, true, type);
 				if (stderr) {
 					System.err.print("Fetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
 				}
+				T entry = fetchDatabaseEntry(id, db, fetcher, parts, fetcherArgs, true, type);
 				if (entry != null) {
 					if (entry.isFetchException()) {
 						exceptionIndexes.add(i);
@@ -820,10 +820,10 @@ public final class PubFetcherMethods {
 				for (int j = 0; j < exceptionIndexes.size(); ++j) {
 					i = exceptionIndexes.get(j);
 					logger.info("Refetch {} {}", type, PubFetcher.progress(i + 1, ids.size(), start));
-					T entry = fetchDatabaseEntry(exceptionIds.get(j), db, fetcher, parts, fetcherArgs, true, type);
 					if (stderr) {
 						System.err.print("Refetch " + type + " " + PubFetcher.progress(i + 1, ids.size(), start) + "  \r");
 					}
+					T entry = fetchDatabaseEntry(exceptionIds.get(j), db, fetcher, parts, fetcherArgs, true, type);
 					if (entry != null) {
 						if (preFilter(args, fetcher, fetcherArgs, entry, type)) {
 							entries.set(i, entry);
@@ -986,14 +986,14 @@ public final class PubFetcherMethods {
 			for (int i = 0; i < publications.size(); ++i) {
 				Publication publication = publications.get(i);
 				logger.info("Update citations count {}", PubFetcher.progress(i + 1, publications.size(), start));
+				if (stderr) {
+					System.err.print("Update citations count " + PubFetcher.progress(i + 1, publications.size(), start) + "  \r");
+				}
 				if (fetcher.updateCitationsCount(publication, fetcherArgs)) {
 					db.putPublication(publication);
 					db.commit();
 				} else {
 					++fail;
-				}
-				if (stderr) {
-					System.err.print("Update citations count " + PubFetcher.progress(i + 1, publications.size(), start) + "  \r");
 				}
 			}
 		}

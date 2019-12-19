@@ -138,16 +138,15 @@ public class DbFetch implements Runnable {
 				}
 
 				logger.info((exceptionIndex ? "Refetch" : "Fetch") + " {} {}", databaseEntryType, PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), progressStart));
+				if (stderr) {
+					System.err.print((exceptionIndex ? "Refetch" : "Fetch") + " " + databaseEntryType + " " + PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), progressStart) + "  \r");
+				}
 
 				DatabaseEntry<?> databaseEntry = null;
 				switch (databaseEntryType) {
 					case publication: databaseEntry = PubFetcher.getPublication((PublicationIds) id, db, fetcher, parts, fetcherArgs); break;
 					case webpage: databaseEntry = PubFetcher.getWebpage((String) id, db, fetcher, fetcherArgs); break;
 					case doc: databaseEntry = PubFetcher.getDoc((String) id, db, fetcher, fetcherArgs); break;
-				}
-
-				if (stderr) {
-					System.err.print((exceptionIndex ? "Refetch" : "Fetch") + " " + databaseEntryType + " " + PubFetcher.progress(localIndex + 1, databaseEntryIds.size(), progressStart) + "  \r");
 				}
 
 				if (databaseEntry != null) {

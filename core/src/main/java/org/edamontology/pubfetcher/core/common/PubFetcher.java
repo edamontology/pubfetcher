@@ -415,7 +415,9 @@ public final class PubFetcher {
 	 * @param pmid the string representing the PMID of the publication
 	 * @param pmcid the string representing the PMCID of the publication
 	 * @param doi the string representing the DOI of the publication
-	 * @param url the string of the URL where the given PMID, PMCID and DOI were found
+	 * @param pmidUrl the string of the URL where the given PMID was found
+	 * @param pmcidUrl the string of the URL where the given PMCID was found
+	 * @param doiUrl the string of the URL where the given DOI was found
 	 * @param throwException if <code>true</code> then an {@link IllegalRequestException} will be thrown if any of the given non-empty PMID, PMCID or DOI is
 	 * not valid or no valid IDs are given; if <code>false</code> then only error messages will be logged for invalid IDs
 	 * @param logEmpty if <code>true</code> then an error message will be logged if no valid IDs are given
@@ -423,7 +425,7 @@ public final class PubFetcher {
 	 * @throws IllegalRequestException if any of the given non-empty PMID, PMCID or DOI is not valid or no valid IDs are given, and
 	 * <code>throwException</code> is <code>true</code>
 	 */
-	public static PublicationIds getPublicationIds(String pmid, String pmcid, String doi, String url, boolean throwException, boolean logEmpty) throws IllegalRequestException {
+	public static PublicationIds getPublicationIds(String pmid, String pmcid, String doi, String pmidUrl, String pmcidUrl, String doiUrl, boolean throwException, boolean logEmpty) throws IllegalRequestException {
 		if (pmid == null || pmid.trim().isEmpty()) pmid = null;
 		else if (!isPmid(pmid)) {
 			logger.error("Invalid PMID: {}", pmid);
@@ -458,7 +460,7 @@ public final class PubFetcher {
 			return null;
 		}
 		return new PublicationIds(pmid, pmcid, doi,
-			pmid == null ? null : url, pmcid == null ? null : url, doi == null ? null : url);
+			pmid == null ? null : pmidUrl, pmcid == null ? null : pmcidUrl, doi == null ? null : doiUrl);
 	}
 
 	/**

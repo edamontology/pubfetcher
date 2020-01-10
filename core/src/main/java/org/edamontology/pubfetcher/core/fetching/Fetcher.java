@@ -126,7 +126,6 @@ public class Fetcher {
 	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
 	private static final String SCIENCEDIRECT_LINK = "https://www.sciencedirect.com/science/article/pii/";
 
-	static final Pattern BIORXIV = Pattern.compile("^https?://(www\\.)?biorxiv\\.org/.+$");
 	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/F1000RESEARCH\\..+$");
 
 	private static Set<ActiveHost> activeHosts = new HashSet<>();
@@ -338,15 +337,7 @@ public class Fetcher {
 			if (e.getStatusCode() == 503) {
 				setFetchException(webpage, publication, null);
 			} else {
-				if (e.getStatusCode() == 404 && host != null && host.equals("biorxiv.org") && links != null) {
-					String urlPdf = e.getUrl();
-					if (urlPdf.endsWith(".full")) {
-						urlPdf = urlPdf.substring(0, urlPdf.length() - 5);
-					}
-					links.add(urlPdf + ".full.pdf", type.toPdf(), from, publication, fetcherArgs, false);
-				} else {
-					setFetchException(null, publication, e.getUrl());
-				}
+				setFetchException(null, publication, e.getUrl());
 			}
 		} catch (FailingHttpStatusCodeException e) {
 			String host = getHost(e.getResponse().getWebRequest().getUrl().toString());
@@ -2200,14 +2191,6 @@ public class Fetcher {
 		}
 
 		boolean javascript = scrape.getJavascript(url);
-
-		if (BIORXIV.matcher(url).matches()) {
-			if ((!publication.getDoi().isFinal(fetcherArgs) && (parts == null || (parts.get(PublicationPartName.doi) != null && parts.get(PublicationPartName.doi))))
-					|| (!publication.getTitle().isFinal(fetcherArgs) && (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))))
-					|| (!publication.getAbstract().isFinal(fetcherArgs) && (parts == null || (parts.get(PublicationPartName.theAbstract) != null && parts.get(PublicationPartName.theAbstract))))) {
-				javascript = true;
-			}
-		}
 
 		Document doc = getDoc(url, publication, type, from, links, parts, javascript, fetcherArgs);
 

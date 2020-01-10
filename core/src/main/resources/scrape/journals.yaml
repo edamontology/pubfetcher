@@ -42,6 +42,7 @@
 'nature\.com': nature
 'journals\.plos\.org': plos
 'biorxiv\.org': biorxiv
+'biorxiv\.org/.+\.full/*[^/]*$': biorxiv_full
 'pubs\.acs\.org/+doi/+abs/+10': acs
 'pubs\.acs\.org/+doi/+(full/+)?10': acs_full
 'arxiv\.org': arxiv
@@ -100,6 +101,15 @@
 'journals\.sagepub\.com/+doi/+abs/+10': sagepub
 'journals\.sagepub\.com/+doi/+(full/+)?10': sagepub_full
 '[a-zA-Z0-9.-]*springeropen\.com': biomedcentral
+'ashpublications\.org': silverchair
+'portlandpress\.com': silverchair
+'mdpi\.com': mdpi
+'mdpi\.com/.+/htm$': mdpi_full
+'preprints\.org': preprints
+'aip\.scitation\.org': aip
+'chemrxiv\.org': chemrxiv
+'iopscience\.iop\.org': iop
+'g3journal\.org': highwire2
 
 ---
 
@@ -177,19 +187,19 @@ sciencedirect:
 
 biomedcentral:
   doi: '#article-info-content [data-track-action=view doi]'
-  title: article > h1
+  title: article h1
   keywords: '#article-info-content li.c-article-subject-list__subject'
   abstract: '#Abs1-content > *'
   fulltext: 'article > section > :not(#Abs1-section):not(#Bib1-section):not(#Ack1-section):not(#author-information-section):not(#additional-information-section):not(#rightslink-section):not(#article-info-section) > *, article > div.c-article-section__content'
   pdf_a: .c-pdf-download > [data-track-action=download pdf]
 
 springer:
-  doi: '#doi-url'
-  title: 'h1.ArticleTitle, h1.ChapterTitle, .page-title > h1, h1.unified-header__title'
+  doi: '#doi-url, :has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi]'
+  title: 'h1.ArticleTitle, h1.ChapterTitle, .page-title > h1, h1.unified-header__title, h1.c-article-title'
   subtitle: '.page-title > .page-title__subtitle'
-  keywords: .Keyword
-  abstract: 'section.Abstract > p, #book-description > *'
-  fulltext: '#body > section > *'
+  keywords: .Keyword, .c-article-subject-list__subject
+  abstract: 'section.Abstract > p, #book-description > *, #Abs1-content > p'
+  fulltext: '#body > section > *, article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *'
   pdf_a: '.test-pdf-link > :not([id$=no_access_banner]) > a'
 
 springer_ref:
@@ -204,10 +214,10 @@ highwire:
   keywords: .kwd-group > .kwd
   abstract: '#content-block .abstract > p, #content-block .executive-summary > p'
   fulltext_src: (\.abstract)?/*$
-  fulltext_dst: \.full
+  fulltext_dst: .full
   fulltext_a: '[rel=view-full-text]'
   pdf_src: (\.abstract)?/*$
-  pdf_dst: \.full.pdf
+  pdf_dst: .full.pdf
 
 highwire_full:
   doi: .slug-doi
@@ -216,14 +226,14 @@ highwire_full:
   abstract: '#content-block .abstract > p, #content-block .executive-summary > p'
   fulltext: '#content-block > .article > p, #content-block > .article [id^=sec] > :not([id^=sec]):not(.section-nav):not(div[id~=^F[0-9]]):not(div[id~=^T[0-9]]), #content-block > .article [id^=sec] > div[id~=^F[0-9]] > :not(.fig-inline), #content-block > .article [id^=sec] > div[id~=^T[0-9]] > :not(.table-inline), #content-block > .article > div[id~=^F[0-9]] > :not(.fig-inline), #content-block > .article > div[id~=T[0-9]] > :not(.table-inline)'
   pdf_src: /*$
-  pdf_dst: \.pdf
+  pdf_dst: .pdf
 
 nature:
   doi: 'h3:has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi], #article-info-section a[data-track-action=view doi]'
   title: 'article header h1, #article #content > .article > h2.article-title'
-  keywords: div[data-component=article-subject-links] a[data-track-action=view subject]
-  abstract: 'article div[data-article-body=true] > section > #abstract-section > div > *, article div[data-article-body=true] > section > #Abs1-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *, article div[data-article-body=true] > div:not(:has(#access-options)):not([aria-hidden=true])'
+  keywords: div[data-component=article-subject-links] a[data-track-action=view subject], .c-article-subject-list__subject
+  abstract: 'article div[data-article-body=true] > section > #abstract-section > div > *, article div[data-article-body=true] > section > #Abs1-section > div > *, article div[data-article-body=true] > section > #Abs2-section > div > *, #article #content > .article > #Summary + p'
+  fulltext: 'article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#Abs2-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *, article div[data-article-body=true] > div:not(:has(#access-options)):not([aria-hidden=true]):not(.c-pdf-button__container)'
   pdf_a: a[data-article-pdf]
 
 plos:
@@ -238,18 +248,32 @@ highwire2:
   doi: .highwire-cite-metadata-doi
   title: '#page-title'
   subtitle: .highwire-cite-subtitle
+  keywords: .kwd-group > .kwd
   abstract: .abstract > :not(h2), .executive-summary > :not(h2)
-  fulltext: .fulltext-view > p:matchText, .fulltext-view > p > :not(.disp-formula):not(.inline-formula), .fulltext-view > div.glossary, .fulltext-view [id^=sec] > h2, .fulltext-view [id^=sec] > h3, .fulltext-view [id^=sec] > h4, .fulltext-view [id^=sec] > h5, .fulltext-view [id^=sec] > p:matchText, .fulltext-view [id^=sec] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view li[id^=list-item] > p:matchText, .fulltext-view [id^=list-item] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view [id^=sec] > div[id~=^F[0-9]] > :not(.highwire-figure), .fulltext-view [id^=sec] > div[id~=^T[0-9]] > :not(.table-inline), .fulltext-view > div[id~=^F[0-9]] > :not(.highwire-figure), .fulltext-view > div[id~=^T[0-9]] > :not(.table-inline)
+  fulltext: .fulltext-view > p:matchText, .fulltext-view > p > :not(.disp-formula):not(.inline-formula), .fulltext-view > div.glossary, .fulltext-view [id^=sec] > h2, .fulltext-view [id^=sec] > h3, .fulltext-view [id^=sec] > h4, .fulltext-view [id^=sec] > h5, .fulltext-view [id^=sec] > p:matchText, .fulltext-view [id^=sec] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view li[id^=list-item] > p:matchText, .fulltext-view [id^=list-item] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view [id^=sec] > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > .fn-group .fn-abbr
   pdf_src: (\.full)?(\?sso-checked=true)?/*$
-  pdf_dst: \.full-text.pdf
+  pdf_dst: .full.pdf
 
 biorxiv:
   doi: .highwire-cite-metadata-doi
   title: '#page-title'
   subtitle: .highwire-cite-subtitle
+  keywords: .kwd-group > .kwd
   abstract: .abstract > :not(h2), .executive-summary > :not(h2)
+  fulltext_src: (\?sso-checked=true)?/*$
+  fulltext_dst: .full
+  pdf_src: (\?sso-checked=true)?/*$
+  pdf_dst: .full.pdf
+
+biorxiv_full:
+  doi: .highwire-cite-metadata-doi
+  title: '#page-title'
+  subtitle: .highwire-cite-subtitle
+  keywords: .kwd-group > .kwd
+  abstract: .abstract > :not(h2), .executive-summary > :not(h2)
+  fulltext: .fulltext-view > p, .fulltext-view > [id~=^(sec|app)-] > :not([id^=sec-]):not(div[id~=^[FT][0-9]]):not([id^=list-]), .fulltext-view > [id~=^(sec|app)-] > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > [id~=^(sec|app)-] > [id^=list-] > *, .fulltext-view > [id~=^(sec|app)-] [id^=sec-] > :not([id^=sec-]):not(div[id~=^[FT][0-9]]):not([id^=list-]), .fulltext-view > [id~=^(sec|app)-] [id^=sec-] > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > [id~=^(sec|app)-] [id^=sec-] > [id^=list-] > *, .fulltext-view > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > div.glossary, .fulltext-view > .fn-group .fn-abbr
   pdf_src: (\.full)?(\?sso-checked=true)?/*$
-  pdf_dst: \.full.pdf
+  pdf_dst: .full.pdf
 
 acs:
   doi: main .article_header-doiurl
@@ -289,7 +313,7 @@ ieee:
   fulltext: '#article > .section > *'
   fulltext_a: '#full-text-section a[ng-if=::ft.article.fullTextAccess]'
   pdf_src: /+document/+([0-9]+).*
-  pdf_dst: /stamp/stamp.jsp\?tp=&arnumber=$1
+  pdf_dst: /stamp/stamp.jsp?tp=&arnumber=$1
 
 # htmlunit is currently unable to execute the JavaScript
 ieee_full:
@@ -357,7 +381,7 @@ peerj:
   keywords: .kwd
   abstract: .abstract > *
   fulltext: main section > :not(section)
-  pdf_a: .article-download-pdf
+  pdf_a: a.js-download-btn[data-format=PDF]
 
 peerj_preprints:
   pmid: '#article-identifier-pmid'
@@ -365,13 +389,13 @@ peerj_preprints:
   title: h1.article-title
   keywords: .kwd
   abstract: .abstract > *
-  pdf_a: .article-download-pdf
+  pdf_a: a.js-download-btn[data-format=PDF]
 
 dtu:
   doi: .digital_object_identifiers a[href^=https://doi.org]
-  title: .publication_view_title h2.title
+  title: main h1
   keywords_split: .keywords > li
-  abstract: .abstract > *
+  abstract: .publication-content > .rendering_abstractportal
 
 tandfonline:
   doi: .dx-doi
@@ -390,11 +414,11 @@ tandfonline_full:
   pdf_a: .tab-nav .show-pdf
 
 acm:
-  doi: tbody > tr:last-child > td > span:containsOwn(doi) > a[href^=https://doi.org]
-  title: '#divmain h1'
-  keywords: '#authortags a'
-  abstract: '#abstract'
-  pdf_a: '#divmain a[name=FullTextPDF]'
+  doi: article .issue-item__doi
+  title: article h1
+  keywords: '#pill-information__content .tags-widget a'
+  abstract: article .hlFld-Abstract > p, article .abstractSection > p
+  pdf_a: article .citation a[title=PDF]
 
 degruyter:
   doi: .article-doi
@@ -455,16 +479,16 @@ sciencemag:
   title: article.primary header h1
   abstract: article.primary .article > [id^=abstract] > p
   fulltext_src: /*$
-  fulltext_dst: \.full
+  fulltext_dst: .full
   pdf_src: /*$
-  pdf_dst: \.full\.pdf
+  pdf_dst: .full.pdf
 
 sciencemag_full:
   title: article.primary header h1
   abstract: article.primary .article > [id^=abstract] > p
   fulltext: article.primary .article > p, article.primary .article [id^=sec] > :not([id^=sec]):not(figure[id^=F]), article.primary .article [id^=sec] > figure[id^=F] > figcaption, article.primary .article > [id^=notes] > *, article.primary .article > figure[id^=F] > figcaption, article.primary .article > div[id^=T]
   pdf_src: /*$
-  pdf_dst: \.pdf
+  pdf_dst: .pdf
 
 bioinformation:
   title: tr > td:matches(^Title$) ~ td:last-of-type
@@ -554,6 +578,58 @@ sagepub_full:
   fulltext: .hlFld-Fulltext > :not(.acknowledgement):not(.fn-group):not(.sectionInfo):not(.references)
   pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
 
+silverchair:
+  doi: '#main .citation-doi > a'
+  title: '#main h1'
+  keywords: '#ContentTab .content-metadata-subjects > a, #ContentTab .content-metadata-topics > a, #ContentTab .content-metadata-keywords > a'
+  abstract: '#ContentTab section.abstract > *'
+  fulltext: '#ContentTab .section-title, #ContentTab .section-title + div > .article-section-wrapper > :not(.fig-modal.reveal-modal), #ContentTab [data-widgetname=ArticleFulltext] > .article-section-wrapper:not(:has(section.abstract)) > :not(.fig-modal.reveal-modal)'
+  pdf_a: '#Toolbar .article-pdfLink'
+
+mdpi:
+  doi: '#abstract .bib-identity > a'
+  title: '#abstract h1'
+  keywords: '#abstract .art-keywords a'
+  abstract: '#abstract .art-abstract'
+  fulltext_a: '#abstract .download > #html_link'
+  pdf_a: '#abstract .download > a:matchesOwn(^Download PDF$)'
+
+mdpi_full:
+  doi: article .html-art-header a
+  title: '#html-article-title'
+  keywords_split: '#html-keywords > div'
+  abstract: '#html-abstract > div'
+  fulltext: 'article > .html-body > section > *, article > .html-back > #html-glossary'
+  pdf_a: article .download > a:matchesOwn(^Download PDF$)
+
+preprints:
+  title: '#submission-content > h1'
+  keywords_split: '#submission-content > h2:matches(^Subject Areas$) + div'
+  abstract: '#submission-content > h2:matches(^Abstract$) + div, #submission-content > h2:matches(^Supplementary and Associated Material$) + div'
+  pdf_src: $
+  pdf_dst: /download
+
+aip:
+  doi: .publicationContentCitation > a
+  title: .publicationContentTitle > h1
+  keywords: .topicList a:matches(^Topics$) + ul > .topicTags
+  abstract: article .abstractSection
+  fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec)
+  pdf_a: .article-menu > .download-pdf a.pdf
+
+chemrxiv:
+  title: .item-left > h2.title
+  keywords: .item-right > .tags a
+  abstract: .item-left > .description
+  pdf_a: .actions-bar .download-button
+
+iop:
+  doi: '#doi'
+  title: main h1
+  abstract: main .article-content > [itemprop=description] > *
+  fulltext: main .article-content > [itemprop=articleBody] > .header-anchor:not([name=acknowledgments]), main .article-content > [itemprop=articleBody] > .header-anchor:not([name=acknowledgments]) + .article-text > *
+  pdf_a: main a.btn:matches(^Download Article PDF$)
+
 ---
 
 # javascript
@@ -567,13 +643,10 @@ sagepub_full:
 - 'xlink\.rsc\.org' # for fulltext_a, pdf_a
 - 'pubs\.rsc\.org' # for fulltext_a, pdf_a
 - 'f1000research\.com/+posters'
-- 'portal\.acm\.org'
-- 'dl\.acm\.org'
 
 # highwire2
 - 'mcponline\.org'
 - 'pnas\.org'
-- 'genomea\.asm\.org'
 - '[a-zA-Z0-9.-]*asm\.org'
 - 'genetics\.org'
 - 'plantphysiol\.org'
@@ -583,3 +656,4 @@ sagepub_full:
 - 'biochemj\.org'
 - 'biochemsoctrans\.org'
 - '[a-zA-Z0-9.-]*aacrjournals\.org'
+- 'g3journal\.org'

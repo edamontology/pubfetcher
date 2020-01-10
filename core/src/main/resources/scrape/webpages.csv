@@ -8,15 +8,14 @@ title,content,license,language,webpage
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54863,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,30052,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54890,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,30057,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
 
 # github.com
 7,942,0,11,https://github.com/sgoodswe/vacceed
-9,15188,0,6,https://github.com/quwubin/MFEprimer
 4,5887,0,27,https://github.com/SciLifeLab/facs/
 10,10673,7,6,https://github.com/petmri/ROCKETSHIP
 4,1863,3,7,https://github.com/pschorderet/NEAT
@@ -24,15 +23,15 @@ title,content,license,language,webpage
 
 # github.com user
 7,1281,0,0,https://github.com/SeqWare
-28,1355,0,0,https://github.com/BeatsonLab-MicrobialGenomics
-37,2198,0,0,https://github.com/brisskit-uol/
+28,1274,0,0,https://github.com/BeatsonLab-MicrobialGenomics
+37,2058,0,0,https://github.com/brisskit-uol/
 
 # github.com wiki
 4,3259,0,0,https://github.com/synergy-zju/gips/wiki
 6,846,0,0,https://github.com/KorfLab/DupHMM/wiki
 6,1909,0,0,https://github.com/ollyburren/vseams/wiki
 11,1615,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,9598,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,9748,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -84,7 +83,7 @@ title,content,license,language,webpage
 32,5645,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
 4,5292,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
 4,974,0,0,https://sourceforge.net/p/treq/home/Home/
-6,14176,0,0,https://sourceforge.net/p/virmid/wiki/Home/
+6,14164,0,0,https://sourceforge.net/p/virmid/wiki/Home/
 21,3979,0,0,https://sourceforge.net/p/metabolic-network-sgl/git/ci/master/tree/
 
 # code.google.com
@@ -108,7 +107,7 @@ title,content,license,language,webpage
 6,1530,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
 
 # bitbucket.org
-7,5784,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
+7,5788,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
 12,0,0,0,https://bitbucket.org/account/user/ipk_bit_team/projects/ED_PUB
 6,0,0,0,https://bitbucket.org/paiyetan/m2lite/downloads
 
@@ -148,8 +147,7 @@ title,content,license,language,webpage
 10,1261,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
 
 # bcgsc.ca platform
-6,305,19,0,http://www.bcgsc.ca/platform/bioinfo/software/anchor
-14,2225,4,0,http://www.bcgsc.ca/platform/bioinfo/software/ds
+6,302,19,0,https://www.bcgsc.ca/resources/software/anchor
 
 # compomics.github.io
 13,12795,0,0,https://compomics.github.io/projects/peptide-shaker.html
@@ -164,8 +162,8 @@ title,content,license,language,webpage
 10,2306,0,0,http://www.uea.ac.uk/computing/my-closure
 
 # rna.informatik.uni-freiburg.de
-25,3423,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
-27,2217,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+25,3437,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+27,2231,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
 
 # gitlab.com
 11,201,31,0,https://gitlab.com/CarlBrunius/sampleDrift
@@ -173,9 +171,9 @@ title,content,license,language,webpage
 7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
-16,779,26,14,https://pypi.python.org/pypi/omics_pipe
-13,1963,35,28,http://pypi.python.org/pypi/plastid
-17,69,48,24,https://pypi.org/project/bio-apricot/
+16,779,26,6,https://pypi.python.org/pypi/omics_pipe
+13,1963,35,69,http://pypi.python.org/pypi/plastid
+17,69,48,11,https://pypi.org/project/bio-apricot/
 
 # bioinformatics.org wiki
 32,2120,0,0,http://www.bioinformatics.org/bna/wiki/
@@ -200,7 +198,7 @@ title,content,license,language,webpage
 # biocatalogue.org
 16,407,0,0,https://www.biocatalogue.org/services/2
 43,1492,0,0,https://www.biocatalogue.org/services/3792
-6,1136,0,0,https://www.biocatalogue.org/services/1928
+6,658,0,0,https://www.biocatalogue.org/services/1928
 18,618,102,0,https://www.biocatalogue.org/services/1418
 5,478,26,0,https://www.biocatalogue.org/services/2059
 
@@ -208,8 +206,8 @@ title,content,license,language,webpage
 86,257,0,0,http://www.mybiosoftware.com/1-03-estimating-effective-size-ne-populations-overlapping-generations.html
 59,224,0,0,http://www.mybiosoftware.com/youscope-1-2-beta-open-source-microscope-control-software.html
 94,370,0,0,http://www.mybiosoftware.com/sissrs-1-4-produce-list-peakmaxima-aligned-positions.html
-73,523,0,0,http://www.mybiosoftware.com/haddock-2-1-docking-approach-for-the-modeling-of-biomolecular-complexes.html
-77,302,0,0,http://www.mybiosoftware.com/frma-1-13-0-frmatools-1-13-0-single-microarray-preprocessing-analysis.html
+73,507,0,0,http://www.mybiosoftware.com/haddock-2-1-docking-approach-for-the-modeling-of-biomolecular-complexes.html
+77,241,0,0,http://www.mybiosoftware.com/frma-1-13-0-frmatools-1-13-0-single-microarray-preprocessing-analysis.html
 
 # apps.cytoscape.org
 92,1983,0,0,http://apps.cytoscape.org/apps/cyspanningtree

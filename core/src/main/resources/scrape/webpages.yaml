@@ -88,7 +88,7 @@
 
 'sourceforge\.net/+projects/+[^/]+/*[^/]*$':
   title: .title > h1
-  content: .title > .summary, article > :first-child .description, article .features, article a[itemprop=ApplicationCategory]
+  content: .title > .summary, article > :first-child .description, article .features, article span[itemprop=applicationCategory]
   license: .project-info > :matchesOwn(^License$) + a
   language: .project-info > :matchesOwn(^Programming Language$) ~ a
 
@@ -158,14 +158,14 @@
   license: .projectSummary-layout th:matchesOwn(^License$) + td, .software-table td:matches(^License$) + td
   language: .projectSummary-layout th:matchesOwn(^Language$) + td, .software-table td:matches(^Language$) + td
 
-'bcgsc\.ca/+platform/':
-  title: '#content h1'
-  content: '#content > div > div > :not(h1):not(.pane)'
-  license: .release_table td.license
+'bcgsc\.ca/+resources/+software/':
+  title: '#block-bccrc-page-title'
+  content: article > div > :not(table):not(h2)
+  license: article td + td + td + td
 
 'compomics\.github\.io':
-  title: .article-entry > h1
-  content: .article-entry > :not(h1):not(p:matches(^Go to top of page$))
+  title: .page-content > h1
+  content: .page-content > :not(h1):not(p:matches(^Go to top of page$))
 
 'rostlab\.org/+owiki/':
   title: h1.firstHeading
@@ -184,13 +184,13 @@
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.home-panel-title
   content: '.project-home-panel .home-panel-description > :not(button), #readme .file-content > *'
-  license: .project-home-panel .project-stats ul > li:first-child
+  license: '#tree-holder .nav > .nav-item:last-child .project-stat-value'
 
 'pypi\.(python\.)?org':
   title: h1.package-header__name
   content: '.package-description__summary, #description > .project-description > *'
   license: .sidebar-section p:matches(^License:)
-  language: .sidebar-section dt:matchesOwn(^Programming Language$) + dd
+  language: .vertical-tabs__tabs .sidebar-section strong:matchesOwn(^Programming Language$) + ul
 
 'bioinformatics\.org/+[^/]+/+wiki/':
   title: '#headlogo'
@@ -219,8 +219,8 @@
   license: '#content .annotations_container > div:first-child:matches(^License\(s\):$) + .box_annotations .annotation_display > *'
 
 'mybiosoftware\.com':
-  title: .title > h1
-  content: .entry > p:matches(^[:][:] DESCRIPTION$) + p, .entry > p:matches(^[:][:] DESCRIPTION$) + p + p:not(:matches(^[:][:] ?DEVELOPER$))
+  title: article > header > h1
+  content: .entry-content > p:matches(^[:][:] DESCRIPTION$) + p, .entry-content > p:matches(^[:][:] DESCRIPTION$) + p + p:not(:matches(^[:][:] ?DEVELOPER$))
 
 'apps\.cytoscape\.org/+apps/':
   title: 'body > div > div > div:has(#app-name)'

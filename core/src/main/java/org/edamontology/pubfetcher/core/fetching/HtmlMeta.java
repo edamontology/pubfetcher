@@ -206,12 +206,8 @@ public final class HtmlMeta {
 			setKeywords(publication, doc, citationType, CITATION_KEYWORDS_SELECTOR, fetcherArgs, parts);
 		}
 		setAbstract(publication, doc, citationType, CITATION_ABSTRACT_SELECTOR, fetcherArgs, parts);
-		if (!Fetcher.BIORXIV.matcher(doc.location()).matches()) {
-			addLinks(publication, doc, citationLinkType, CITATION_FULLTEXT_SELECTOR, links, fetcherArgs);
-		}
-		if (!Fetcher.BIORXIV.matcher(doc.location()).matches() && (site == null || !site.equals("highwire2"))) {
-			addLinks(publication, doc, citationPdfType, CITATION_FULLTEXT_PDF_SELECTOR, links, fetcherArgs);
-		}
+		addLinks(publication, doc, citationLinkType, CITATION_FULLTEXT_SELECTOR, links, fetcherArgs);
+		addLinks(publication, doc, citationPdfType, CITATION_FULLTEXT_PDF_SELECTOR, links, fetcherArgs);
 
 		// eprints
 		PublicationPartType eprintsType = chooseType(PublicationPartType.eprints, type);

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jsoup.helper.StringUtil;
+import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.CDataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -309,7 +309,7 @@ public final class CleanWebpage {
 			logger.error("null Element given for formatting");
 			return "";
 		}
-		final StringBuilder accum = new StringBuilder();
+		final StringBuilder accum = StringUtil.borrowBuilder();
 		NodeTraversor.traverse(new NodeVisitor() {
 			public void head(Node node, int depth) {
 				if (node instanceof TextNode) {
@@ -338,7 +338,7 @@ public final class CleanWebpage {
 				}
 			}
 		}, element);
-		return accum.toString().trim();
+		return StringUtil.releaseBuilder(accum).trim();
 	}
 
 	// the supplied Document will be modified

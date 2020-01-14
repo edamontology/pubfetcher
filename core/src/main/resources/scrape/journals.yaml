@@ -164,7 +164,7 @@ citeseerx:
 wiley:
   doi: .article-citation .epub-doi
   title: .article-citation .citation__title
-  #keywords: .keywords li # not working, even if javascript enabled
+  keywords: .keywords li # not working, even if javascript enabled
   abstract: .article-section__abstract > .article-section__content > *
   fulltext_a: .coolBar .go-to-full
   pdf_a: .coolBar .PdfLink > .pdf-download
@@ -172,7 +172,7 @@ wiley:
 wiley_full:
   doi: .article-citation .epub-doi
   title: .article-citation .citation__title
-  #keywords: .keywords li # not working, even if javascript enabled
+  keywords: .keywords li # not working, even if javascript enabled
   abstract: .article-section__abstract > .article-section__content > *
   fulltext: .article-section__full > [id].article-section__content > :not(.article-section__sub-content), .article-section__full > .article-section__supporting, .article-section__full .article-section__sub-content > :not(.article-section__sub-content)
   pdf_a: .coolBar .PdfLink > .pdf-download
@@ -182,8 +182,8 @@ sciencedirect:
   title: article h1 > .title-text
   keywords: article .Keywords > div > .keyword
   abstract: article .Abstracts > div:not(.graphical) > div
-  fulltext: article .Body > div:not(.Appendices) > *
-  pdf_a: .PdfDropDownMenu a:matchesOwn(^Article$)
+  fulltext: article .Body > div:not(.Appendices) > * # not working
+  pdf_a: .PdfDropDownMenu a:matchesOwn(^Article$) # not working
 
 biomedcentral:
   doi: '#article-info-content [data-track-action=view doi]'
@@ -363,7 +363,7 @@ iucr:
 
 f1000research_articles:
   doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=https://doi.org]
-  #title: '#anchor-title' # has non-excludable information about approval as part of the title
+  title: '#anchor-title > h1'
   abstract: .abstract-text
   fulltext: '#article-context > .generated-article-body > *, #article-context > .generated-article-footer > :has(h2:containsOwn(Supplementary materials))'
   pdf_src: /*$
@@ -373,6 +373,7 @@ f1000research_posters:
   title: .asset-title > h1
   keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
   abstract: .abstract__content
+  # pdf_a not working (because href="#")
 
 peerj:
   pmid: '#article-identifier-pmid'
@@ -524,7 +525,7 @@ researchgate:
   #doi: .publication-details__section > .publication-meta > div:first-child + div
   title: .publication-header > h1, .publication-details__section > h1
   abstract: .publication-abstract > :not(:first-child), .publication-details__section > div > div:matches(^Abstract$) + div
-  #pdf_a: .publication-resources-summary--buttons > a.publication-header-full-text, a.gtm-fulltext-download-btn-section
+  pdf_a: a:matches(^Download full-text PDF$)
 
 frontiersin:
   doi: .abstract-container > .article-header-container > .header-bar-three > a

@@ -49,14 +49,16 @@ title,content,license,language,webpage
 4,493,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
 # galaxy.pasteur.fr
+# java.lang.NullPointerException: JavascriptThread has not created a Document!
 0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
-0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
-0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
-0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
-0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
+100,1845,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
+85,1425,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
+50,187,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
+88,2368,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
+# java.lang.NullPointerException: JavascriptThread has not created a Document!
 0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr/repos/khillion/salmonella_crispr_typing/salmonella_crispr_typing/1.0.0
-0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
-0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=CONVERTER_genbank_to_fasta
+75,774,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
+101,73,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=CONVERTER_genbank_to_fasta
 
 # emboss.open-bio.org
 # begins wrongly with "The master copies of EMBOSS documentation are available at on the EMBOSS Wiki."

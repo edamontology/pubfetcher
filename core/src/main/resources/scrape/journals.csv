@@ -334,10 +334,9 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,25,85,3,1342,0,2,https://doi.org/10.1142/S0219720014420050
 
 # f1000research_articles
-# can't extract title
-0,0,31,0,0,1283,15079,2,https://doi.org/10.12688/f1000research.2-192.v1
-0,0,29,0,0,1216,20714,2,https://doi.org/10.12688/f1000research.5165.2
-0,0,30,0,0,837,8968,2,https://doi.org/10.12688/f1000research.11223.1
+0,0,31,86,0,1283,15167,2,https://doi.org/10.12688/f1000research.2-192.v1
+0,0,29,100,0,1216,20816,2,https://doi.org/10.12688/f1000research.5165.2
+0,0,30,71,0,837,9041,2,https://doi.org/10.12688/f1000research.11223.1
 
 # f1000research_posters
 # pdf_a not working (because href="#")
@@ -472,8 +471,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,29,86,0,496,0,1,https://doi.org/10.3233/978-1-61499-769-6-182
 
 # researchgate
-0,0,0,89,0,1608,0,1,https://doi.org/10.13140/RG.2.1.2763.4807
-0,0,0,73,0,1435,0,1,https://doi.org/10.13140/RG.2.1.3547.6561
+0,0,0,89,0,1608,0,2,https://doi.org/10.13140/RG.2.1.2763.4807
+0,0,0,73,0,1435,0,2,https://doi.org/10.13140/RG.2.1.3547.6561
 
 # frontiersin
 0,0,24,215,0,0,7809,2,https://doi.org/10.3389/FGENE.2014.00130
@@ -508,7 +507,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,site
 0,0,22,112,0,1600,76501,2,https://doi.org/10.1105/TPC.113.121913
 
 # bloodjournal, now ashpublications.org
-0,0,28,67,2,0,5035,2,https://doi.org/10.1182/BLOOD-2010-04-282616
+0,0,28,67,2,0,5034,2,https://doi.org/10.1182/BLOOD-2010-04-282616
 
 # bloodadvances, now ashpublications.org
 0,0,32,107,12,1950,34205,2,https://doi.org/10.1182/BLOODADVANCES.2016000794

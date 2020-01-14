@@ -74,13 +74,10 @@
   title: h1 > [itemprop=name]
   content: .repository-content .blob-wrapper > :not([aria-hidden=true]), .repository-content .blob
 
-# HtmlUnit currently can't execute the JavaScript
 'galaxy\.pasteur\.fr/+(root|tool_runner)':
-#  title: '#center .portlet-title-text'
-#  content: '#center .portlet-body .ui-form-title-text, #center .ui-form-help'
-  title: ''
-  content: ''
-#  javascript: 'true'
+  title: '#center .portlet-title-text'
+  content: '#center .portlet-body .ui-form-title-text, #center .ui-form-help'
+  javascript: 'true'
 
 'emboss\.open-bio\.org/+rel/':
   title: body > :first-child
@@ -130,6 +127,7 @@
 #  content: div[class^=Page__PageContent] header + div > div > div > p, div[class^=Page__PageContent] article
   title: ''
   content: ''
+#  javascript: 'true'
 
 'sanger\.ac\.uk':
   title: '#main-content > .pagetitle'

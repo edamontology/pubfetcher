@@ -21,7 +21,6 @@ package org.edamontology.pubfetcher.core.fetching;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,6 +32,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import org.edamontology.pubfetcher.core.common.FetcherArgs;
+import org.edamontology.pubfetcher.core.db.publication.CorrespAuthor;
 import org.edamontology.pubfetcher.core.db.publication.Publication;
 import org.edamontology.pubfetcher.core.db.publication.PublicationPartName;
 import org.edamontology.pubfetcher.core.db.publication.PublicationPartType;
@@ -49,6 +49,7 @@ public final class HtmlMeta {
 	private static final String CITATION_ABSTRACT_SELECTOR = selectorCombinations("citation_abstract");
 	private static final String CITATION_FULLTEXT_SELECTOR = selectorCombinations("citation_fulltext_html_url") + ", " + selectorCombinations("citation_full_html_url");
 	private static final String CITATION_FULLTEXT_PDF_SELECTOR = selectorCombinations("citation_pdf_url");
+	private static final String CITATION_AUTHOR_EMAIL_SELECTOR = selectorCombinations("citation_author_email");
 
 	private static final String EPRINTS_PMID_SELECTOR = selectorCombinations("eprints.pubmed_id");
 	private static final String EPRINTS_TITLE_SELECTOR = selectorCombinations("eprints.title");
@@ -82,7 +83,6 @@ public final class HtmlMeta {
 
 	private static final Pattern BIOMEDCENTRAL = Pattern.compile("^https?://[a-zA-Z0-9.-]*biomedcentral\\.com/.+$");
 	private static final Pattern CITESEERX = Pattern.compile("^https?://(www\\.)?citeseerx\\..+$");
-	private static final Pattern F1000 = Pattern.compile("^https?://(www\\.)?f1000research\\.com/.+$");
 	private static final Pattern NATURE = Pattern.compile("^https?://(www\\.)?nature\\.com/.+$");
 	private static final Pattern WILEY = Pattern.compile("^https?://[a-zA-Z0-9.-]*onlinelibrary\\.wiley\\.com/.+$");
 	private static final Pattern SCIENCEMAG = Pattern.compile("^https?://[a-zA-Z0-9.-]*sciencemag\\.org/.+$");
@@ -148,11 +148,6 @@ public final class HtmlMeta {
 			if (type.isBetterThan(publication.getKeywords().getType())) {
 				Elements metaKeywords = doc.select(keywordsSelector);
 				if (!metaKeywords.isEmpty()) {
-					if (F1000.matcher(doc.location()).matches()) {
-						for (Iterator<Element> it = metaKeywords.iterator(); it.hasNext(); ) {
-							if (it.next().attr("content").indexOf('|') < 0) it.remove();
-						}
-					}
 					List<String> keywords = metaKeywords.stream()
 							.flatMap(k -> SEPARATOR.splitAsStream(k.attr("content")))
 							.collect(Collectors.toList());
@@ -189,6 +184,21 @@ public final class HtmlMeta {
 		}
 	}
 
+	private static void setCorrespAuthor(Publication publication, Document doc, PublicationPartType type, String authorEmailSelector) {
+		if (publication.getCorrespAuthor().isEmpty()) {
+			Elements metaAuthorEmails = doc.select(authorEmailSelector);
+			if (!metaAuthorEmails.isEmpty()) {
+				List<CorrespAuthor> correspAuthor = metaAuthorEmails.stream()
+					.map(e -> e.attr("content").trim())
+					.filter(a -> !a.isEmpty())
+					.map(e -> { CorrespAuthor ca = new CorrespAuthor(); ca.setEmail(e); return ca; })
+					.collect(Collectors.toList());
+				logger.info("    Found corresp. authors from meta {} in {}", type, doc.location());
+				publication.setCorrespAuthor(correspAuthor);
+			}
+		}
+	}
+
 	private static PublicationPartType chooseType(PublicationPartType metaType, PublicationPartType type) {
 		return (metaType.isBetterThan(type) ? type : metaType);
 	}
@@ -208,6 +218,7 @@ public final class HtmlMeta {
 		setAbstract(publication, doc, citationType, CITATION_ABSTRACT_SELECTOR, fetcherArgs, parts);
 		addLinks(publication, doc, citationLinkType, CITATION_FULLTEXT_SELECTOR, links, fetcherArgs);
 		addLinks(publication, doc, citationPdfType, CITATION_FULLTEXT_PDF_SELECTOR, links, fetcherArgs);
+		setCorrespAuthor(publication, doc, type, CITATION_AUTHOR_EMAIL_SELECTOR);
 
 		// eprints
 		PublicationPartType eprintsType = chooseType(PublicationPartType.eprints, type);

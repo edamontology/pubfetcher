@@ -102,6 +102,10 @@ pdf_dst
   The replacement string for the URL substring matched using "pdf_src". Must be specified if "pdf_src" is specified (and vice versa).
 pdf_a
   Selector string to extract all full text PDF links on the current page. All elements (usually ``<a>``) found using the selector are extracted and the value of their ``href`` attribute added to :ref:`Links <links>`, if the value of ``href`` is a valid URL. The type (from :ref:`Publication types <publication_types>`) of the link will be the corresponding PDF type of the current type (e.g., type "pdf_doi" corresponds to type "doi"). If possible, the "pdf_a" selector should probably be preferred over "pdf_src" and "pdf_dst", as sometimes the PDF file can be missing or inaccessible and then the "pdf_a" selector will correctly fail to add any links, but "pdf_src" and "pdf_dst" will add a manually constructed, but non-existing link to :ref:`Links <links>`.
+corresp_author_names
+  Selector string for the names of :ref:`correspAuthor <correspauthor>`. All elements found using the selector are extracted, each name added as a separate corresponding author.
+corresp_author_emails
+  Selector string for the e-mails of :ref:`correspAuthor <correspauthor>`. All elements found using the selector are extracted, with e-mail addresses found in ``href`` attributes (after the prefix ``mailto:`` which is removed). E-mail addresses are added to the names extracted with "corresp_author_names" (in the same order), which means the number of names must match the number of e-mail addresses -- if they don't match, then names are discarded and corresponding authors are only created using the extracted e-mails.
 
 The ``-scrape-selector`` command of the :ref:`CLI <scrape_rules>` can be used to test which selector string from loaded configuration files will be in effect for the supplied URL and "ScrapeSiteKey".
 

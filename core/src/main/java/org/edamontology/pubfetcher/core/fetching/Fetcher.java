@@ -102,6 +102,7 @@ public class Fetcher {
 
 	private static final Pattern KEYWORDS_BEGIN = Pattern.compile("(?i)^[\\p{Z}\\p{Cc}]*keywords?[\\p{Z}\\p{Cc}]*:*[\\p{Z}\\p{Cc}]*");
 	private static final Pattern SEPARATOR = Pattern.compile("[,;|]");
+	private static final Pattern MAILTO_BEGIN = Pattern.compile("(?i)^[\\p{Z}\\p{Cc}]*mailto[\\p{Z}\\p{Cc}]*:*[\\p{Z}\\p{Cc}]*");
 
 	private static final Pattern PMID_EXTRACT = Pattern.compile("(?i)pmid[\\p{Z}\\p{Cc}]*:*[\\p{Z}\\p{Cc}]*(" + PubFetcher.PMID.pattern() + ")");
 	private static final Pattern PMCID_EXTRACT = Pattern.compile("(?i)pmcid[\\p{Z}\\p{Cc}]*:*[\\p{Z}\\p{Cc}]*(" + PubFetcher.PMCID.pattern() + ")");
@@ -126,7 +127,7 @@ public class Fetcher {
 	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
 	private static final String SCIENCEDIRECT_LINK = "https://www.sciencedirect.com/science/article/pii/";
 
-	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/F1000RESEARCH\\..+$");
+	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/.+\\..+\\..+$");
 
 	private static Set<ActiveHost> activeHosts = new HashSet<>();
 
@@ -1307,6 +1308,83 @@ public class Fetcher {
 		}
 	}
 
+	private void setCorrespAuthor(Publication publication, Element element, String names, String emails, String location) {
+		if (publication.getCorrespAuthor().isEmpty() && (names != null && !names.trim().isEmpty() || emails != null && !emails.trim().isEmpty())) {
+			List<String> caNames = null;
+			if (names != null && !names.trim().isEmpty()) {
+				caNames = getAll(element, names, location, true).stream().map(e -> e.text()).collect(Collectors.toList());
+			}
+			List<String> caEmails = null;
+			if (emails != null && !emails.trim().isEmpty()) {
+				caEmails = getAll(element, emails, location, true).stream().map(e -> MAILTO_BEGIN.matcher(e.attr("abs:href").trim()).replaceFirst("")).collect(Collectors.toList());
+			}
+			if (caNames != null && !caNames.isEmpty() && caEmails != null && !caEmails.isEmpty() && (caEmails.size() == caNames.size() * caNames.size() && caNames.size() > 1 || caEmails.size() > 1 && caNames.size() == 1)) {
+				boolean reduce = true;
+				for (int i = 0; i < caNames.size(); ++i) {
+					for (int j = i + caNames.size(); j < caEmails.size(); j += caNames.size()) {
+						if (!caEmails.get(i).equals(caEmails.get(j))) {
+							reduce = false;
+						}
+					}
+				}
+				if (reduce) {
+					caEmails = caEmails.subList(0, caNames.size());
+				}
+			}
+			if (caEmails != null && caEmails.size() > 1) {
+				boolean namesEqual = false;
+				if (caNames != null && caNames.size() == caEmails.size()) {
+					namesEqual = true;
+					String firstName = caNames.get(0);
+					for (int i = 1; i < caNames.size(); ++i) {
+						if (!firstName.equals(caNames.get(i))) {
+							namesEqual = false;
+							break;
+						}
+					}
+				}
+				boolean emailsEqual = true;
+				String firstEmail = caEmails.get(0);
+				for (int i = 1; i < caEmails.size(); ++i) {
+					if (!firstEmail.equals(caEmails.get(i))) {
+						emailsEqual = false;
+						break;
+					}
+				}
+				if (emailsEqual && !namesEqual) {
+					caEmails = new ArrayList<>();
+					caEmails.add(firstEmail);
+				}
+			}
+			if ((caNames == null || caNames.isEmpty()) && (caEmails == null || caEmails.isEmpty())) {
+				logger.warn("No corresponding authors found in {}", location);
+			} else {
+				if (caNames != null && !caNames.isEmpty() && caEmails != null && !caEmails.isEmpty() && caNames.size() != caEmails.size()) {
+					logger.warn("Discarding corresponding author names as number of names ({}) is not equal to number of e-mails ({}) in {}", caNames.size(), caEmails.size(), location);
+					caNames = null;
+				}
+				List<CorrespAuthor> correspAuthor = new ArrayList<>();
+				int correspAuthorSize = 0;
+				if (caNames != null && !caNames.isEmpty()) {
+					correspAuthorSize = caNames.size();
+				} else if (caEmails != null && !caEmails.isEmpty()) {
+					correspAuthorSize = caEmails.size();
+				}
+				for (int i = 0; i < correspAuthorSize; ++i) {
+					CorrespAuthor ca = new CorrespAuthor();
+					if (caNames != null && !caNames.isEmpty()) {
+						ca.setName(caNames.get(i));
+					}
+					if (caEmails != null && !caEmails.isEmpty()) {
+						ca.setEmail(caEmails.get(i));
+					}
+					correspAuthor.add(ca);
+				}
+				publication.setCorrespAuthor(correspAuthor);
+			}
+		}
+	}
+
 	private boolean isFinal(Publication publication, PublicationPartName[] names, EnumMap<PublicationPartName, Boolean> parts, boolean oa, FetcherArgs fetcherArgs) {
 		for (PublicationPartName name : names) {
 			if (!publication.getPart(name).isFinal(fetcherArgs) && (parts == null || (parts.get(name) != null && parts.get(name)))) {
@@ -2238,6 +2316,8 @@ public class Fetcher {
 				for (String pdfHrefA : pdfHrefsA) {
 					links.add(pdfHrefA, type.toPdf(), finalUrl, publication, fetcherArgs, false);
 				}
+
+				setCorrespAuthor(publication, doc, scrape.getSelector(site, ScrapeSiteKey.corresp_author_names), scrape.getSelector(site, ScrapeSiteKey.corresp_author_emails), doc.location());
 			} else {
 				logger.warn("No scrape rules for {}", finalUrl);
 				if (parts == null || (parts.get(PublicationPartName.title) != null && parts.get(PublicationPartName.title))) {

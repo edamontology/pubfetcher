@@ -66,7 +66,7 @@
 '[a-zA-Z0-9.-]*asm\.org': highwire2
 'dl\.acm\.org': acm
 'degruyter\.com': degruyter
-'hindawi\.com': hindawi
+'[a-zA-Z0-9.-]*hindawi\.com': hindawi
 'biecoll\.ub\.uni-bielefeld\.de': biecoll
 'jbc\.org': highwire
 'jbc\.org/.+full$': highwire_full
@@ -110,6 +110,9 @@
 'chemrxiv\.org': chemrxiv
 'iopscience\.iop\.org': iop
 'g3journal\.org': highwire2
+'wellcomeopenresearch\.org/+articles': f1000research_articles
+'gatesopenresearch\.org/+articles': f1000research_articles
+'aasopenresearch\.org/+articles': f1000research_articles
 
 ---
 
@@ -129,6 +132,8 @@
 #  pdf_src:
 #  pdf_dst:
 #  pdf_a:
+#  corresp_author_names:
+#  corresp_author_emails:
 
 # Each site must have at least one mention in the previous section
 
@@ -154,6 +159,8 @@ oup:
   abstract: section.abstract > p, section.abstract > .sec > *
   fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content)):not(.table-modal)
   pdf_a: .article-pdfLink
+  corresp_author_names: .info-card-author:has(.info-author-correspondence) .info-card-name
+  corresp_author_emails: .info-card-author .info-author-correspondence a, .info-card-author:has(.info-author-correspondence) .info-card-affilitation a[href^=mailto]
 
 citeseerx:
   title: '#viewHeader > h2'
@@ -168,6 +175,8 @@ wiley:
   abstract: .article-section__abstract > .article-section__content > *
   fulltext_a: .coolBar .go-to-full
   pdf_a: .coolBar .PdfLink > .pdf-download
+  corresp_author_names: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .author-name'
+  corresp_author_emails: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) span:matchesOwn(^E-mail address:$) + a, .loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .corr-email'
 
 wiley_full:
   doi: .article-citation .epub-doi
@@ -176,6 +185,8 @@ wiley_full:
   abstract: .article-section__abstract > .article-section__content > *
   fulltext: .article-section__full > [id].article-section__content > :not(.article-section__sub-content), .article-section__full > .article-section__supporting, .article-section__full .article-section__sub-content > :not(.article-section__sub-content)
   pdf_a: .coolBar .PdfLink > .pdf-download
+  corresp_author_names: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .author-name'
+  corresp_author_emails: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) span:matchesOwn(^E-mail address:$) + a, .loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .corr-email'
 
 sciencedirect:
   doi: article .DoiLink > .doi
@@ -192,21 +203,26 @@ biomedcentral:
   abstract: '#Abs1-content > *'
   fulltext: 'article > section > :not(#Abs1-section):not(#Bib1-section):not(#Ack1-section):not(#author-information-section):not(#additional-information-section):not(#rightslink-section):not(#article-info-section) > *, article > div.c-article-section__content'
   pdf_a: .c-pdf-download > [data-track-action=download pdf]
+  corresp_author_names: .c-author-list a[data-test=author-name]:has(.u-icon)
 
 springer:
-  doi: '#doi-url, :has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi]'
+  doi: '#doi-url, #AboutThisContent a[data-track-action=view doi], #article-info-section a[data-track-action=view doi]'
   title: 'h1.ArticleTitle, h1.ChapterTitle, .page-title > h1, h1.unified-header__title, h1.c-article-title'
   subtitle: '.page-title > .page-title__subtitle'
   keywords: .Keyword, .c-article-subject-list__subject
   abstract: 'section.Abstract > p, #book-description > *, #Abs1-content > p'
   fulltext: '#body > section > *, article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *'
   pdf_a: '.test-pdf-link > :not([id$=no_access_banner]) > a'
+  corresp_author_names: .authors__list li:has(.authors__contact) .authors__name
+  corresp_author_emails: .authors__list li .authors__contact a
 
 springer_ref:
   doi: .FulltextWrapper .ChapterDOI
   title: .FulltextWrapper .ChapterTitle
   abstract: '#body > section > h2:matchesOwn(^Definition$) ~ * > *'
   fulltext: '#body > section > h2:not(:matchesOwn(^Definition$)) ~ * > *'
+  corresp_author_names: .authors__list li:has(.authors__contact) .authors__name
+  corresp_author_emails: .authors__list li .authors__contact a
 
 highwire:
   doi: .slug-doi
@@ -218,6 +234,7 @@ highwire:
   fulltext_a: '[rel=view-full-text]'
   pdf_src: (\.abstract)?/*$
   pdf_dst: .full.pdf
+  # corresp_author_emails is plain text in html not mailto href
 
 highwire_full:
   doi: .slug-doi
@@ -227,6 +244,7 @@ highwire_full:
   fulltext: '#content-block > .article > p, #content-block > .article [id^=sec] > :not([id^=sec]):not(.section-nav):not(div[id~=^F[0-9]]):not(div[id~=^T[0-9]]), #content-block > .article [id^=sec] > div[id~=^F[0-9]] > :not(.fig-inline), #content-block > .article [id^=sec] > div[id~=^T[0-9]] > :not(.table-inline), #content-block > .article > div[id~=^F[0-9]] > :not(.fig-inline), #content-block > .article > div[id~=T[0-9]] > :not(.table-inline)'
   pdf_src: /*$
   pdf_dst: .pdf
+  # corresp_author_emails is plain text in html not mailto href
 
 nature:
   doi: 'h3:has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi], #article-info-section a[data-track-action=view doi]'
@@ -235,6 +253,7 @@ nature:
   abstract: 'article div[data-article-body=true] > section > #abstract-section > div > *, article div[data-article-body=true] > section > #Abs1-section > div > *, article div[data-article-body=true] > section > #Abs2-section > div > *, #article #content > .article > #Summary + p'
   fulltext: 'article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#Abs2-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *, article div[data-article-body=true] > div:not(:has(#access-options)):not([aria-hidden=true]):not(.c-pdf-button__container)'
   pdf_a: a[data-article-pdf]
+  corresp_author_names: .c-author-list a[data-test=author-name]:has(.u-icon)
 
 plos:
   doi: '#artDoi'
@@ -243,6 +262,8 @@ plos:
   abstract: '#artText > .abstract > *'
   fulltext: '#artText > [id^=section] > *'
   pdf_a: '#downloadPdf'
+  corresp_author_names: '#author-list li:has([id^=authCorresponding]) .author-name' # name includes trailing "," in the end
+  corresp_author_emails: '#author-list li [id^=authCorresponding] a'
 
 highwire2:
   doi: .highwire-cite-metadata-doi
@@ -253,6 +274,8 @@ highwire2:
   fulltext: .fulltext-view > p:matchText, .fulltext-view > p > :not(.disp-formula):not(.inline-formula), .fulltext-view > div.glossary, .fulltext-view [id^=sec] > h2, .fulltext-view [id^=sec] > h3, .fulltext-view [id^=sec] > h4, .fulltext-view [id^=sec] > h5, .fulltext-view [id^=sec] > p:matchText, .fulltext-view [id^=sec] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view li[id^=list-item] > p:matchText, .fulltext-view [id^=list-item] > p > :not(.disp-formula):not(.inline-formula), .fulltext-view [id^=sec] > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > .fn-group .fn-abbr
   pdf_src: (\.full)?(\?sso-checked=true)?/*$
   pdf_dst: .full.pdf
+  corresp_author_names: '[class~=^author-tooltip-[0-9]+$]:has(.author-corresp-email-link) .author-tooltip-name'
+  corresp_author_emails: '[class~=^author-tooltip-[0-9]+$] .author-corresp-email-link a'
 
 biorxiv:
   doi: .highwire-cite-metadata-doi
@@ -264,6 +287,8 @@ biorxiv:
   fulltext_dst: .full
   pdf_src: (\?sso-checked=true)?/*$
   pdf_dst: .full.pdf
+  corresp_author_names: '[class~=^author-tooltip-[0-9]+$]:has(.author-corresp-email-link) .author-tooltip-name'
+  corresp_author_emails: '[class~=^author-tooltip-[0-9]+$] .author-corresp-email-link a'
 
 biorxiv_full:
   doi: .highwire-cite-metadata-doi
@@ -274,6 +299,8 @@ biorxiv_full:
   fulltext: .fulltext-view > p, .fulltext-view > [id~=^(sec|app)-] > :not([id^=sec-]):not(div[id~=^[FT][0-9]]):not([id^=list-]), .fulltext-view > [id~=^(sec|app)-] > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > [id~=^(sec|app)-] > [id^=list-] > *, .fulltext-view > [id~=^(sec|app)-] [id^=sec-] > :not([id^=sec-]):not(div[id~=^[FT][0-9]]):not([id^=list-]), .fulltext-view > [id~=^(sec|app)-] [id^=sec-] > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > [id~=^(sec|app)-] [id^=sec-] > [id^=list-] > *, .fulltext-view > div[id~=^[FT][0-9]] > :not(.highwire-figure):not(.table-inline), .fulltext-view > div.glossary, .fulltext-view > .fn-group .fn-abbr
   pdf_src: (\.full)?(\?sso-checked=true)?/*$
   pdf_dst: .full.pdf
+  corresp_author_names: '[class~=^author-tooltip-[0-9]+$]:has(.author-corresp-email-link) .author-tooltip-name'
+  corresp_author_emails: '[class~=^author-tooltip-[0-9]+$] .author-corresp-email-link a'
 
 acs:
   doi: main .article_header-doiurl
@@ -285,6 +312,8 @@ acs:
   fulltext_dst: /doi/full/10
   pdf_src: /+doi/+abs/+10
   pdf_dst: /doi/pdf/10
+  corresp_author_names: .loa .hlFld-ContribAuthor:has(.author-xref-symbol:matches(^\*$)) > a
+  #corresp_author_emails: .affiliations .corresp-info a # email-protection
 
 acs_full:
   doi: main .article_header-doiurl
@@ -295,6 +324,8 @@ acs_full:
   fulltext: 'main .article_content-left > .NLM_sec > :not(.article_content-header), main .article_content-left > .NLM_sec > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .article_supporting-info > :not(.article_content-header), main .article_content-left > .NLM_back > .article_supporting-info > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .NLM_sec'
   pdf_src: /+doi/+(full/+)?10
   pdf_dst: /doi/pdf/10
+  corresp_author_names: .loa .hlFld-ContribAuthor:has(.author-xref-symbol:matches(^\*$)) > a
+  #corresp_author_emails: .affiliations .corresp-info a # email-protection
 
 arxiv:
   doi: .metatable .msc_classes
@@ -331,6 +362,8 @@ liebertpub:
   abstract: .abstractSection
   fulltext_a: .coolBar--download a:matches(Full Text$)
   pdf_a: .coolBar--download a:matches(PDF$)
+  corresp_author_names: .loa-wrapper .author-name:has(.icon-Email) > span
+  corresp_author_emails: .loa-wrapper .author-name:has(.icon-Email) + .author-info a[href^=mailto]
 
 liebertpub_full:
   doi: .epub-section__doi__text
@@ -340,13 +373,17 @@ liebertpub_full:
   fulltext: .hlFld-Fulltext > :not(:matches(^References ))
   fulltext_a: .coolBar--download a:matches(Full Text$)
   pdf_a: .coolBar--download a:matches(PDF$)
+  corresp_author_names: .loa-wrapper .author-name:has(.icon-Email) > span
+  corresp_author_emails: .loa-wrapper .author-name:has(.icon-Email) + .author-info a[href^=mailto]
 
 rsc:
-  doi: .list__item-label:containsOwn(DOI:) + .list__item-data
+  doi: '#divAbout .doi-link'
   title: .article__title > h2
   abstract: h3:matchesOwn(^Abstract$) + div > *
   fulltext_a: '#DownloadOption a:contains(HTML)'
   pdf_a: '#DownloadOption a:contains(PDF)'
+  corresp_author_names: .article__authors > .article__author-link:matchesOwn(\*) > a
+  corresp_author_emails: .article__author-affiliation b:matchesOwn(^E-mail:$) + a
 
 rsc_full:
   doi: .article_info > a:matchesOwn(^10\.)
@@ -364,16 +401,21 @@ iucr:
 f1000research_articles:
   doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=https://doi.org]
   title: '#anchor-title > h1'
+  keywords_split: .article-abstract > h2:matchesOwn(^Keywords$) + p
   abstract: .abstract-text
   fulltext: '#article-context > .generated-article-body > *, #article-context > .generated-article-footer > :has(h2:containsOwn(Supplementary materials))'
   pdf_src: /*$
   pdf_dst: /pdf
+  corresp_author_names: .f1r-article-desk .authors > span > a.cauthor
+  corresp_author_emails: .f1r-article-desk .authors > span > a.cauthor
 
 f1000research_posters:
   title: .asset-title > h1
   keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
   abstract: .abstract__content
   # pdf_a not working (because href="#")
+  corresp_author_names: .asset-details-container-large .asset-authors > a
+  corresp_author_emails: .asset-details-container-large .asset-authors > a
 
 peerj:
   pmid: '#article-identifier-pmid'
@@ -383,6 +425,8 @@ peerj:
   abstract: .abstract > *
   fulltext: main section > :not(section)
   pdf_a: a.js-download-btn[data-format=PDF]
+  corresp_author_names: .article-authors > .contrib:has(.corresp) .name
+  corresp_author_emails: .article-authors > .contrib .corresp
 
 peerj_preprints:
   pmid: '#article-identifier-pmid'
@@ -391,6 +435,8 @@ peerj_preprints:
   keywords: .kwd
   abstract: .abstract > *
   pdf_a: a.js-download-btn[data-format=PDF]
+  corresp_author_names: .article-authors > .contrib:has(.corresp) .name
+  corresp_author_emails: .article-authors > .contrib .corresp
 
 dtu:
   doi: .digital_object_identifiers a[href^=https://doi.org]
@@ -429,11 +475,11 @@ degruyter:
   pdf_a: .gs-access-fullcontentlink .pdf-link
 
 hindawi:
-  doi: .middle_content pre a[href^=http://dx.doi.org]
-  title: .middle_content h2
-  abstract: .middle_content h4:matchesOwn(^Abstract$) + p
-  fulltext: .middle_content .end-abs ~ *
-  pdf_a: '#article_list .full_text_pdf'
+  doi: .middle_content pre a[href^=http://dx.doi.org], .article_citation a[aria-label=Doi-link]
+  title: .middle_content h2, h1.article_title
+  abstract: '.middle_content h4:matchesOwn(^Abstract$) + p, article #abstract + p'
+  fulltext: .middle_content .end-abs ~ *, article .end-abs ~ *
+  pdf_a: '#article_list .full_text_pdf, #rightSectionMenu a.pdf_desktop'
 
 biecoll:
   doi: b:matchesOwn(^DOI) > a[href^=http://dx.doi.org]
@@ -483,6 +529,8 @@ sciencemag:
   fulltext_dst: .full
   pdf_src: /*$
   pdf_dst: .full.pdf
+  corresp_author_names: .contributor-list > .contributor:has(.xref-corresp) .name
+  corresp_author_emails: .corresp-list > .corresp .em-addr a, .fn-corresp .em-addr a
 
 sciencemag_full:
   title: article.primary header h1
@@ -490,6 +538,8 @@ sciencemag_full:
   fulltext: article.primary .article > p, article.primary .article [id^=sec] > :not([id^=sec]):not(figure[id^=F]), article.primary .article [id^=sec] > figure[id^=F] > figcaption, article.primary .article > [id^=notes] > *, article.primary .article > figure[id^=F] > figcaption, article.primary .article > div[id^=T]
   pdf_src: /*$
   pdf_dst: .pdf
+  corresp_author_names: .contributor-list > .contributor:has(.xref-corresp) .name
+  corresp_author_emails: .corresp-list > .corresp .em-addr a, .fn-corresp .em-addr a
 
 bioinformation:
   title: tr > td:matches(^Title$) ~ td:last-of-type
@@ -497,6 +547,7 @@ bioinformation:
   abstract: tr > td:matches(^Abstract$) ~ td:last-of-type
   pdf_src: htm$
   pdf_dst: pdf
+  corresp_author_emails: tr > td:matches(^E-?mail\*?$) ~ td:last-of-type a
 
 aps:
   doi: '#article-content > .abstract > div > p > .doi-field'
@@ -543,6 +594,7 @@ theiet:
 bmj:
   title: '#article-top .highwire-cite-title'
   abstract: '#article-top .article > .abstract > :not(h2)'
+  corresp_author_emails: .corresp .em-addr a
 
 nrcresearchpress:
   doi: '#content .citationLine > a'
@@ -594,6 +646,7 @@ mdpi:
   abstract: '#abstract .art-abstract'
   fulltext_a: '#abstract .download > #html_link'
   pdf_a: '#abstract .download > a:matchesOwn(^Download PDF$)'
+  corresp_author_names: .art-authors > span:has(.emailCaptcha) > span > a
 
 mdpi_full:
   doi: article .html-art-header a
@@ -602,6 +655,7 @@ mdpi_full:
   abstract: '#html-abstract > div'
   fulltext: 'article > .html-body > section > *, article > .html-back > #html-glossary'
   pdf_a: article .download > a:matchesOwn(^Download PDF$)
+  corresp_author_names: .html-author-group > span:has(.emailCaptcha) > span > a
 
 preprints:
   title: '#submission-content > h1'
@@ -617,6 +671,8 @@ aip:
   abstract: article .abstractSection
   fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec)
   pdf_a: .article-menu > .download-pdf a.pdf
+  corresp_author_names: .entryAuthor > .contrib-author:has(.email) > a[href^=/author/]
+  # corresp_author_emails: .entryAuthor > .contrib-author > .email # email-protection
 
 chemrxiv:
   title: .item-left > h2.title

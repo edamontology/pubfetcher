@@ -212,6 +212,7 @@ public final class FetcherTest {
 			mismatch += equal(test[6], publication.getFulltext().getContent().length(), "fulltext length");
 		}
 		mismatch += equal(test[7], publication.getVisitedSites().size(), "visited sites size");
+		mismatch += equal(test[8], CorrespAuthor.toString(publication.getCorrespAuthor()).length(), "corresponding author length");
 		return mismatch;
 	}
 
@@ -426,14 +427,14 @@ public final class FetcherTest {
 
 	private static void testSite(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, String regex) throws IOException, ReflectiveOperationException {
 		int mismatch = 0;
-		List<String[]> tests = getTest("journals.csv", "scrape", 9);
-		filterTests(tests, regex, 8);
+		List<String[]> tests = getTest("journals.csv", "scrape", 10);
+		filterTests(tests, regex, 9);
 		int i = 0;
 		long start = System.currentTimeMillis();
 		for (String[] test : tests) {
 			++i;
-			logger.info("Test {} {}", test[8], PubFetcher.progress(i, tests.size(), start));
-			Publication publication = fetchSite(test[8], fetcher, parts, fetcherArgs);
+			logger.info("Test {} {}", test[9], PubFetcher.progress(i, tests.size(), start));
+			Publication publication = fetchSite(test[9], fetcher, parts, fetcherArgs);
 			mismatch += testSite(test, publication, parts);
 		}
 		if (mismatch == 0) logger.info("OK");

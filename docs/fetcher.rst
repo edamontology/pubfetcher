@@ -107,7 +107,7 @@ The endpoint of the API is https://www.ebi.ac.uk/europepmc/webservices/rest/sear
 
 We can possibly get all `publication parts`_ from the Europe PMC API, except for fulltext_, efo_ and go_ for which we get a ``Y`` or ``N`` indicating if the corresponding part is available at the `Europe PMC fulltext`_ or `Europe PMC mined`_ resource. In addition, we can possibly get values for the publication fields :ref:`oa <oa>`, :ref:`journalTitle <journaltitle>`, :ref:`pubDate <pubdate>` and :ref:`citationsCount <citationscount>`. Europe PMC is currently the only resource we can get the :ref:`citationsCount <citationscount>` value from.
 
-Europe PMC itself has content from multiple sources (see https://europepmc.org/Help#whatserachingEPMC) and in some cases multiple results are returned for a query (each from a different source). In that case the MED (MEDLINE) source is preferred, then PMC (PubMed Central), then PPR (preprints) and then whichever source is first in the list of results.
+Europe PMC itself has content from multiple sources (see https://europepmc.org/Help#contentsources) and in some cases multiple results are returned for a query (each from a different source). In that case the MED (MEDLINE) source is preferred, then PMC (PubMed Central), then PPR (preprints) and then whichever source is first in the list of results.
 
 .. _europe_pmc_fulltext:
 

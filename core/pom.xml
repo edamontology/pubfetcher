@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.edamontology.pubfetcher</groupId>
     <artifactId>pubfetcher</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <artifactId>pubfetcher-core</artifactId>

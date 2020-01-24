@@ -1,17 +1,31 @@
 # INSTALL
 
+## Compiling from latest source
+
 [git](https://git-scm.com/), [JDK 8](https://openjdk.java.net/projects/jdk8/) (or later) and [Apache Maven](https://maven.apache.org/) are required.
 
-On the command-line, go to the directory PubFetcher should be installed in and execute:
+Execute:
 
 ```shell
+$ cd ~/foo/bar/
 $ git clone https://github.com/edamontology/pubfetcher.git
 $ cd pubfetcher/
+$ git checkout develop
 $ mvn clean install
 ```
 
 PubFetcher can now be run with:
 
 ```shell
-$ java -jar /path/to/pubfetcher/target/pubfetcher-cli-0.2-SNAPSHOT.jar -h
+$ java -jar ~/foo/bar/pubfetcher/target/pubfetcher-cli-<version>.jar -h
 ```
+
+A packaged version of PubFetcher can be found as `~/foo/bar/pubfetcher/dist/target/pubfetcher-<version>.zip`.
+
+## Compiling latest release
+
+Same as previous section, except `git checkout develop` must be replaced with `git checkout master`.
+
+## Using a pre-compiled release
+
+Pre-built releases can be found from https://github.com/edamontology/pubfetcher/releases. A downloaded release package can be unzipped in the desired location, where `pubfetcher-cli-<version>.jar` can again be run with `java -jar`.

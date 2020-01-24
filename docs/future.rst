@@ -66,8 +66,7 @@ Meta
 * Do comment more in code.
 * Also, the whole API should be documented with Javadoc (currently only `PubFetcher <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/java/org/edamontology/pubfetcher/core/common/PubFetcher.java>`_ is covered).
 * Make code more robust and secure.
-* Do proper packaging of the code, maybe as a release ZIP, maybe including scripts for running the program. Also, take notice of the license requirements of used libraries.
-* Deploy the PubFetcher library to a remote repository.
+* Deploy the PubFetcher library to a `remote repository <https://mvnrepository.com/>`_, possibly `Maven Central <https://search.maven.org/>`_, mention this in `INSTALL.md <https://github.com/edamontology/pubfetcher/blob/master/INSTALL.md>`_.
 
 **************
 Misc new stuff

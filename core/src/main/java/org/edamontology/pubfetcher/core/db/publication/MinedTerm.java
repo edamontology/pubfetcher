@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016, 2018 Erik Jaaniso
+ * Copyright © 2016, 2018, 2020 Erik Jaaniso
  *
  * This file is part of PubFetcher.
  *
@@ -20,28 +20,18 @@
 package org.edamontology.pubfetcher.core.db.publication;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.edamontology.pubfetcher.core.common.PubFetcher;
 
-public class MinedTerm implements Serializable {
+public class MinedTerm implements Serializable, Comparable<MinedTerm> {
 
-	private static final long serialVersionUID = 4674690901850332360L;
-
-	private static final String EFOlink = "https://www.ebi.ac.uk/efo/";
-	private static final String GOlink = "http://amigo.geneontology.org/amigo/term/GO:";
+	private static final long serialVersionUID = 245681198110119069L;
 
 	private String term = "";
 
 	private int count = 0;
 
-	private List<String> altNames = new ArrayList<>();
-
-	private String dbName = "";
-
-	private List<String> dbIds = new ArrayList<>();
+	private String uri = "";
 
 	public MinedTerm() {}
 
@@ -61,38 +51,12 @@ public class MinedTerm implements Serializable {
 		this.count = count;
 	}
 
-	public List<String> getAltNames() {
-		return altNames;
+	public String getUri() {
+		return uri;
 	}
-	public void setAltNames(List<String> altNames) {
-		if (altNames != null) {
-			this.altNames = altNames.stream()
-				.filter(k -> k != null)
-				.map(k -> k.trim())
-				.filter(k -> !k.isEmpty())
-				.collect(Collectors.toList());
-		}
-	}
-
-	public String getDbName() {
-		return dbName;
-	}
-	public void setDbName(String dbName) {
-		if (dbName != null) {
-			this.dbName = dbName.trim();
-		}
-	}
-
-	public List<String> getDbIds() {
-		return dbIds;
-	}
-	public void setDbIds(List<String> dbIds) {
-		if (dbIds != null) {
-			this.dbIds = dbIds.stream()
-				.filter(k -> k != null)
-				.map(k -> k.trim())
-				.filter(k -> !k.isEmpty())
-				.collect(Collectors.toList());
+	public void setUri(String uri) {
+		if (uri != null) {
+			this.uri = uri.trim();
 		}
 	}
 
@@ -113,32 +77,18 @@ public class MinedTerm implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(term);
-		if (!altNames.isEmpty()) {
-			sb.append(" (");
-			sb.append(String.join("; ", altNames));
-			sb.append(")");
-		}
-		return sb.toString();
-	}
-
-	public String toStringLink() {
-		StringBuilder sb = new StringBuilder();
-		if (!dbIds.isEmpty()) {
-			if (dbName.equalsIgnoreCase("efo")) {
-				sb.append(EFOlink).append(dbIds.get(0));
-			} else if (dbName.equalsIgnoreCase("GO")) {
-				sb.append(GOlink).append(dbIds.get(0));
-			}
-		}
-		return sb.toString();
+		return term;
 	}
 
 	public String toStringHtml() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(PubFetcher.getLinkHtml(toStringLink(), term.isEmpty() ? "NA" : term));
+		sb.append(PubFetcher.getLinkHtml(uri, term.isEmpty() ? "NA" : term));
 		if (count != 0) sb.append(" <small>").append(count).append("</small>");
 		return sb.toString();
+	}
+
+	@Override
+	public int compareTo(MinedTerm o) {
+		return o.count - count;
 	}
 }

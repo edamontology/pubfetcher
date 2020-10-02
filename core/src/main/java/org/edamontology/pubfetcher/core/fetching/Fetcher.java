@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016, 2017, 2018 Erik Jaaniso
+ * Copyright © 2016, 2017, 2018, 2020 Erik Jaaniso
  *
  * This file is part of PubFetcher.
  *
@@ -34,12 +34,16 @@ import java.text.Normalizer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -98,6 +102,7 @@ public class Fetcher {
 	private static long JAVASCRIPT_HARD_TIMEOUT = 120000; // 2 minutes
 
 	private static final String EUROPEPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/";
+	private static final String EUROPEPMC_ANNOTATIONS = "https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds?";
 	private static final String EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 
 	private static final Pattern KEYWORDS_BEGIN = Pattern.compile("(?i)^[\\p{Z}\\p{Cc}]*keywords?[\\p{Z}\\p{Cc}]*:*[\\p{Z}\\p{Cc}]*");
@@ -1679,7 +1684,7 @@ public class Fetcher {
 
 		setIds(publication, doc, type,
 			"article > front article-id[pub-id-type=pmid]",
-			"article > front article-id[pub-id-type=pmcid], article > front article-id[pub-id-type=pmc]",
+			type == PublicationPartType.europepmc_xml ? null : "article > front article-id[pub-id-type=pmcid], article > front article-id[pub-id-type=pmc]",
 			"article > front article-id[pub-id-type=doi]", true, doc.location(), true, fetcherArgs);
 
 		String titleSelector = "article > front title-group:first-of-type article-title";
@@ -1791,7 +1796,7 @@ public class Fetcher {
 		if (!state.europepmcHasFulltextXML) return;
 
 		if (isFinal(publication, new PublicationPartName[] {
-				PublicationPartName.pmid, PublicationPartName.pmcid, PublicationPartName.doi,
+				PublicationPartName.pmid, PublicationPartName.doi,
 				PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
 			}, parts, false, fetcherArgs)) return;
 
@@ -1848,72 +1853,85 @@ public class Fetcher {
 	}
 
 	private List<MinedTerm> getEuropepmcMinedTerms(String url, Publication publication, FetcherArgs fetcherArgs) {
-		List<MinedTerm> minedTerms = new ArrayList<>();
+		Map<String, List<String>> minedTerms = new LinkedHashMap<>();
 
 		Document doc = getDoc(url, publication, fetcherArgs);
 
 		if (doc != null) {
-			Elements elements = doc.getElementsByTag("tmSummary");
-			if (elements.isEmpty()) {
+			Elements annotations = doc.getElementsByTag("annotation");
+			if (annotations.isEmpty()) {
 				logger.warn("No mined terms found in {}", doc.location());
 			}
-			for (Element tmSummary : elements) {
-				MinedTerm minedTerm = new MinedTerm();
-
-				Element term = tmSummary.getElementsByTag("term").first();
-				if (term != null) {
-					String termText = term.text();
-					if (termText.isEmpty()) {
-						logger.warn("Tag term has no content in {}", doc.location());
+			for (Element annotation : annotations) {
+				String term = "";
+				Element termTag = annotation.getElementsByTag("exact").first();
+				if (termTag != null) {
+					term = termTag.text();
+					if (term.isEmpty()) {
+						logger.warn("Tag <exact> has no content in {}", doc.location());
 					}
-					minedTerm.setTerm(termText);
 				} else {
-					logger.warn("Tag term not found in {}", doc.location());
+					logger.warn("Tag <exact> not found in {}", doc.location());
 				}
 
-				Element count = tmSummary.getElementsByTag("count").first();
-				if (count != null) {
+				int count = 1;
+				Element countTag = annotation.getElementsByTag("frequency").first();
+				if (countTag != null) {
 					try {
-						int countInt = Integer.parseInt(count.text());
-						if (countInt < 1) {
-							logger.warn("Tag count has value less than 1 in {}", doc.location());
+						count = Integer.parseInt(countTag.text());
+						if (count < 1) {
+							logger.warn("Tag <frequency> has value less than 1 in {}", doc.location());
 						}
-						minedTerm.setCount(countInt);
 					} catch (NumberFormatException e) {
-						logger.warn("Tag count does not contain an integer in {}", doc.location());
+						logger.warn("Tag <frequency> does not contain an integer in {}", doc.location());
+					}
+				}
+
+				String uri = "";
+				Element tags = annotation.getElementsByTag("tags").first();
+				if (tags != null) {
+					Element tag = annotation.getElementsByTag("tag").first();
+					if (tag != null) {
+						Element uriTag = annotation.getElementsByTag("uri").first();
+						if (uriTag != null) {
+							uri = uriTag.text();
+							if (uri.isEmpty()) {
+								logger.warn("Tag <uri> has no content in {}", doc.location());
+							}
+						} else {
+							logger.warn("Tag <uri> not found in {}", doc.location());
+						}
+					} else {
+						logger.warn("Tag <uri> not found in {}", doc.location());
 					}
 				} else {
-					logger.warn("Tag count not found in {}", doc.location());
+					logger.warn("Tag <uri> not found in {}", doc.location());
 				}
 
-				Element altNameList = tmSummary.getElementsByTag("altNameList").first();
-				if (altNameList != null) {
-					List<String> altNames = new ArrayList<>();
-					for (Element altName : altNameList.getElementsByTag("altName")) {
-						altNames.add(altName.text());
+				if (!term.isEmpty() && count > 0 && !uri.isEmpty()) {
+					if (minedTerms.get(uri) == null) {
+						minedTerms.put(uri, new ArrayList<>());
 					}
-					minedTerm.setAltNames(altNames);
-				}
-
-				Element dbName = tmSummary.getElementsByTag("dbName").first();
-				if (dbName != null) {
-					minedTerm.setDbName(dbName.text());
-				}
-
-				Element dbIdList = tmSummary.getElementsByTag("dbIdList").first();
-				if (dbIdList != null) {
-					List<String> dbIds = new ArrayList<>();
-					for (Element dbId : dbIdList.getElementsByTag("dbId")) {
-						dbIds.add(dbId.text());
+					for (int i = 0; i < count; ++i) {
+						minedTerms.get(uri).add(term);
 					}
-					minedTerm.setDbIds(dbIds);
 				}
-
-				minedTerms.add(minedTerm);
 			}
 		}
 
-		return minedTerms;
+		List<MinedTerm> minedTermsList = new ArrayList<>();
+		for (Map.Entry<String, List<String>> entry : minedTerms.entrySet()) {
+			MinedTerm minedTerm = new MinedTerm();
+			minedTerm.setTerm(entry.getValue().stream()
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
+					.max(Comparator.comparing(Map.Entry::getValue)).get().getKey());
+			minedTerm.setCount(entry.getValue().size());
+			minedTerm.setUri(entry.getKey());
+			minedTermsList.add(minedTerm);
+		}
+		Collections.sort(minedTermsList);
+
+		return minedTermsList;
 	}
 
 	void fetchEuropepmcMinedTermsEfo(Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
@@ -1922,19 +1940,18 @@ public class Fetcher {
 
 		if (isFinal(publication, new PublicationPartName[] { PublicationPartName.efo }, parts, false, fetcherArgs)) return;
 
-		// src/ext_id/textMinedTerms/[semantic_type]/[page]/[pageSize]/[format]
-		String ext_id = null;
+		String articleIds = null;
 		if (!publication.getPmcid().isEmpty() && !state.europepmcMinedTermsEfoPmcid) {
-			ext_id = "PMC/" + publication.getPmcid().getContent() + "/textMinedTerms";
+			articleIds = "articleIds=PMC%3A" + publication.getPmcid().getContent();
 			state.europepmcMinedTermsEfoPmcid = true;
 		} else if (!publication.getPmid().isEmpty() && !state.europepmcMinedTermsEfoPmid) {
-			ext_id = "MED/" + publication.getPmid().getContent() + "/textMinedTerms";
+			articleIds = "articleIds=MED%3A" + publication.getPmid().getContent();
 			state.europepmcMinedTermsEfoPmid = true;
 		} else {
 			return;
 		}
 
-		String efo = EUROPEPMC + ext_id + "/EFO" + "/1/100";
+		String efo = EUROPEPMC_ANNOTATIONS + articleIds + "&type=Experimental%20Methods&format=XML";
 		List<MinedTerm> efoTerms = getEuropepmcMinedTerms(efo, publication, fetcherArgs);
 		if (!efoTerms.isEmpty()) {
 			state.europepmcMinedTermsEfo = true;
@@ -1948,19 +1965,18 @@ public class Fetcher {
 
 		if (isFinal(publication, new PublicationPartName[] { PublicationPartName.go }, parts, false, fetcherArgs)) return;
 
-		// src/ext_id/textMinedTerms/[semantic_type]/[page]/[pageSize]/[format]
-		String ext_id = null;
+		String articleIds = null;
 		if (!publication.getPmcid().isEmpty() && !state.europepmcMinedTermsGoPmcid) {
-			ext_id = "PMC/" + publication.getPmcid().getContent() + "/textMinedTerms";
+			articleIds = "articleIds=PMC%3A" + publication.getPmcid().getContent();
 			state.europepmcMinedTermsGoPmcid = true;
 		} else if (!publication.getPmid().isEmpty() && !state.europepmcMinedTermsGoPmid) {
-			ext_id = "MED/" + publication.getPmid().getContent() + "/textMinedTerms";
+			articleIds = "articleIds=MED%3A" + publication.getPmid().getContent();
 			state.europepmcMinedTermsGoPmid = true;
 		} else {
 			return;
 		}
 
-		String go = EUROPEPMC + ext_id + "/GO_TERM" + "/1/100";
+		String go = EUROPEPMC_ANNOTATIONS + articleIds + "&type=Gene%20Ontology&format=XML";
 		List<MinedTerm> goTerms = getEuropepmcMinedTerms(go, publication, fetcherArgs);
 		if (!goTerms.isEmpty()) {
 			state.europepmcMinedTermsGo = true;
@@ -2056,26 +2072,26 @@ public class Fetcher {
 
 		Document doc = getDoc(PubFetcher.PMIDlink + pmid, publication, fetcherArgs);
 		if (doc != null) {
-			if (doc.getElementsByClass("rprt").first() == null) {
+			if (doc.getElementById("article-details") == null) {
 				logger.error("No article found in {}", doc.location());
 				return;
 			}
 
 			setIds(publication, doc, type,
-				".rprt .rprtid dt:containsOwn(PMID:) + dd",
-				".rprt .rprtid dt:containsOwn(PMCID:) + dd",
-				".rprt .rprtid dt:containsOwn(DOI:) + dd", false, doc.location(), true, fetcherArgs);
+				"#article-details #full-view-identifiers .pubmed .current-id",
+				"#article-details #full-view-identifiers .pmc .id-link",
+				"#article-details #full-view-identifiers .doi .id-link", false, doc.location(), true, fetcherArgs);
 
 			// subtitle is already embedded in title
-			setTitle(publication, doc, type, ".rprt > h1", null, doc.location(), parts, fetcherArgs);
+			setTitle(publication, doc, type, "#article-details h1.heading-title", null, doc.location(), parts, fetcherArgs);
 
-			setKeywords(publication, doc, type, ".rprt .keywords p", doc.location(), true, parts, fetcherArgs);
+			setKeywords(publication, doc, type, "#article-details #abstract p:has(.sub-title:matchesOwn(^Keywords:$))", doc.location(), true, parts, fetcherArgs);
 
 			if (parts == null || (parts.get(PublicationPartName.mesh) != null && parts.get(PublicationPartName.mesh))) {
 				if (!publication.getMeshTerms().isFinal(fetcherArgs)) {
 					List<MeshTerm> meshTerms = new ArrayList<>();
 					String previousDescriptorNameText = "";
-					for (Element descriptorName : doc.select(".rprt a[alsec=mesh]")) {
+					for (Element descriptorName : doc.select("#article-details #mesh-terms button")) {
 						MeshTerm meshTerm = new MeshTerm();
 
 						String descriptorNameText = descriptorName.text();
@@ -2099,7 +2115,7 @@ public class Fetcher {
 				}
 			}
 
-			setAbstract(publication, doc, type, ".rprt .abstr p", doc.location(), parts, fetcherArgs);
+			setAbstract(publication, doc, type, "#article-details #enc-abstract > p", doc.location(), parts, fetcherArgs);
 		}
 	}
 

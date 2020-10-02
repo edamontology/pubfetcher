@@ -1,25 +1,25 @@
 title,content,license,language,webpage
 
 # bioconductor.org
-9,642,5,8,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
-7,835,12,8,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
+9,536,5,0,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
+7,878,12,18,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
 9,264,12,18,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
 8,640,5,28,http://bioconductor.org/packages/release/bioc/html/synapter.html
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54890,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,30057,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54306,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,30055,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
 
 # github.com
-7,942,0,11,https://github.com/sgoodswe/vacceed
+7,175,0,11,https://github.com/sgoodswe/vacceed
 4,5887,0,27,https://github.com/SciLifeLab/facs/
-10,10673,7,6,https://github.com/petmri/ROCKETSHIP
-4,1863,3,7,https://github.com/pschorderet/NEAT
-9,422,3,24,https://github.com/arq5x/poretools
+10,10673,15,6,https://github.com/petmri/ROCKETSHIP
+4,1863,11,7,https://github.com/pschorderet/NEAT
+9,422,11,24,https://github.com/arq5x/poretools
 
 # github.com user
 7,1281,0,0,https://github.com/SeqWare
@@ -49,16 +49,17 @@ title,content,license,language,webpage
 4,493,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
 # galaxy.pasteur.fr
+# switched off, as requires JavaScript that for this case is too resource intensive for some reason
 # java.lang.NullPointerException: JavascriptThread has not created a Document!
-0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
-100,1845,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
-85,1425,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
-50,187,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
-88,2368,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
+#0,0,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=toolshed.pasteur.fr/repos/odoppelt/taxonomy_analysis/taxoptimizer/0.0.2
+#100,1845,0,0,https://galaxy.pasteur.fr/root?tool_id=aggregate_scores_in_intervals2
+#85,1425,0,0,https://galaxy.pasteur.fr/root?tool_id=clustalw
+#50,187,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbam_to_sam%2Fbam_to_sam%2F1.0.3
+#88,2368,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr%2Frepos%2Fafelten%2Fmicrobiome_analyses%2FCD-HIT%2F4.6.1
 # java.lang.NullPointerException: JavascriptThread has not created a Document!
-0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr/repos/khillion/salmonella_crispr_typing/salmonella_crispr_typing/1.0.0
-75,774,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
-101,73,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=CONVERTER_genbank_to_fasta
+#0,0,0,0,https://galaxy.pasteur.fr/root?tool_id=toolshed.pasteur.fr/repos/khillion/salmonella_crispr_typing/salmonella_crispr_typing/1.0.0
+#75,774,0,0,https://galaxy.pasteur.fr/root?tool_id=vcf_intersect
+#101,73,0,0,https://galaxy.pasteur.fr/tool_runner?tool_id=CONVERTER_genbank_to_fasta
 
 # emboss.open-bio.org
 # begins wrongly with "The master copies of EMBOSS documentation are available at on the EMBOSS Wiki."
@@ -98,7 +99,7 @@ title,content,license,language,webpage
 87,412,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
 54,373,5,0,https://cran.r-project.org/web/packages/lme4/index.html
 39,163,5,0,https://cran.r-project.org/web/packages/GUniFrac/index.html
-0,4421,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
+0,4484,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
 
 # cran.r-project.org vignettes
 25,29820,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
@@ -122,13 +123,8 @@ title,content,license,language,webpage
 0,0,0,0,https://bitbucket.org/paiyetan/xglycscan/src
 
 # sanger.ac.uk
-7,233,0,0,http://www.sanger.ac.uk/science/tools/artemis
-22,888,0,0,http://www.sanger.ac.uk/science/tools/ssahasnp
-
-# dna.leeds.ac.uk
-21,1465,0,0,http://dna.leeds.ac.uk/AffyErrorRate/
-14,1519,0,0,http://dna.leeds.ac.uk/agile/AgileGenotyper/
-12,1762,0,0,http://dna.leeds.ac.uk/methylviewer/
+7,468,392,0,http://www.sanger.ac.uk/science/tools/artemis
+8,1772,699,0,http://www.sanger.ac.uk/science/tools/ssahasnp
 
 # tools.proteomecenter.org
 14,1004,0,0,http://tools.proteomecenter.org/Libra.php
@@ -143,7 +139,7 @@ title,content,license,language,webpage
 
 # zhanglab.ccmb.med.umich.edu
 47,776,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3568,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+79,3747,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
 
 # bioinformatics.mdanderson.org
 10,1261,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
@@ -152,16 +148,12 @@ title,content,license,language,webpage
 6,302,19,0,https://www.bcgsc.ca/resources/software/anchor
 
 # compomics.github.io
-13,12795,0,0,https://compomics.github.io/projects/peptide-shaker.html
+13,13547,0,0,https://compomics.github.io/projects/peptide-shaker.html
 8,397,0,0,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
-7,8025,0,0,https://rostlab.org/owiki/index.php/CHOPPER
+7,8021,0,0,https://rostlab.org/owiki/index.php/CHOPPER
 10,1450,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
-
-# uea.ac.uk
-5,3042,0,0,https://www.uea.ac.uk/computing/psiko
-10,2306,0,0,http://www.uea.ac.uk/computing/my-closure
 
 # rna.informatik.uni-freiburg.de
 25,3437,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
@@ -174,7 +166,7 @@ title,content,license,language,webpage
 
 # pypi.org
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe
-13,1963,35,69,http://pypi.python.org/pypi/plastid
+13,2311,35,97,http://pypi.python.org/pypi/plastid
 17,69,48,11,https://pypi.org/project/bio-apricot/
 
 # bioinformatics.org wiki

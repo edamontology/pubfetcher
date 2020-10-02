@@ -50,9 +50,9 @@
 
 'github\.com/+[^/]+/+[^/]+/*$':
   title: h1 > [itemprop=name]
-  content: '.repository-content [itemprop=about], #readme > .Box-body > * > *'
-  license: .numbers-summary a:has(.octicon-law):not(:matches(^View license$))
-  language: .repository-lang-stats-numbers a:has(.percent:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > .lang # only take languages with percentage >= 5%
+  content: '.BorderGrid-cell > h2:matchesOwn(^About$) + p, #readme > .Box-body > * > *'
+  license: a:has(.octicon-law):not(:matches(^View license$))
+  language: a[href~=/search\?l=]:has(span:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > span.text-bold
 
 'github\.com/+[^/]+/*$':
   title: h1
@@ -60,7 +60,7 @@
 
 'github\.com/+[^/]+/+[^/]+/+wiki(/|$)':
   title: h1 > [itemprop=name]
-  content: 'h1.gh-header-title, #wiki-body > :not(#wiki-footer), #wiki-rightbar #wiki-pages-box a, #wiki-rightbar .wiki-custom-sidebar'
+  content: 'h1.gh-header-title, #wiki-body > :not(#wiki-footer), .wiki-rightbar #wiki-pages-box a, .wiki-rightbar .wiki-custom-sidebar'
 
 'github\.com/+[^/]+/+[^/]+/+tree/':
   title: h1 > [itemprop=name]
@@ -77,7 +77,7 @@
 'galaxy\.pasteur\.fr/+(root|tool_runner)':
   title: '#center .portlet-title-text'
   content: '#center .portlet-body .ui-form-title-text, #center .ui-form-help'
-  javascript: 'true'
+  javascript: 'false' # too resource intensive
 
 'emboss\.open-bio\.org/+rel/':
   title: body > :first-child
@@ -130,12 +130,9 @@
 #  javascript: 'true'
 
 'sanger\.ac\.uk':
-  title: '#main-content > .pagetitle'
-  content: '#overview > :not(h4), .view-tool-type a'
-
-'dna\.leeds\.ac\.uk':
-  title: '#content > h1'
-  content: '#content > :not(h1)'
+  title: '#main .panel-outer h2'
+  content: '#main .panel-outer .button-container a, #main .panel-outer .intro'
+  license: '#main .panel-outer label:matchesOwn(^License and Citation$) + div'
 
 'tools\.proteomecenter\.org':
   title: h1.firstHeading
@@ -168,10 +165,6 @@
 'rostlab\.org/+owiki/':
   title: h1.firstHeading
   content: '#mw-content-text > :not(#toc)'
-
-'uea\.ac\.uk':
-  title: '#breadcrumbs li.last > a'
-  content: .journal-content-article
 
 'rna\.informatik\.uni-freiburg\.de':
   title: .content > h1
@@ -249,4 +242,10 @@
 
 # Results in java.lang.StackOverflowError after ~1.5 minutes
 'seltarbase\.org':
+  javascript: 'false'
+
+'who\.int':
+  javascript: 'false'
+
+'ncbi\.nlm\.nih\.gov':
   javascript: 'false'

@@ -1,5 +1,5 @@
 #
-#  Copyright © 2016, 2018 Erik Jaaniso
+#  Copyright © 2016, 2018, 2020 Erik Jaaniso
 #
 #  This file is part of PubFetcher.
 #
@@ -156,8 +156,8 @@ oup:
   doi: .ww-citation-primary > a
   title: h1
   keywords: .kwd-group > .kwd-part
-  abstract: section.abstract > p, section.abstract > .sec > *
-  fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content)):not(.table-modal)
+  abstract: section.abstract > p, section.abstract > .sec > *, section.abstract > div > .title, section.abstract > div > p
+  fulltext: .widget-ArticleFulltext > div > div > :not(.abstract-title):not(section.abstract):not(.article-metadata-panel):not(.article-metadata-standalone-panel):not(.kwd-group):not(.backreferences-title):not(.ref-list):not(.copyright):not(.reveal-modal):not(.license):not(.authorNotes-section-title):not(.authorNotes-section-title + p):not(.backacknowledgements-title):not(.backacknowledgements-title + p):not(.pdf-notice):not(:has(.footnote-content)):not(.table-modal):not(.widget-FirstPagePreview)
   pdf_a: .article-pdfLink
   corresp_author_names: .info-card-author:has(.info-author-correspondence) .info-card-name
   corresp_author_emails: .info-card-author .info-author-correspondence a, .info-card-author:has(.info-author-correspondence) .info-card-affilitation a[href^=mailto]
@@ -212,9 +212,8 @@ springer:
   keywords: .Keyword, .c-article-subject-list__subject
   abstract: 'section.Abstract > p, #book-description > *, #Abs1-content > p'
   fulltext: '#body > section > *, article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *'
-  pdf_a: '.test-pdf-link > :not([id$=no_access_banner]) > a'
-  corresp_author_names: .authors__list li:has(.authors__contact) .authors__name
-  corresp_author_emails: .authors__list li .authors__contact a
+  pdf_a: '.test-pdf-link > :not([id$=no_access_banner]) > a, .c-pdf-download__link'
+  corresp_author_names: .c-author-list a[data-test=author-name]:has(.u-icon)
 
 springer_ref:
   doi: .FulltextWrapper .ChapterDOI
@@ -250,8 +249,8 @@ nature:
   doi: 'h3:has(abbr[title=Digital Object Identifier]) + p > a[data-track-action=view doi], #article-info-section a[data-track-action=view doi]'
   title: 'article header h1, #article #content > .article > h2.article-title'
   keywords: div[data-component=article-subject-links] a[data-track-action=view subject], .c-article-subject-list__subject
-  abstract: 'article div[data-article-body=true] > section > #abstract-section > div > *, article div[data-article-body=true] > section > #Abs1-section > div > *, article div[data-article-body=true] > section > #Abs2-section > div > *, #article #content > .article > #Summary + p'
-  fulltext: 'article div[data-article-body=true] > section > :not(#abstract-section):not(#Abs1-section):not(#Abs2-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *, article div[data-article-body=true] > div:not(:has(#access-options)):not([aria-hidden=true]):not(.c-pdf-button__container)'
+  abstract: 'article .c-article-body > section > #abstract-section > div > *, article .c-article-body > section > #Abs1-section > div > *, article .c-article-body > section > #Abs2-section > div > *, #article #content > .article > #Summary + p'
+  fulltext: 'article .c-article-body > section > :not(#abstract-section):not(#Abs1-section):not(#Abs2-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section) > *, article .c-article-body > div:not(:has(#access-options)):not([aria-hidden=true]):not(.c-pdf-button__container)'
   pdf_a: a[data-article-pdf]
   corresp_author_names: .c-author-list a[data-test=author-name]:has(.u-icon)
 
@@ -412,7 +411,7 @@ f1000research_articles:
 f1000research_posters:
   title: .asset-title > h1
   keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
-  abstract: .abstract__content
+  abstract: .abstract__content:not(:has(.abstract__content))
   # pdf_a not working (because href="#")
   corresp_author_names: .asset-details-container-large .asset-authors > a
   corresp_author_emails: .asset-details-container-large .asset-authors > a
@@ -468,11 +467,11 @@ acm:
   pdf_a: article .citation a[title=PDF]
 
 degruyter:
-  doi: .article-doi
-  title: h1.entryTitle
-  keywords: .articleBody_keywords > a
-  abstract: .articleBody_abstract > p
-  pdf_a: .gs-access-fullcontentlink .pdf-link
+  doi: dt.c-List__item:matchesOwn(^DOI:$) + dd.c-List__item > a
+  title: '#pageBody h1'
+  keywords: dt.c-List__item:matchesOwn(^Keywords:$) + dd.c-List__item > a
+  abstract: '#pageBody section.abstract > p'
+  pdf_a: '#pdf-download'
 
 hindawi:
   doi: .middle_content pre a[href^=http://dx.doi.org], .article_citation a[aria-label=Doi-link]
@@ -573,9 +572,9 @@ iospress:
   abstract: '#contentcolumn .metadata > .abstract > p'
 
 researchgate:
-  #doi: .publication-details__section > .publication-meta > div:first-child + div
-  title: .publication-header > h1, .publication-details__section > h1
-  abstract: .publication-abstract > :not(:first-child), .publication-details__section > div > div:matches(^Abstract$) + div
+  doi: .research-detail-header-section__metadata > div:matchesOwn(^DOI:) > a
+  title: main h1
+  abstract: main .research-detail-middle-section__abstract
   pdf_a: a:matches(^Download full-text PDF$)
 
 frontiersin:
@@ -649,13 +648,13 @@ mdpi:
   corresp_author_names: .art-authors > span:has(.emailCaptcha) > span > a
 
 mdpi_full:
-  doi: article .html-art-header a
-  title: '#html-article-title'
-  keywords_split: '#html-keywords > div'
-  abstract: '#html-abstract > div'
-  fulltext: 'article > .html-body > section > *, article > .html-back > #html-glossary'
-  pdf_a: article .download > a:matchesOwn(^Download PDF$)
-  corresp_author_names: .html-author-group > span:has(.emailCaptcha) > span > a
+  doi: '#abstract .bib-identity > a'
+  title: '#abstract h1'
+  keywords: '#abstract .art-keywords a'
+  abstract: '#abstract .art-abstract'
+  fulltext: 'article .html-body section > :not(section), article #SupplementaryFiles, article #html-glossary'
+  pdf_a: '#abstract .download > a:matchesOwn(^Download PDF$)'
+  corresp_author_names: .art-authors > span:has(.emailCaptcha) > span > a
 
 preprints:
   title: '#submission-content > h1'
@@ -669,16 +668,16 @@ aip:
   title: .publicationContentTitle > h1
   keywords: .topicList a:matches(^Topics$) + ul > .topicTags
   abstract: article .abstractSection
-  fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec)
-  pdf_a: .article-menu > .download-pdf a.pdf
+  fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.sectionInfo), .hlFld-Fulltext .NLM_sec > .sectionInfo > .sectionHeading
+  pdf_a: .article-menu > .download-pdf a:not(.notVisible)
   corresp_author_names: .entryAuthor > .contrib-author:has(.email) > a[href^=/author/]
   # corresp_author_emails: .entryAuthor > .contrib-author > .email # email-protection
 
 chemrxiv:
-  title: .item-left > h2.title
-  keywords: .item-right > .tags a
-  abstract: .item-left > .description
-  pdf_a: .actions-bar .download-button
+  title: main h2
+  keywords: main h3:matchesOwn(^Keyword\(s\)$) + div > a
+  abstract: main ._1bqUT
+  pdf_a: '#a11y-1-tab-tab-download'
 
 iop:
   doi: '#doi'
@@ -699,7 +698,6 @@ iop:
 - 'ieeexplore\.ieee\.org'
 - 'xlink\.rsc\.org' # for fulltext_a, pdf_a
 - 'pubs\.rsc\.org' # for fulltext_a, pdf_a
-- 'f1000research\.com/+posters'
 
 # highwire2
 - 'mcponline\.org'

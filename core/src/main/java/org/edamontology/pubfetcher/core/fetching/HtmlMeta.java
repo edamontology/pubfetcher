@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Erik Jaaniso
+ * Copyright © 2018, 2020 Erik Jaaniso
  *
  * This file is part of PubFetcher.
  *

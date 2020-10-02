@@ -40,7 +40,7 @@ public class FetcherPrivateArgs extends Args {
 	private static final String userAgentId = "userAgent";
 	private static final String userAgentDescription = "HTTP User-Agent";
 	// better to use a Desktop UA, like Firefox ESR
-	private static final String userAgentDefault = "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0";
+	private static final String userAgentDefault = "Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0";
 	@Parameter(names = { "--" + userAgentId }, description = userAgentDescription)
 	private String userAgent = userAgentDefault;
 

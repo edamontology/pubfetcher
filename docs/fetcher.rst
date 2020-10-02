@@ -16,7 +16,7 @@ Low-level methods
 Getting a HTML document
 =======================
 
-Fetching HTML (or XML) resources for both :ref:`publications <publications>` and :ref:`webpages <webpages>`/:ref:`docs <docs>` is done in the same method, where either the `jsoup <https://jsoup.org/>`_ or `HtmlUnit <http://htmlunit.sourceforge.net/>`_ libraries are used for getting the document. The HtmlUnit library has the advantage of supporting JavaScript, which needs to be executed to get the proper output for many sites, and it also works for some sites with problematic SSL certificates. As a disadvantage, it is a lot slower than jsoup, which is why using jsoup is the default and HtmlUnit is used only if JavaScript support is requested (or switched to automatically in case of some SSL exceptions). Also, fetching with JavaScript can get stuck for a few rare sites, in which case the misbehaving HtmlUnit code is terminated.
+Fetching HTML (or XML) resources for both :ref:`publications <publications>` and :ref:`webpages <webpages>`/:ref:`docs <docs>` is done in the same method, where either the `jsoup <https://jsoup.org/>`_ or `HtmlUnit <https://htmlunit.sourceforge.io/>`_ libraries are used for getting the document. The HtmlUnit library has the advantage of supporting JavaScript, which needs to be executed to get the proper output for many sites, and it also works for some sites with problematic SSL certificates. As a disadvantage, it is a lot slower than jsoup, which is why using jsoup is the default and HtmlUnit is used only if JavaScript support is requested (or switched to automatically in case of some SSL exceptions). Also, fetching with JavaScript can get stuck for a few rare sites, in which case the misbehaving HtmlUnit code is terminated.
 
 Supplied :ref:`fetching <fetching>` parameters :ref:`timeout <timeout>` and :ref:`userAgent <useragent>` are used for setting the connect timeout and the read timeout and the User-Agent HTTP header of connections. If getting the HTML document for a publication is successful and a list of already fetched links is supplied, then the current URL will be added to that list so that it is not tried again for the current publication. The successfully fetched document is returned to the caller for further processing.
 
@@ -123,7 +123,7 @@ The API is primarily meant for getting the fulltext_, but it can also be used to
 Europe PMC mined
 ----------------
 
-Europe PMC has text-mined terms from publication full texts. Such EFO terms can be obtained from https://www.ebi.ac.uk/europepmc/webservices/rest/PMC/{PMCID}/textMinedTerms/EFO or https://www.ebi.ac.uk/europepmc/webservices/rest/MED/{PMID}/textMinedTerms/EFO and GO terms can be obtained from the same URLs where "EFO" is replaced with "GO_TERM". These resources are the only way to fill the `publication parts`_ efo_ and go_ and only those publication parts can be obtained from these resources. Either a PMID_ or a PMCID_ is required to query these resources.
+Europe PMC has text-mined terms from publication full texts. These can be fetched from the API endpoint https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds, documentation of the Annotations API is at https://europepmc.org/AnnotationsApi. These resources are the only way to fill the `publication parts`_ efo_ and go_ and only those publication parts can be obtained from these resources (type "Gene Ontology" is used for GO and type "Experimental Methods" for EFO). Either a PMID_ or a PMCID_ is required to query these resources.
 
 .. _pubmed_xml:
 
@@ -320,7 +320,7 @@ _`mesh`
 _`efo`
   .. _fetcher_efo:
 
-  `Experimental factor ontology <https://www.ebi.ac.uk/efo/>`_ terms of the publication. Text-mined by the `Europe PMC <https://europepmc.org/>`_ project from the full text of the article. The :ref:`efo structure <efo>`.
+  `Experimental factor ontology <https://www.ebi.ac.uk/efo/>`_ terms of the publication (but also experimental methods terms from other ontologies like `Molecular Interactions Controlled Vocabulary <https://github.com/HUPO-PSI/psi-mi-CV>`_ and `Ontology for Biomedical Investigations <http://obi-ontology.org/>`_). Text-mined by the `Europe PMC <https://europepmc.org/>`_ project from the full text of the article. The :ref:`efo structure <efo>`.
 _`go`
   .. _fetcher_go:
 

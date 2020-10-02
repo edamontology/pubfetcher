@@ -45,7 +45,7 @@ Fetcher contains the public method "getDoc", which is described in :ref:`Getting
 
 The Fetcher methods "initPublication" and "initWebpage" must be used to construct a Publication and Webpage. Then, the methods "getPublication" and "getWebpage" can be used to fetch the Publication and Webpage. But instead of these "init" and "get" methods, the "getPublication", "getWebpage" and "getDoc" methods of class `PubFetcher <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/java/org/edamontology/pubfetcher/core/common/PubFetcher.java>`_ should be used, when possible.
 
-Because executing JavaScript is prone to serious bugs in the used `HtmlUnit <http://htmlunit.sourceforge.net/>`_ library, fetching a HTML document with JavaScript support turned on is done in a separate `JavaScriptThread <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/java/org/edamontology/pubfetcher/core/fetching/JavascriptThread.java>`_, that can be killed if it gets stuck.
+Because executing JavaScript is prone to serious bugs in the used `HtmlUnit <https://htmlunit.sourceforge.io/>`_ library, fetching a HTML document with JavaScript support turned on is done in a separate `JavaScriptThread <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/java/org/edamontology/pubfetcher/core/fetching/JavascriptThread.java>`_, that can be killed if it gets stuck.
 
 The `HtmlMeta class <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/java/org/edamontology/pubfetcher/core/fetching/HtmlMeta.java>`_ is explained in :ref:`Meta <meta>` and the `Links class <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/java/org/edamontology/pubfetcher/core/fetching/Links.java>`_ in :ref:`Links <links>`.
 

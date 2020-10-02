@@ -53,7 +53,7 @@ _`fetchExceptionCooldown`      ``1440``          If that many minutes have passe
 _`retryLimit`                  ``3``             How many times can fetching be retried for an entry that is still empty, non-final or has a :ref:`fetchException <fetchexception>` after the initial attempt. Setting to ``0`` will disable retrying, unless the :ref:`retryCounter <retrycounter>` is reset by a cooldown in which case one initial attempt is allowed again. Setting to a negative value will disable this upper limit.
 _`titleMinLength`              ``4``      ``0``  Minimum length of a :ref:`usable <usable>` :ref:`publication <content_of_publications>` :ref:`title <fetcher_title>`
 _`keywordsMinSize`             ``2``      ``0``  Minimum size of a :ref:`usable <usable>` :ref:`publication <content_of_publications>` :ref:`keywords <fetcher_keywords>`/:ref:`MeSH <fetcher_mesh>` list
-_`minedTermsMinSize`           ``1``      ``0``  Minimum size of a :ref:`usable <usable>` :ref:`publication <content_of_publications>` :ref:`EFO <fetcher_efo>`/:ref:`GO <fetcher_go>` terms list
+_`minedTermsMinSize`           ``1``      ``0``  Minimum size of a :ref:`usable <usable>` :ref:`publication <content_of_publications>` :ref:`EFO <efo>`/:ref:`GO <go>` terms list
 _`abstractMinLength`           ``200``    ``0``  Minimum length of a :ref:`usable <usable>` :ref:`publication <content_of_publications>` :ref:`abstract <fetcher_theabstract>`
 _`fulltextMinLength`           ``2000``   ``0``  Minimum length of a :ref:`usable <usable>` :ref:`publication <content_of_publications>` :ref:`fulltext <fetcher_fulltext>`
 _`webpageMinLength`            ``50``     ``0``  Minimum length of a :ref:`usable webpage <webpage_usable>` combined :ref:`title <webpage_title>` and :ref:`content <webpage_content>`
@@ -423,7 +423,7 @@ Conditions that :ref:`publication part <publication_parts>`\ s must meet for the
 
 Each parameter (except ``-part-empty``, ``-not-part-empty``, ``-part-usable``, ``-not-part-usable``, ``-part-final``, ``-not-part-final``) has a corresponding parameter specifying the publication parts that need to meet the condition given by the parameter. For example, ``-part-content`` gives a regular expression and ``-part-content-part`` lists all publication parts that must have a match with the given regular expression. If ``-part-content`` is specified, then ``-part-content-part`` must also be specified (and vice versa).
 
-A publication part is any of: :ref:`the pmid <fetcher_pmid>`, :ref:`the pmcid <fetcher_pmcid>`, :ref:`the doi <fetcher_doi>`, :ref:`title <fetcher_title>`, :ref:`keywords <fetcher_keywords>`, :ref:`MeSH <fetcher_mesh>`, :ref:`EFO <fetcher_efo>`, :ref:`GO <fetcher_go>`, :ref:`theAbstract <fetcher_theabstract>`, :ref:`fulltext <fetcher_fulltext>`.
+A publication part is any of: :ref:`the pmid <fetcher_pmid>`, :ref:`the pmcid <fetcher_pmcid>`, :ref:`the doi <fetcher_doi>`, :ref:`title <fetcher_title>`, :ref:`keywords <fetcher_keywords>`, :ref:`MeSH <fetcher_mesh>`, :ref:`EFO <efo>`, :ref:`GO <go>`, :ref:`theAbstract <fetcher_theabstract>`, :ref:`fulltext <fetcher_fulltext>`.
 
 ========================  ====================================================  ===========
 Parameter                 Parameter args                                        Description

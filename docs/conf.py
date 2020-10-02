@@ -3,7 +3,7 @@
 
 project = 'PubFetcher'
 author = 'Erik Jaaniso'
-copyright = '2018-2019, Erik Jaaniso'
+copyright = '2018-2020, Erik Jaaniso'
 version = '1.0.1-SNAPSHOT'
 release = '1.0.1-SNAPSHOT'
 

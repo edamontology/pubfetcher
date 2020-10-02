@@ -294,7 +294,7 @@ publications
 
     .. _efo:
   efo
-    Publication part representing publication EFO terms. Structure same as in pmid_, except content_ is replaced with "list" and size_ is number of elements in "list".
+    Publication part representing publication EFO and other experimental methods terms. Structure same as in pmid_, except content_ is replaced with "list" and size_ is number of elements in "list".
 
     list
       Array of objects representing publication EFO terms
@@ -303,12 +303,8 @@ publications
         Term name
       count
         Number of times the term was mined from full text by :ref:`Europe PMC <europe_pmc>`
-      altNames
-        Array of strings representing alternative names for the term
-      dbName
-        Database name (e.g., ``efo``, ``GO``)
-      dbIds
-        Array of strings representing term IDs in the database
+      uri
+        Unique URI to the ontology term
 
     .. _go:
   go

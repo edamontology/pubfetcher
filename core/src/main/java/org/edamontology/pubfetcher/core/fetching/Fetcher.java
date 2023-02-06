@@ -648,7 +648,7 @@ public class Fetcher {
 		}
 		String text = getAll(element, selector, location, false).stream()
 			.filter(e -> e.hasText())
-			.map(e -> formatText ? CleanWebpage.formattedText(e) : e.text())
+			.map(e -> formatText ? CleanWebpage.formattedText(e) : e.text().replaceAll("<[hH][1-6]>", " ").replaceAll("</[hH][1-6]>", ". "))
 			.collect(Collectors.joining("\n\n"));
 		if (logMissing && text.isEmpty()) {
 			logger.warn("No text found for selector {} in {}", selector, location);
@@ -1743,9 +1743,9 @@ public class Fetcher {
 			if (!publication.getFulltext().isFinal(fetcherArgs)) {
 				String notFigTable = europepmc ? ":not(.fig):not(.table-wrap)" : "";
 				String fulltext = text(doc,
-					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) > :not(.sec):not(.goto)" + notFigTable + ", " +
-					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
-					".article > div > [id].bk-sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]) > :not(.goto), " +
+					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]):not([id^=ack]) > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id].sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]):not([id^=ack]) .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
+					".article > div > [id].bk-sec:not([id^=__]):not([id^=App]):not([id^=APP]):not([id~=-APP]):not([id^=Bib]):not([id^=ref]):not([id^=Abs]):not([id^=idm]):not([id^=rs]):not([id^=ack]) > :not(.goto), " +
 					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].sec > :not(.sec):not(.goto)" + notFigTable + ", " +
 					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].sec .sec > :not(.sec):not(.goto)" + notFigTable + ", " +
 					".article > div > [id~=^(__sec|__bodyid|__glossaryid|__notesid)].bk-sec > :not(.goto)" +
@@ -2115,7 +2115,7 @@ public class Fetcher {
 				}
 			}
 
-			setAbstract(publication, doc, type, "#article-details #enc-abstract > p", doc.location(), parts, fetcherArgs);
+			setAbstract(publication, doc, type, "#article-details #eng-abstract > p", doc.location(), parts, fetcherArgs);
 		}
 	}
 

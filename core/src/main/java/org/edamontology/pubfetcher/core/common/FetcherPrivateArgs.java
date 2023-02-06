@@ -33,14 +33,14 @@ public class FetcherPrivateArgs extends Args {
 
 	private static final String oadoiEmailId = "oadoiEmail";
 	private static final String oadoiEmailDescription = "E-mail to send to the oaDOI (Unpaywall) API";
-	private static final String oadoiEmailDefault = "test";
+	private static final String oadoiEmailDefault = "@";
 	@Parameter(names = { "--" + oadoiEmailId }, description = oadoiEmailDescription)
 	private String oadoiEmail = oadoiEmailDefault;
 
 	private static final String userAgentId = "userAgent";
 	private static final String userAgentDescription = "HTTP User-Agent";
 	// better to use a Desktop UA, like Firefox ESR
-	private static final String userAgentDefault = "Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0";
+	private static final String userAgentDefault = "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0";
 	@Parameter(names = { "--" + userAgentId }, description = userAgentDescription)
 	private String userAgent = userAgentDefault;
 

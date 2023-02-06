@@ -56,7 +56,7 @@
 
 'github\.com/+[^/]+/*$':
   title: h1
-  content: .orghead .org-description, .orghead .org-description + div, .repo-list > ul > li > :not(.f6) > :not(.f6)
+  content: .orghead h1 + div, .repo-list ul > li > :not(.f6) > :not(.f6) > * > :not(.Label--secondary), .pinned-item-list-item-content > div:not(.f6), .pinned-item-list-item-content > .pinned-item-desc
 
 'github\.com/+[^/]+/+[^/]+/+wiki(/|$)':
   title: h1 > [itemprop=name]
@@ -72,7 +72,7 @@
 
 'github\.com/+[^/]+/+[^/]+/+blob/':
   title: h1 > [itemprop=name]
-  content: .repository-content .blob-wrapper > :not([aria-hidden=true]), .repository-content .blob
+  content: .repository-content .blob-wrapper > :not([aria-hidden=true]) > :not(.js-file-alert-template), .repository-content .blob
 
 'galaxy\.pasteur\.fr/+(root|tool_runner)':
   title: '#center .portlet-title-text'
@@ -81,7 +81,7 @@
 
 'emboss\.open-bio\.org/+rel/':
   title: body > :first-child
-  content: body:matchText, body > h2:matchesOwn(^Function$) ~ :not(h2):not(table:has(th:matchesOwn(^Program name$) + th:matchesOwn(^Description$))):not(p:matchesOwn(^Please report all bugs to the EMBOSS bug team))
+  content: body:matchText, body > h2:nth-of-type(2) ~ :not(h2):not(table:has(th:matchesOwn(^Program name$) + th:matchesOwn(^Description$))):not(p:matchesOwn(^Please report all bugs to the EMBOSS bug team))
 
 'sourceforge\.net/+projects/+[^/]+/*[^/]*$':
   title: .title > h1
@@ -104,8 +104,8 @@
   license: .maia-aside li:matchesOwn(^License:) > a
 
 'cran\.r-project\.org/+web/+packages/+[^/]+/*(index\.html)?$':
-  title: body > h2
-  content: body > h2 + p, td:matchesOwn(^In views:$) + td > a
+  title: body h2
+  content: body h2 + p, td:matchesOwn(^In views:$) + td > a
   license: td:matchesOwn(^License:$) + td > a
 
 'cran\.r-project\.org/+web/+packages/+[^/]+/+vignettes/':
@@ -143,7 +143,7 @@
   title: h1.firstHeading
   content: '#mw-content-text > :not(#toc):not(.editsection):not(.printfooter):not(#catlinks), #catlinks li'
 
-'zhanglab\.ccmb\.med\.umich\.edu':
+'zhanggroup\.org':
   title: head > title
   content: '#z_page'
 
@@ -191,10 +191,6 @@
   title: body > table:nth-of-type(2) > tbody > tr > td:nth-of-type(2) > table:first-child
   content: body > table:nth-of-type(2) > tbody > tr > td:nth-of-type(2) > p:first-of-type ~ p
   license: body > table:nth-of-type(2) > tbody > tr > td:nth-of-type(2) > table:nth-of-type(2)
-
-'omics\.pnl\.gov':
-  title: '#page-title'
-  content: '#block-system-main'
 
 'en\.wikipedia\.org':
   title: '#firstHeading'

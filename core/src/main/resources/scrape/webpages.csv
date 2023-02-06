@@ -1,15 +1,14 @@
 title,content,license,language,webpage
 
 # bioconductor.org
-9,536,5,0,http://bioconductor.org/packages/release/bioc/html/RIPSeeker.html
-7,878,12,18,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
+7,889,12,18,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
 9,264,12,18,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
-8,640,5,28,http://bioconductor.org/packages/release/bioc/html/synapter.html
+8,491,5,0,http://bioconductor.org/packages/release/bioc/html/synapter.html
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54306,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,30055,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,53896,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,30061,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
@@ -22,16 +21,16 @@ title,content,license,language,webpage
 9,422,11,24,https://github.com/arq5x/poretools
 
 # github.com user
-7,1281,0,0,https://github.com/SeqWare
-28,1274,0,0,https://github.com/BeatsonLab-MicrobialGenomics
-37,2058,0,0,https://github.com/brisskit-uol/
+7,1301,0,0,https://github.com/SeqWare
+28,1361,0,0,https://github.com/BeatsonLab-MicrobialGenomics
+37,910,0,0,https://github.com/brisskit-uol/
 
 # github.com wiki
-4,3259,0,0,https://github.com/synergy-zju/gips/wiki
-6,846,0,0,https://github.com/KorfLab/DupHMM/wiki
-6,1909,0,0,https://github.com/ollyburren/vseams/wiki
+4,3304,0,0,https://github.com/synergy-zju/gips/wiki
+6,901,0,0,https://github.com/KorfLab/DupHMM/wiki
+6,1980,0,0,https://github.com/ollyburren/vseams/wiki
 11,1615,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,9748,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,9848,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
@@ -63,10 +62,10 @@ title,content,license,language,webpage
 
 # emboss.open-bio.org
 # begins wrongly with "The master copies of EMBOSS documentation are available at on the EMBOSS Wiki."
-13,18655,0,0,http://emboss.open-bio.org/rel/rel6/apps/backtranambig.html
-6,83005,0,0,http://emboss.open-bio.org/rel/rel6/apps/banana.html
-8,15429,0,0,http://emboss.open-bio.org/rel/rel6/apps/btwisted.html
-4,14085,0,0,http://emboss.open-bio.org/rel/rel6/apps/yank.html
+13,18806,0,0,http://emboss.open-bio.org/rel/rel6/apps/backtranambig.html
+6,83182,0,0,http://emboss.open-bio.org/rel/rel6/apps/banana.html
+8,15790,0,0,http://emboss.open-bio.org/rel/rel6/apps/btwisted.html
+4,14244,0,0,http://emboss.open-bio.org/rel/rel6/apps/yank.html
 
 # sourceforge.net
 7,1036,0,6,https://sourceforge.net/projects/ambient-bio/?source=navbar
@@ -77,10 +76,10 @@ title,content,license,language,webpage
 10,220,46,23,https://sourceforge.net/projects/omicbrowse/
 
 # sourceforge.net files
-10,0,0,0,https://sourceforge.net/projects/protms/files/mres2x/
+16,0,0,0,https://sourceforge.net/projects/protms/files/mres2x/
 10,0,0,0,https://sourceforge.net/projects/pathoscope/files/pathoscope2.0_v0.02_tutorial.pdf/download
-7,1990,0,0,https://sourceforge.net/projects/sb2nhri/files/drVM/
-4,7784,0,0,https://sourceforge.net/projects/plek/files/
+13,2140,0,0,https://sourceforge.net/projects/sb2nhri/files/drVM/
+10,9378,0,0,https://sourceforge.net/projects/plek/files/
 
 # sourceforge.net wiki
 32,5645,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
@@ -96,10 +95,10 @@ title,content,license,language,webpage
 24,2976,0,0,https://code.google.com/archive/p/ehu-bio/wikis/PAnalyzer.wiki
 
 # cran.r-project.org
-87,412,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
-54,373,5,0,https://cran.r-project.org/web/packages/lme4/index.html
-39,163,5,0,https://cran.r-project.org/web/packages/GUniFrac/index.html
-0,4484,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
+87,477,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
+54,347,5,0,https://cran.r-project.org/web/packages/lme4/index.html
+142,820,5,0,https://cran.r-project.org/web/packages/GUniFrac/index.html
+0,4772,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
 
 # cran.r-project.org vignettes
 25,29820,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
@@ -110,12 +109,10 @@ title,content,license,language,webpage
 6,1530,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
 
 # bitbucket.org
-7,5788,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
-12,0,0,0,https://bitbucket.org/account/user/ipk_bit_team/projects/ED_PUB
+7,5796,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
 6,0,0,0,https://bitbucket.org/paiyetan/m2lite/downloads
 
 # bitbucker.org src
-0,0,0,0,https://bitbucket.org/mckinsel/shortfuse
 0,0,0,0,https://bitbucket.org/pchanda/hapzipper
 0,0,0,0,https://bitbucket.org/tobiasmarschall/mosdi
 0,0,0,0,https://bitbucket.org/dbeisser/taxmapper_supplement/src/master/databases/taxonomy/
@@ -135,11 +132,10 @@ title,content,license,language,webpage
 # genome.sph.umich.edu
 3,3949,0,0,https://genome.sph.umich.edu/wiki/Arf
 5,968,0,0,https://genome.sph.umich.edu/wiki/METAL_Program
-# getting timeout
 
-# zhanglab.ccmb.med.umich.edu
-47,776,0,0,https://zhanglab.ccmb.med.umich.edu/BSpred/
-79,3747,0,0,https://zhanglab.ccmb.med.umich.edu/EvoDesign/
+# zhanggroup.org
+47,776,0,0,https://zhanggroup.org//BSpred/
+79,3747,0,0,https://zhanggroup.org//EvoDesign/
 
 # bioinformatics.mdanderson.org
 10,1261,6,4,http://bioinformatics.mdanderson.org/main/BreakTrans
@@ -148,21 +144,21 @@ title,content,license,language,webpage
 6,302,19,0,https://www.bcgsc.ca/resources/software/anchor
 
 # compomics.github.io
-13,13547,0,0,https://compomics.github.io/projects/peptide-shaker.html
-8,397,0,0,http://compomics.github.io/projects/reporter.html
+13,13294,0,0,https://compomics.github.io/projects/peptide-shaker.html
+8,396,0,0,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
-7,8021,0,0,https://rostlab.org/owiki/index.php/CHOPPER
-10,1450,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
+7,8270,0,0,https://rostlab.org/owiki/index.php/CHOPPER
+10,1456,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
 
 # rna.informatik.uni-freiburg.de
-25,3437,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
-27,2231,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+25,3387,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+27,2258,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
 
 # gitlab.com
 11,201,31,0,https://gitlab.com/CarlBrunius/sampleDrift
 6,134,9,0,https://gitlab.com/Gustafsson-lab/lassim
-7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
+7,118,10,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe
@@ -177,13 +173,9 @@ title,content,license,language,webpage
 18,179,35,0,http://www.bioinformatics.org/groups/?group_id=493
 47,252,35,0,http://www.bioinformatics.org/project/?group_id=39
 
-# omics.pnl.gov
-60,973,0,0,https://omics.pnl.gov/software/concatenated-dta-mascot-generic-file-mgf-file-converter
-27,2305,0,0,https://omics.pnl.gov/software/protein-digestion-simulator
-
 # en.wikipedia.org
-5,1268,0,0,https://en.wikipedia.org/wiki/CLIPZ
-9,1186,0,0,https://en.wikipedia.org/wiki/ProRepeat
+5,1270,0,0,https://en.wikipedia.org/wiki/CLIPZ
+9,1189,0,0,https://en.wikipedia.org/wiki/ProRepeat
 
 # webchem.ncbr.muni.cz wiki
 27,1991,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual

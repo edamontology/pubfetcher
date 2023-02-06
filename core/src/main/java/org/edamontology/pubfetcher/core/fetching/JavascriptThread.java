@@ -81,7 +81,7 @@ public class JavascriptThread implements Runnable {
 			webClient.getOptions().setGeolocationEnabled(false);
 			webClient.getOptions().setDoNotTrackEnabled(false);
 			webClient.getOptions().setPrintContentOnFailingStatusCode(false);
-			webClient.getOptions().setThrowExceptionOnFailingStatusCode(true);
+			webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
 			webClient.getOptions().setThrowExceptionOnScriptError(false);
 			webClient.getOptions().setActiveXNative(false);
 			webClient.getOptions().setTimeout(fetcherArgs.getTimeout());

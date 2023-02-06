@@ -48,6 +48,16 @@ public class Version {
 		} else {
 			throw new MissingResourceException("Can't find project properties", clazz.getSimpleName(), "project.properties");
 		}
+		InputStream resourceSystem = clazz.getResourceAsStream("/system.properties");
+		if (resourceSystem != null) {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(resourceSystem, StandardCharsets.UTF_8))) {
+				Properties properties = new Properties(System.getProperties());
+				properties.load(br);
+				System.setProperties(properties);
+			}
+		} else {
+			throw new MissingResourceException("Can't find system properties", clazz.getSimpleName(), "system.properties");
+		}
 	}
 
 	public String getName() {

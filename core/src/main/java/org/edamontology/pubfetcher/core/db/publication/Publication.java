@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -201,7 +201,7 @@ public class Publication extends DatabaseEntry<Publication> {
 	}
 	private void set(String content, PublicationPartType type, String url, FetcherArgs fetcherArgs, PublicationPartString part, boolean canMakeFinal, boolean clean) {
 		content = content.trim();
-		if (clean) content = Jsoup.clean(content, new Whitelist());
+		if (clean) content = Jsoup.clean(content, new Safelist());
 		if (!part.isFinal(fetcherArgs) && !content.isEmpty()
 			&& (type.isFinal() && part.getContent().length() < content.length()
 				|| type.isBetterThan(part.getType()))) {
@@ -262,7 +262,7 @@ public class Publication extends DatabaseEntry<Publication> {
 		List<String> keywordsFull = keywords.stream()
 			.filter(k -> k != null)
 			.map(k -> k.trim())
-			.map(k -> { if (clean) return Jsoup.clean(k, new Whitelist()); else return k; })
+			.map(k -> { if (clean) return Jsoup.clean(k, new Safelist()); else return k; })
 			.filter(k -> !k.isEmpty())
 			.distinct()
 			.collect(Collectors.toList());

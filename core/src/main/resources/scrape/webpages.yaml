@@ -49,30 +49,32 @@
   content: ''
 
 'github\.com/+[^/]+/+[^/]+/*$':
-  title: h1 > [itemprop=name]
+  title: '#repository-container-header [itemprop=name]'
   content: '.BorderGrid-cell > h2:matchesOwn(^About$) + p, #readme > .Box-body > * > *'
   license: a:has(.octicon-law):not(:matches(^View license$))
   language: a[href~=/search\?l=]:has(span:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > span.text-bold
 
 'github\.com/+[^/]+/*$':
-  title: h1
+  title: main header h1
   content: .orghead h1 + div, .repo-list ul > li > :not(.f6) > :not(.f6) > * > :not(.Label--secondary), .pinned-item-list-item-content > div:not(.f6), .pinned-item-list-item-content > .pinned-item-desc
 
 'github\.com/+[^/]+/+[^/]+/+wiki(/|$)':
-  title: h1 > [itemprop=name]
+  title: '#repository-container-header [itemprop=name]'
   content: 'h1.gh-header-title, #wiki-body > :not(#wiki-footer), .wiki-rightbar #wiki-pages-box a, .wiki-rightbar .wiki-custom-sidebar'
 
 'github\.com/+[^/]+/+[^/]+/+tree/':
-  title: h1 > [itemprop=name]
-  content: '#readme > .Box-body > * > *'
+  title: '#repository-container-header strong > a'
+  content: '#readme > div ~ *' # not working
+  javascript: 'true'
 
 'github\.com/+[^/]+/+[^/]+/+issues(/|$)':
-  title: h1 > [itemprop=name]
+  title: '#repository-container-header strong > a'
   content: ''
 
 'github\.com/+[^/]+/+[^/]+/+blob/':
-  title: h1 > [itemprop=name]
-  content: .repository-content .blob-wrapper > :not([aria-hidden=true]) > :not(.js-file-alert-template), .repository-content .blob
+  title: '#repository-container-header strong > a'
+  content: '#repos-sticky-header ~ *' # not working
+  javascript: 'true'
 
 'galaxy\.pasteur\.fr/+(root|tool_runner)':
   title: '#center .portlet-title-text'
@@ -86,7 +88,7 @@
 'sourceforge\.net/+projects/+[^/]+/*[^/]*$':
   title: .title > h1
   content: .title > .summary, article > :first-child .description, article .features, article span[itemprop=applicationCategory]
-  license: .project-info > :matchesOwn(^License$) + a
+  license: .project-info:has(:matchesOwn(^License$))
   language: .project-info > :matchesOwn(^Programming Language$) ~ a
 
 'sourceforge\.net/+projects/+[^/]+/+files/':
@@ -200,10 +202,10 @@
   title: '#firstHeading'
   content: '#bodyContent'
 
-'biocatalogue\.org':
-  title: '#content .resource_title > span'
-  content: '#content .aliases > span > span:not(.faded_plus), #content .categories_box .categories a, #content .annotations_container > div:first-child:matches(^Description\(s\):$) + .box_annotations .annotation_display > *, #content .annotations_container > div:first-child:matches(^ELIXIR Description\(s\):$) + .box_annotations .annotation_display > *, [id~=^Service_[0-9]+_tag_cloud$] a'
-  license: '#content .annotations_container > div:first-child:matches(^License\(s\):$) + .box_annotations .annotation_display > *'
+#'biocatalogue\.org':
+#  title: article > header > h1
+#  content: article .entry-content > p
+#  license: '#content .annotations_container > div:first-child:matches(^License\(s\):$) + .box_annotations .annotation_display > *'
 
 'mybiosoftware\.com':
   title: article > header > h1

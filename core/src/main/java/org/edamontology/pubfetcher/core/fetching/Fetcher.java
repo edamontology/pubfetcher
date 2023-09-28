@@ -50,7 +50,9 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -98,7 +100,7 @@ public class Fetcher {
 	private static final Logger logger = LogManager.getLogger();
 
 	private static int LINKS_LIMIT = 10;
-	private static long MAX_PDF_SIZE = 104857600; // 1 MiB
+	// private static long MAX_PDF_SIZE = 104857600; // 100 MiB
 	private static long JAVASCRIPT_HARD_TIMEOUT = 120000; // 2 minutes
 
 	private static final String EUROPEPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/";
@@ -444,7 +446,8 @@ public class Fetcher {
 				webpage.setFinalUrl(finalUrl);
 			}
 
-			try (PDDocument doc = PDDocument.load(con.getInputStream(), MemoryUsageSetting.setupMainMemoryOnly(MAX_PDF_SIZE))) {
+			// TODO MAX_PDF_SIZE
+			try (PDDocument doc = Loader.loadPDF(new RandomAccessReadBuffer(con.getInputStream()), IOUtils.createMemoryOnlyStreamCache())) {
 				logger.info("    GOT PDF {}", finalUrl);
 				if (webpage != null) {
 					if (con instanceof HttpURLConnection) {
@@ -2282,6 +2285,11 @@ public class Fetcher {
 				}
 			} catch (MalformedURLException e) {
 			}
+		}
+
+		if (scrape.getOff(url)) {
+			logger.info("    Fetching of {} turned off", url);
+			return;
 		}
 
 		boolean javascript = scrape.getJavascript(url);

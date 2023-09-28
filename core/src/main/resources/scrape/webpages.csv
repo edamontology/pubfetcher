@@ -3,12 +3,12 @@ title,content,license,language,webpage
 # bioconductor.org
 7,889,12,18,https://bioconductor.org/packages/release/bioc/html/biomaRt.html
 9,264,12,18,http://bioconductor.org/packages/release/bioc/html/BiocStyle.html
-8,491,5,0,http://bioconductor.org/packages/release/bioc/html/synapter.html
+8,640,5,28,http://bioconductor.org/packages/release/bioc/html/synapter.html
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,53896,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,30061,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,54740,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,30071,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
@@ -16,27 +16,28 @@ title,content,license,language,webpage
 # github.com
 7,175,0,11,https://github.com/sgoodswe/vacceed
 4,5887,0,27,https://github.com/SciLifeLab/facs/
-10,10673,15,6,https://github.com/petmri/ROCKETSHIP
+10,11840,15,6,https://github.com/petmri/ROCKETSHIP
 4,1863,11,7,https://github.com/pschorderet/NEAT
 9,422,11,24,https://github.com/arq5x/poretools
 
 # github.com user
 7,1301,0,0,https://github.com/SeqWare
 28,1361,0,0,https://github.com/BeatsonLab-MicrobialGenomics
-37,910,0,0,https://github.com/brisskit-uol/
+37,855,0,0,https://github.com/brisskit-uol/
 
 # github.com wiki
 4,3304,0,0,https://github.com/synergy-zju/gips/wiki
 6,901,0,0,https://github.com/KorfLab/DupHMM/wiki
-6,1980,0,0,https://github.com/ollyburren/vseams/wiki
+6,1979,0,0,https://github.com/ollyburren/vseams/wiki
 11,1615,0,0,https://github.com/PALMsiever/palm-siever/wiki
-6,9848,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
+6,9847,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
-9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
-6,69,0,0,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
-5,20852,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
-5,718,0,0,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
+# getting content not working
+9,0,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
+6,0,0,0,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
+5,0,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
+5,0,0,0,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
 14,0,0,0,https://github.com/NCIP/cagrid-general/tree/master/demos/06annual/workflow/JRProteomicsGridSkeletonValue-1.0/src/org/globus/cagrid/RProteomics
 
 # github.com issues
@@ -44,8 +45,8 @@ title,content,license,language,webpage
 6,0,0,0,https://github.com/RGLab/ggcyto/issues
 
 # github.com blob
-10,40369,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
-4,493,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
+10,0,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
+4,0,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
 # galaxy.pasteur.fr
 # switched off, as requires JavaScript that for this case is too resource intensive for some reason
@@ -70,10 +71,10 @@ title,content,license,language,webpage
 # sourceforge.net
 7,1036,0,6,https://sourceforge.net/projects/ambient-bio/?source=navbar
 7,182,0,4,https://sourceforge.net/projects/asm2ace/
-4,315,11,0,https://sourceforge.net/projects/bait/
-8,420,46,6,https://sourceforge.net/projects/basilisk-dbn/
-9,267,46,16,https://sourceforge.net/projects/cnvoffseq/
-10,220,46,23,https://sourceforge.net/projects/omicbrowse/
+4,315,19,0,https://sourceforge.net/projects/bait/
+8,420,54,6,https://sourceforge.net/projects/basilisk-dbn/
+9,267,54,16,https://sourceforge.net/projects/cnvoffseq/
+10,220,54,23,https://sourceforge.net/projects/omicbrowse/
 
 # sourceforge.net files
 16,0,0,0,https://sourceforge.net/projects/protms/files/mres2x/
@@ -82,11 +83,11 @@ title,content,license,language,webpage
 10,9378,0,0,https://sourceforge.net/projects/plek/files/
 
 # sourceforge.net wiki
-32,5645,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
-4,5292,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
-4,974,0,0,https://sourceforge.net/p/treq/home/Home/
-6,14164,0,0,https://sourceforge.net/p/virmid/wiki/Home/
-21,3979,0,0,https://sourceforge.net/p/metabolic-network-sgl/git/ci/master/tree/
+37,5645,0,0,https://sourceforge.net/p/bless-ec/wiki/Home/
+9,5292,0,0,https://sourceforge.net/p/mira-assembler/wiki/Home/
+9,974,0,0,https://sourceforge.net/p/treq/home/Home/
+11,14164,0,0,https://sourceforge.net/p/virmid/wiki/Home/
+25,3979,0,0,https://sourceforge.net/p/metabolic-network-sgl/git/ci/master/tree/
 
 # code.google.com
 6,2025,10,0,https://code.google.com/archive/p/acpype
@@ -96,7 +97,7 @@ title,content,license,language,webpage
 
 # cran.r-project.org
 87,477,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
-54,347,5,0,https://cran.r-project.org/web/packages/lme4/index.html
+54,340,5,0,https://cran.r-project.org/web/packages/lme4/index.html
 142,820,5,0,https://cran.r-project.org/web/packages/GUniFrac/index.html
 0,4772,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
 
@@ -130,8 +131,8 @@ title,content,license,language,webpage
 18,10143,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
 
 # genome.sph.umich.edu
-3,3949,0,0,https://genome.sph.umich.edu/wiki/Arf
-5,968,0,0,https://genome.sph.umich.edu/wiki/METAL_Program
+3,4116,0,0,https://genome.sph.umich.edu/wiki/Arf
+5,1057,0,0,https://genome.sph.umich.edu/wiki/METAL_Program
 
 # zhanggroup.org
 47,776,0,0,https://zhanggroup.org//BSpred/
@@ -144,8 +145,8 @@ title,content,license,language,webpage
 6,302,19,0,https://www.bcgsc.ca/resources/software/anchor
 
 # compomics.github.io
-13,13294,0,0,https://compomics.github.io/projects/peptide-shaker.html
-8,396,0,0,http://compomics.github.io/projects/reporter.html
+13,13554,0,0,https://compomics.github.io/projects/peptide-shaker.html
+8,397,0,0,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
 7,8270,0,0,https://rostlab.org/owiki/index.php/CHOPPER
@@ -156,13 +157,13 @@ title,content,license,language,webpage
 27,2258,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
 
 # gitlab.com
-11,201,31,0,https://gitlab.com/CarlBrunius/sampleDrift
+11,201,0,0,https://gitlab.com/CarlBrunius/sampleDrift
 6,134,9,0,https://gitlab.com/Gustafsson-lab/lassim
-7,118,10,0,https://gitlab.com/SimonHTausch/RAMBO-K
+7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe
-13,2311,35,97,http://pypi.python.org/pypi/plastid
+13,3636,35,27,http://pypi.python.org/pypi/plastid
 17,69,48,11,https://pypi.org/project/bio-apricot/
 
 # bioinformatics.org wiki
@@ -174,23 +175,23 @@ title,content,license,language,webpage
 47,252,35,0,http://www.bioinformatics.org/project/?group_id=39
 
 # en.wikipedia.org
-5,1270,0,0,https://en.wikipedia.org/wiki/CLIPZ
-9,1189,0,0,https://en.wikipedia.org/wiki/ProRepeat
+5,1233,0,0,https://en.wikipedia.org/wiki/CLIPZ
+9,899,0,0,https://en.wikipedia.org/wiki/ProRepeat
 
 # webchem.ncbr.muni.cz wiki
 27,1991,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
 26,1466,0,0,http://webchem.ncbr.muni.cz/Wiki/MotiveValidator:UserManual
 
 # biocatalogue.org
-16,407,0,0,https://www.biocatalogue.org/services/2
-43,1492,0,0,https://www.biocatalogue.org/services/3792
-6,658,0,0,https://www.biocatalogue.org/services/1928
-18,618,102,0,https://www.biocatalogue.org/services/1418
-5,478,26,0,https://www.biocatalogue.org/services/2059
+#16,407,0,0,https://www.biocatalogue.org/services/2
+#43,1492,0,0,https://www.biocatalogue.org/services/3792
+#6,658,0,0,https://www.biocatalogue.org/services/1928
+#18,618,102,0,https://www.biocatalogue.org/services/1418
+#5,478,26,0,https://www.biocatalogue.org/services/2059
 
 # mybiosoftware.com
 86,257,0,0,http://www.mybiosoftware.com/1-03-estimating-effective-size-ne-populations-overlapping-generations.html
-59,224,0,0,http://www.mybiosoftware.com/youscope-1-2-beta-open-source-microscope-control-software.html
+56,224,0,0,http://www.mybiosoftware.com/youscope-1-2-beta-open-source-microscope-control-software.html
 94,370,0,0,http://www.mybiosoftware.com/sissrs-1-4-produce-list-peakmaxima-aligned-positions.html
 73,507,0,0,http://www.mybiosoftware.com/haddock-2-1-docking-approach-for-the-modeling-of-biomolecular-complexes.html
 77,241,0,0,http://www.mybiosoftware.com/frma-1-13-0-frmatools-1-13-0-single-microarray-preprocessing-analysis.html

@@ -200,6 +200,9 @@ public final class PubFetcherMethods {
 	private static void scrapeJavascript(String url, Fetcher fetcher) {
 		System.out.println(fetcher.getScrape().getJavascript(url));
 	}
+	private static void scrapeOff(String url, Fetcher fetcher) {
+		System.out.println(fetcher.getScrape().getOff(url));
+	}
 	private static void scrapeWebpage(String url, Fetcher fetcher) {
 		System.out.println(fetcher.getScrape().getWebpage(url));
 	}
@@ -1779,6 +1782,7 @@ public final class PubFetcherMethods {
 		if (args.scrapeSelector != null) scrapeSelector(args.scrapeSelector.get(0), ScrapeSiteKey.valueOf(args.scrapeSelector.get(1)), fetcher);
 		if (args.scrapeWebpage != null) scrapeWebpage(args.scrapeWebpage, fetcher);
 		if (args.scrapeJavascript != null) scrapeJavascript(args.scrapeJavascript, fetcher);
+		if (args.scrapeOff != null) scrapeOff(args.scrapeOff, fetcher);
 
 		if (args.isPmid != null) isPmid(args.isPmid);
 		if (args.isPmcid != null) isPmcid(args.isPmcid);
@@ -2088,8 +2092,8 @@ public final class PubFetcherMethods {
 
 		if (topHosts) {
 			Boolean hasScrape = null;
-			if (args.hasScrape) hasScrape = new Boolean(true);
-			if (args.notHasScrape) hasScrape = new Boolean(false);
+			if (args.hasScrape) hasScrape = Boolean.TRUE;
+			if (args.notHasScrape) hasScrape = Boolean.FALSE;
 			topHostsPublications = topHosts(publications, fetcher.getScrape(), hasScrape, DatabaseEntryType.publication);
 			topHostsWebpages = topHosts(webpages, fetcher.getScrape(), hasScrape, DatabaseEntryType.webpage);
 			topHostsDocs = topHosts(docs, fetcher.getScrape(), hasScrape, DatabaseEntryType.doc);

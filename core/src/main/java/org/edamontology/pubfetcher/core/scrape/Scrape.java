@@ -55,6 +55,8 @@ public class Scrape {
 
 	private final List<Pattern> javascript = new ArrayList<>();
 
+	private final List<Pattern> off = new ArrayList<>();
+
 	private final Map<Pattern, Map<String, String>> webpages = new LinkedHashMap<>();
 
 	public Scrape(String journals, String webpages) throws IOException, ParseException {
@@ -87,22 +89,27 @@ public class Scrape {
 		Yaml yaml = new Yaml();
 		Iterator<Object> it = yaml.loadAll(br).iterator();
 
-		Map<String, String> regexSection = (Map<String, String>) nextSection(it, journals, 1, 3, Map.class);
+		Map<String, String> regexSection = (Map<String, String>) nextSection(it, journals, 1, 4, Map.class);
 		if (regexSection != null) {
 			regex.putAll(makeRegex(regexSection, journals));
 		}
 
-		Map<String, Map<String, String>> siteSection = (Map<String, Map<String, String>>) nextSection(it, journals, 2, 3, Map.class);
+		Map<String, Map<String, String>> siteSection = (Map<String, Map<String, String>>) nextSection(it, journals, 2, 4, Map.class);
 		if (siteSection != null) {
 			site.putAll(siteSection);
 		}
 
-		List<String> javascriptSection = (List<String>) nextSection(it, journals, 3, 3, List.class);
+		List<String> javascriptSection = (List<String>) nextSection(it, journals, 3, 4, List.class);
 		if (javascriptSection != null) {
-			javascript.addAll(makeJavascript(javascriptSection, journals));
+			javascript.addAll(makeJavascriptOff(javascriptSection, journals, true));
 		}
 
-		validateTooManySections(it, journals, 3);
+		List<String> offSection = (List<String>) nextSection(it, journals, 4, 4, List.class);
+		if (offSection != null) {
+			off.addAll(makeJavascriptOff(offSection, journals, false));
+		}
+
+		validateTooManySections(it, journals, 4);
 
 		validateJournal();
 	}
@@ -160,24 +167,24 @@ public class Scrape {
 		}
 		return regex;
 	}
-	private List<Pattern> makeJavascript(List<String> javascriptString, String name) throws ParseException {
-		List<Pattern> javascript = new ArrayList<>();
-		for (int i = 0; i < javascriptString.size(); ++i) {
+	private List<Pattern> makeJavascriptOff(List<String> javascriptOffString, String name, Boolean javascript) throws ParseException {
+		List<Pattern> javascriptOff = new ArrayList<>();
+		for (int i = 0; i < javascriptOffString.size(); ++i) {
 			String j;
 			try {
-				j = javascriptString.get(i);
+				j = javascriptOffString.get(i);
 			} catch (ClassCastException e) {
-				throw new ParseException("Syntax error in javascript regex in scraping rules '" + name + "'! (javascript pos " + (i + 1) + ")\n" + e, i + 1);
+				throw new ParseException("Syntax error in " + (javascript ? "javascript" : "off")  + " regex in scraping rules '" + name + "'! (" + (javascript ? "javascript" : "off") + " pos " + (i + 1) + ")\n" + e, i + 1);
 			}
 			if (j == null || j.isEmpty()) {
-				throw new ParseException("Javascript regex cannot be empty in scraping rules '" + name + "'! (javascript pos " + (i + 1) + ")", i + 1);
+				throw new ParseException((javascript ? "Javascript" : "Off") + " regex cannot be empty in scraping rules '" + name + "'! (" + (javascript ? "javascript" : "off") + " pos " + (i + 1) + ")", i + 1);
 			}
 			if (j.charAt(0) != '^') {
 				j = "(?i)^https?://(www\\.)?" + j;
 			}
-			javascript.add(Pattern.compile(j));
+			javascriptOff.add(Pattern.compile(j));
 		}
-		return javascript;
+		return javascriptOff;
 	}
 
 	private Map<Pattern, Map<String, String>> makeWebpages(Map<String, Map<String, String>> yaml, String name) throws ParseException {
@@ -336,6 +343,20 @@ public class Scrape {
 			return false;
 		}
 		for (Pattern pattern : javascript) {
+			if (pattern.matcher(url).find()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public boolean getOff(String url) {
+		try {
+			url = new URL(url).toString();
+		} catch (MalformedURLException e) {
+			logger.error(e);
+			return false;
+		}
+		for (Pattern pattern : off) {
 			if (pattern.matcher(url).find()) {
 				return true;
 			}

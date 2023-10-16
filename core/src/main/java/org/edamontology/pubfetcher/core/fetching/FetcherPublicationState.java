@@ -49,6 +49,8 @@ public class FetcherPublicationState {
 	boolean pmcXmlPmcid = false;
 	boolean pmcHtmlPmcid = false;
 
+	boolean pmcManuscript = false;
+
 	boolean doi = false;
 
 	boolean oadoi = false;

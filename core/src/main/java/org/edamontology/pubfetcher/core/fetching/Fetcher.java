@@ -2137,6 +2137,11 @@ public class Fetcher {
 		Document doc = getDoc(EUTILS + "efetch.fcgi?retmode=xml&db=pmc&id=" + PubFetcher.extractPmcid(pmcid), publication, fetcherArgs);
 		if (doc != null) {
 			state.pmcXml = fillWithPubMedCentralXml(publication, doc, PublicationPartType.pmc_xml, parts, fetcherArgs);
+			if (state.pmcXml) {
+				if (!doc.select("article-id[pub-id-type=manuscript]").isEmpty()) {
+					state.pmcManuscript = true;
+				}
+			}
 		}
 	}
 
@@ -2537,6 +2542,12 @@ public class Fetcher {
 
 		fetchDoi(publication, links, state, parts, fetcherArgs);
 		fetchOaDoi(publication, links, state, parts, fetcherArgs);
+
+		// https://www.ncbi.nlm.nih.gov/pmc/about/authorms/
+		// The PMC Author Manuscript Dataset files are available for text mining.
+		if (state.pmcManuscript) {
+			fetchPmcHtml(publication, links, state, parts, true, fetcherArgs);
+		}
 
 		if (!pmid.isEmpty() && !publication.getPmid().isEmpty() && !pmid.equals(publication.getPmid().getContent())) {
 			logger.error("PMID changed from {} to {}", pmid, publication.getPmid().getContent());

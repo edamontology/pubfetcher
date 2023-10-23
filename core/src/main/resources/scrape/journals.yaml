@@ -109,6 +109,13 @@
 'wellcomeopenresearch\.org/+articles': f1000research_articles # not working, MathJax
 'gatesopenresearch\.org/+articles': f1000research_articles
 'aasopenresearch\.org/+articles': f1000research_articles # not working, MathJax
+'researchsquare\.com/+article': researchsquare
+'medrxiv\.org': biorxiv
+'medrxiv\.org/.+\.full/*[^/]*$': biorxiv_full
+'authorea\.com': authorea
+'osf\.io': osf
+'aimspress\.com/+article/+doi': aimspress
+'cambridge\.org/+core': cambridge
 
 ---
 
@@ -573,11 +580,10 @@ nrcresearchpress:
   abstract: '#content .abstractInFull'
 
 zenodo:
-  doi: .col-right h4:matchesOwn(^Versions$) + table .info > td:first-child > small
-  title: .col-left > h1
-  keywords: .col-right dt:matchesOwn(^Keyword\(s\):$) + dd > a
-  abstract: .col-left > p:gt(2), .col-left > ul, .col-left > .record-description
-  pdf_a: '#files a[href~=/files/article.pdf\?download=1$]'
+  title: 'h1#record-title'
+  keywords: '#keywords-and-subjects a'
+  abstract: '#description > :not(h2)'
+  pdf_a: 'a[href~=/files/article.pdf\?download=1$]'
 
 jstatsoft:
   doi: .article-more-details .row > div:has(strong:matchesOwn(^DOI:$)) + div
@@ -641,6 +647,48 @@ iop:
   fulltext: main .article-content > [itemprop=articleBody] > .header-anchor:not([name=acknowledgments]), main .article-content > [itemprop=articleBody] > .header-anchor:not([name=acknowledgments]) + .article-text > *
   pdf_a: main a.btn:matches(^Download Article PDF$)
 
+researchsquare:
+  doi: .tw-min-h-screen .tw-max-w-reading > div.tw-py-3 p:matches(^https://doi.org/)
+  title: .tw-min-h-screen .tw-max-w-reading h1
+  keywords: .tw-min-h-screen .tw-max-w-reading > div:has(h2:matches(^Abstract$)) > .tw-pb-1 > .tw-pb-3 p
+  abstract: .tw-min-h-screen .tw-max-w-reading > div:has(h2:matches(^Abstract$)) > .tw-pb-1 > :not(.tw-pb-3) p
+  fulltext: .tw-min-h-screen .tw-max-w-reading > div:has(h2:matches(^Abstract$)) ~ :not(div:has(h2:matches(^Declarations$))):not(div:has(h2:matches(^References$))):not(div:has(h2:matches(^Additional Declarations$)))
+  pdf_a: a:has(span:matches(^Download PDF$))
+
+# can't get fulltext, keywords, doi
+authorea:
+  doi: .publication-status .publication-status__citation-doi
+  title: .article-preview-content .au-article-title
+  keywords: .article-preview-content .preview-tags a
+  abstract: .article-preview-content .preview-abstract > div
+  #fulltext: '#article-content .au-block-list > div:not(:has(div:matches(^References$))):not(:has(div:matches(^Acknowledgments$))):not(:has(div:matches(^Conflict of Interest$))):not(:has(div:matches(^Ethics Statement$))):not(:has(div:matches(^Author Contributions$)))'
+  pdf_a: a.social-box__download-preprint-button:matches(^Download PDF$)
+  corresp_author_names: .article-preview-content .preview-authors-row .preview-author-name:has(.fa-envelope)
+
+osf:
+  doi: .doi-section a[href^=https://doi.org/]
+  title: '#preprintTitle'
+  keywords: div:has(> h4 > strong:matches(^Disciplines$)) > span, div:has(> h4 > strong:matches(^Tags$)) > span
+  pdf_a: .share-row > a:matches(^Download$)
+
+aimspress:
+  doi: .article-list-time a[href^=https://doi.org/]
+  title: .article-title h1
+  abstract: '#Abstract abstract > *'
+  fulltext: '#FullTextWrap > :not(#Abstract-list):not(.article-abstract):not(#References-list):not(#References)'
+  corresp_author_names: .article-author > li:has(.com-mail) .mainColor
+  corresp_author_emails: .article-author > li .com-mail
+
+cambridge:
+  doi: .article-details .doi-data a > .text
+  title: '#maincontent h1'
+  subtitle: '#maincontent .subtitle'
+  keywords: '#article-tab #keywords a'
+  abstract: '#article-tab .abstract > *'
+  fulltext: '#article-tab #content-container .content-box .body > *'
+  corresp_author_names: '#authors-details .author dt:matches(\*)'
+  corresp_author_emails: '#authors-details .corresp a[href^=mailto]'
+
 ---
 
 # javascript
@@ -653,6 +701,8 @@ iop:
 - 'xlink\.rsc\.org' # for fulltext_a, pdf_a
 - 'pubs\.rsc\.org' # for fulltext_a, pdf_a
 - 'iopscience\.iop\.org' # bot protection
+- 'osf\.io'
+- 'aimspress\.com/+article/+doi' # for fulltext
 
  # email-protection
 - 'aasopenresearch\.org'

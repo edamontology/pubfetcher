@@ -48,6 +48,11 @@ title,content,license,language,webpage
 10,0,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
 4,0,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
+# github.com releases
+12,344,0,0,https://github.com/fuhuancheng/CRISPR-GRANT/releases
+7,27,0,0,https://github.com/malanjary-wur/CAGECAT/releases
+6,621,0,0,https://github.com/jyyulab/NetBID/releases/tag/1.0.0
+
 # galaxy.pasteur.fr
 # switched off, as requires JavaScript that for this case is too resource intensive for some reason
 # java.lang.NullPointerException: JavascriptThread has not created a Document!
@@ -200,3 +205,9 @@ title,content,license,language,webpage
 92,1983,0,0,http://apps.cytoscape.org/apps/cyspanningtree
 101,1010,0,0,http://apps.cytoscape.org/apps/gasoline
 54,8102,0,0,http://apps.cytoscape.org/apps/kddn
+
+# zenodo.org
+85,1188,0,0,https://zenodo.org/records/7258553
+42,1066,0,0,https://zenodo.org/records/7240927
+53,2818,0,0,https://zenodo.org/records/7922928
+64,3055,0,0,https://zenodo.org/records/7389996

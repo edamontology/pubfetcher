@@ -133,6 +133,7 @@ public class Fetcher {
 	private static final Pattern ELSEVIER_REDIRECT = Pattern.compile("^https?://linkinghub\\.elsevier\\.com/retrieve/pii/(.+)$");
 	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
 	private static final String SCIENCEDIRECT_LINK = "https://www.sciencedirect.com/science/article/pii/";
+	private static final String LIEBERTPUB_COOKIE_ABSENT = "https://www.liebertpub.com/action/cookieAbsent";
 
 	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/.+\\..+\\..+$");
 
@@ -2309,6 +2310,10 @@ public class Fetcher {
 				// using JavaScript does not help get the fulltext
 				doc = getDoc(SCIENCEDIRECT_LINK + elsevier_id.group(1), publication, type, from, links, parts, false, fetcherArgs);
 			}
+		}
+
+		if (doc != null && doc.location() == LIEBERTPUB_COOKIE_ABSENT) {
+			return;
 		}
 
 		if (doc != null) {

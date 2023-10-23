@@ -519,10 +519,10 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,29,50,0,1562,59114,2,87,https://doi.org/10.1158/1541-7786.MCR-16-0459
 
 # zenodo
-0,0,22,46,0,59,0,1,0,https://doi.org/10.5281/ZENODO.1251638
-0,0,22,19,11,544,0,1,0,https://doi.org/10.5281/ZENODO.1217112
-0,0,20,6,7,835,0,1,0,https://doi.org/10.5281/ZENODO.34090
-0,0,21,53,0,82,0,1,0,https://doi.org/10.5281/ZENODO.573771
+0,0,0,46,0,59,0,1,0,https://doi.org/10.5281/ZENODO.1251638
+0,0,0,19,11,544,0,1,0,https://doi.org/10.5281/ZENODO.1217112
+0,0,0,6,7,835,0,1,0,https://doi.org/10.5281/ZENODO.34090
+0,0,0,53,0,82,0,1,0,https://doi.org/10.5281/ZENODO.573771
 0,0,0,58,0,2627,0,2,0,https://zenodo.org/record/1259625
 0,0,0,46,0,46,0,2,0,https://zenodo.org/record/1233395
 
@@ -600,3 +600,40 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 # aasopenresearch
 # not working, MathJax
 0,0,27,104,6,1161,24354,2,38,https://doi.org/10.12688/aasopenres.12847.2
+
+# researchsquare
+0,0,27,120,4,2217,26559,2,0,https://doi.org/10.21203/rs.3.rs-2867460/v1
+0,0,27,112,5,2409,31521,2,0,https://doi.org/10.21203/rs.3.rs-2893943/v1
+0,0,27,105,7,1155,1319,2,0,https://doi.org/10.21203/rs.3.rs-2890196/v1
+0,0,27,131,7,2186,49360,2,0,https://doi.org/10.21203/rs.3.rs-2858709/v1
+0,0,27,103,5,2213,27896,2,0,https://doi.org/10.21203/rs.3.rs-2898842/v1
+0,0,27,59,7,1462,1534,2,0,https://doi.org/10.21203/rs.3.rs-2753702/v1
+0,0,27,79,7,2318,26674,2,0,https://doi.org/10.21203/rs.3.rs-2182259/v5
+
+# medrxiv
+0,0,27,130,0,2981,0,3,65,https://doi.org/10.1101/2023.04.27.23289149
+0,0,27,171,0,1911,0,3,0,https://doi.org/10.1101/2023.05.16.23290024
+0,0,27,90,0,1654,0,3,36,https://doi.org/10.1101/2023.05.12.23289878
+0,0,27,103,0,2761,0,3,91,https://doi.org/10.1101/2023.05.04.23289518
+
+# medrxiv_full
+0,0,27,130,0,2981,31976,2,65,https://www.medrxiv.org/content/10.1101/2023.04.27.23289149v2.full
+0,0,27,171,0,1911,29578,2,0,https://www.medrxiv.org/content/10.1101/2023.05.16.23290024v1.full
+0,0,27,90,0,1654,86942,2,36,https://www.medrxiv.org/content/10.1101/2023.05.12.23289878v1.full
+0,0,27,103,0,2761,29930,2,91,https://www.medrxiv.org/content/10.1101/2023.05.04.23289518v1.full
+
+# authorea
+0,0,0,82,0,1470,0,2,15,https://doi.org/10.22541/au.166117417.77605988/v2
+0,0,0,107,0,1714,0,2,15,https://doi.org/10.22541/au.168501604.43569192/v1
+
+# osf
+0,0,21,99,7,0,0,2,0,https://doi.org/10.31234/osf.io/f2sqd
+0,0,21,122,12,0,0,2,0,https://doi.org/10.31219/osf.io/9bmf3
+
+# aimspress
+0,0,19,109,0,2133,26426,1,86,https://doi.org/10.3934/mbe.2023300
+0,0,19,97,0,1310,20422,1,68,https://doi.org/10.3934/mbe.2023295
+
+# cambridge
+0,0,18,155,0,1031,80945,1,47,https://doi.org/10.1017/pls.2022.2
+0,0,20,147,0,1755,22320,1,31,https://doi.org/10.1017/ash.2023.140

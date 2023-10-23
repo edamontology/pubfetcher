@@ -76,6 +76,10 @@
   content: '#repos-sticky-header ~ *' # not working
   javascript: 'true'
 
+'github\.com/+[^/]+/+[^/]+/+releases(/|$)':
+  title: '#repository-container-header strong > a'
+  content: .Box-body > .markdown-body
+
 'galaxy\.pasteur\.fr/+(root|tool_runner)':
   title: '#center .portlet-title-text'
   content: '#center .portlet-body .ui-form-title-text, #center .ui-form-help'
@@ -215,6 +219,10 @@
   title: 'body > div > div > div:has(#app-name)'
   content: '#cy-app-details-md, #cy-app-details-tab > div:first-child a'
 
+'zenodo\.org/+record':
+  title: 'h1#record-title'
+  content: '#description > :not(h2), #keywords-and-subjects a'
+
 # Explicitly disable JavaScript for URLs that cause htmlunit code getting stuck at 100% CPU
 
 # http://labs.genetics.ucla.edu/horvath/htdocs/RGLM/
@@ -247,3 +255,17 @@
 
 'ncbi\.nlm\.nih\.gov':
   javascript: 'false'
+
+# Disable journals
+
+'papers\.ssrn\.com':
+  title: ''
+  content: ''
+
+'arxiv\.org':
+  title: ''
+  content: ''
+
+'osf\.io':
+  title: ''
+  content: ''

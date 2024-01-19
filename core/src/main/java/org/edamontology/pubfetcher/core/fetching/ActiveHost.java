@@ -23,34 +23,28 @@ public class ActiveHost {
 
 	private final String host;
 
-	private final long threadId;
-
 	private int count;
 
 	ActiveHost(String host) {
 		this.host = host;
-		threadId = Thread.currentThread().getId();
-		count = 0;
+		count = 1;
 	}
 
 	String getHost() {
 		return host;
 	}
 
-	long getThreadId() {
-		return threadId;
+	int getCount() {
+		return count;
 	}
 
 	void increment() {
 		++count;
 	}
 
-	boolean decrement() {
-		if (count <= 0) {
-			return false;
-		} else {
+	void decrement() {
+		if (count > 0) {
 			--count;
-			return true;
 		}
 	}
 

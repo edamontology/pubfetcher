@@ -56,6 +56,24 @@ public class FetcherPrivateArgs extends Args {
 	@Parameter(names = { "--" + webpagesYamlId }, description = webpagesYamlDescription)
 	private String webpagesYaml = webpagesYamlDefault;
 
+	private static final String seleniumId = "selenium";
+	private static final String seleniumDescription = "Enable Selenium WebDriver (using Firefox) for JavaScript execution instead of HtmlUnit";
+	private static final Boolean seleniumDefault = true;
+	@Parameter(names = { "--" + seleniumId }, arity = 1, description = seleniumDescription)
+	private Boolean selenium = seleniumDefault;
+
+	private static final String seleniumGeckodriverId = "seleniumGeckodriver";
+	private static final String seleniumGeckodriverDescription = "Location of the geckodriver executable used by Selenium WebDriver. If not specified Selenium Manager will download it automatically. Specifying the location automatically enables Selenium WebDriver usage.";
+	private static final String seleniumGeckodriverDefault = "";
+	@Parameter(names = { "--" + seleniumGeckodriverId }, description = seleniumGeckodriverDescription)
+	private String seleniumGeckodriver = seleniumGeckodriverDefault;
+
+	private static final String seleniumFirefoxId = "seleniumFirefox";
+	private static final String seleniumFirefoxDescription = "Location of the firefox executable used by Selenium WebDriver. Not necessary to specify if the wanted firefox is in PATH. Specifying the location automatically enables Selenium WebDriver usage.";
+	private static final String seleniumFirefoxDefault = "";
+	@Parameter(names = { "--" + seleniumFirefoxId }, description = seleniumFirefoxDescription)
+	private String seleniumFirefox = seleniumFirefoxDefault;
+
 	@Override
 	protected void addArgs() {
 		args.add(new Arg<>(this::getEuropepmcEmail, this::setEuropepmcEmail, europepmcEmailDefault, europepmcEmailId, "Europe PMC e-mail", europepmcEmailDescription, null));
@@ -63,6 +81,9 @@ public class FetcherPrivateArgs extends Args {
 		args.add(new Arg<>(this::getUserAgent, this::setUserAgent, userAgentDefault, userAgentId, "User Agent", userAgentDescription, null));
 		args.add(new Arg<>(this::getJournalsYamlFilename, this::setJournalsYaml, journalsYamlDefault, journalsYamlId, "Journals scrape rules", journalsYamlDescription, null));
 		args.add(new Arg<>(this::getWebpagesYamlFilename, this::setWebpagesYaml, webpagesYamlDefault, webpagesYamlId, "Webpages scrape rules", webpagesYamlDescription, null));
+		args.add(new Arg<>(this::isSelenium, this::setSelenium, seleniumDefault, seleniumId, "Selenium", seleniumDescription, null));
+		args.add(new Arg<>(this::getSeleniumGeckodriver, this::setSeleniumGeckodriver, seleniumGeckodriverDefault, seleniumGeckodriverId, "Selenium geckodriver", seleniumGeckodriverDescription, null));
+		args.add(new Arg<>(this::getSeleniumFirefox, this::setSeleniumFirefox, seleniumFirefoxDefault, seleniumFirefoxId, "Selenium firefox", seleniumFirefoxDescription, null));
 	}
 
 	@Override
@@ -114,5 +135,26 @@ public class FetcherPrivateArgs extends Args {
 	}
 	public void setWebpagesYaml(String webpagesYaml) {
 		this.webpagesYaml = webpagesYaml;
+	}
+
+	public Boolean isSelenium() {
+		return selenium;
+	}
+	public void setSelenium(Boolean selenium) {
+		this.selenium = selenium;
+	}
+
+	public String getSeleniumGeckodriver() {
+		return seleniumGeckodriver;
+	}
+	public void setSeleniumGeckodriver(String seleniumGeckodriver) {
+		this.seleniumGeckodriver = seleniumGeckodriver;
+	}
+
+	public String getSeleniumFirefox() {
+		return seleniumFirefox;
+	}
+	public void setSeleniumFirefox(String seleniumFirefox) {
+		this.seleniumFirefox = seleniumFirefox;
 	}
 }

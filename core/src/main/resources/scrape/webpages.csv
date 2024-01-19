@@ -33,11 +33,10 @@ title,content,license,language,webpage
 6,9847,0,0,https://github.com/PacificBiosciences/DevNet/wiki/SMRT-View
 
 # github.com tree
-# getting content not working
-9,0,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
-6,0,0,0,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
-5,0,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
-5,0,0,0,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
+9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
+6,69,0,0,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
+5,20852,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
+5,718,0,0,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
 14,0,0,0,https://github.com/NCIP/cagrid-general/tree/master/demos/06annual/workflow/JRProteomicsGridSkeletonValue-1.0/src/org/globus/cagrid/RProteomics
 
 # github.com issues
@@ -45,8 +44,8 @@ title,content,license,language,webpage
 6,0,0,0,https://github.com/RGLab/ggcyto/issues
 
 # github.com blob
-10,0,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
-4,0,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
+10,49515,0,0,https://github.com/brwnj/repertoire/blob/master/assembly/iSSAKE
+4,493,0,0,https://github.com/chapmanb/bcbb/blob/master/nextgen/README.md
 
 # github.com releases
 12,344,0,0,https://github.com/fuhuancheng/CRISPR-GRANT/releases
@@ -115,15 +114,20 @@ title,content,license,language,webpage
 6,1530,0,0,https://bibiserv.cebitec.uni-bielefeld.de/cgcat
 
 # bitbucket.org
-7,5796,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
-6,0,0,0,https://bitbucket.org/paiyetan/m2lite/downloads
+9,0,0,0,https://bitbucket.org/pchanda/hapzipper
+5,14587,0,0,https://bitbucket.org/tobiasmarschall/mosdi
+8,0,0,0,https://bitbucket.org/dbeisser/taxmapper_supplement/src/master/databases/taxonomy/
+9,112,0,0,https://bitbucket.org/paiyetan/xglycscan/src
+9,3026,15,0,https://bitbucket.org/veitveit/polystest/src/master
+9,3026,15,0,https://bitbucket.org/veitveit/polystest/src/master/README.md
+8,1912,95,0,https://bitbucket.org/baskargroup/cy-rsoxs/src/master/
 
-# bitbucker.org src
-0,0,0,0,https://bitbucket.org/pchanda/hapzipper
-0,0,0,0,https://bitbucket.org/tobiasmarschall/mosdi
-0,0,0,0,https://bitbucket.org/dbeisser/taxmapper_supplement/src/master/databases/taxonomy/
-0,0,0,0,https://bitbucket.org/paiyetan/m2lite/src
-0,0,0,0,https://bitbucket.org/paiyetan/xglycscan/src
+# bitbucket.org wiki
+7,5796,0,0,https://bitbucket.org/vda-lab/triovis/wiki/Home
+6,3710,0,0,https://bitbucket.org/paiyetan/m2lite/wiki
+
+# bitbucket.org raw
+0,9394,0,0,https://bitbucket.org/veitveit/polystest/raw/35094e12b4781b3b658018a5500314fd27c3329e/README.md
 
 # sanger.ac.uk
 7,468,392,0,http://www.sanger.ac.uk/science/tools/artemis

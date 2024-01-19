@@ -50,9 +50,10 @@
 
 'github\.com/+[^/]+/+[^/]+/*$':
   title: '#repository-container-header [itemprop=name]'
-  content: '.BorderGrid-cell > h2:matchesOwn(^About$) + p, #readme > .Box-body > * > *'
-  license: a:has(.octicon-law):not(:matches(^View license$))
+  content: .BorderGrid-cell h2:matchesOwn(^About$) + p, .Layout-main .plain > pre, .Layout-main article.markdown-body
+  license: a:has(.octicon-law):not(:matches(^View license$)):not(:matches(^License$))
   language: a[href~=/search\?l=]:has(span:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > span.text-bold
+  javascript: 'true'
 
 'github\.com/+[^/]+/*$':
   title: main header h1
@@ -64,7 +65,7 @@
 
 'github\.com/+[^/]+/+[^/]+/+tree/':
   title: '#repository-container-header strong > a'
-  content: '#readme > div ~ *' # not working
+  content: '#readme > div ~ *'
   javascript: 'true'
 
 'github\.com/+[^/]+/+[^/]+/+issues(/|$)':
@@ -73,7 +74,7 @@
 
 'github\.com/+[^/]+/+[^/]+/+blob/':
   title: '#repository-container-header strong > a'
-  content: '#repos-sticky-header ~ *' # not working
+  content: '#repos-sticky-header ~ *'
   javascript: 'true'
 
 'github\.com/+[^/]+/+[^/]+/+releases(/|$)':
@@ -123,17 +124,18 @@
   title: .title
   content: .app_content_left > .content
 
-'bitbucket\.org':
+'bitbucket\.org/+[^/]+/+[^/]+':
+  title: header h1
+  content: header + div > div > p, header + div article, header + div [data-testid=file-content-not-collapsible]
+  license: '#markdown-header-license + p'
+  javascript: 'true'
+
+'bitbucket\.org/+[^/]+/+[^/]+/+wiki':
   title: .app-header--breadcrumbs li:last-of-type
   content: '#readme > :not(.blank-slate-readme), #wiki-content'
 
-# HtmlUnit currently can't execute the JavaScript
-'bitbucket\.org/+[^/]+/+[^/]+/+src':
-#  title: div[class^=Page__PageContent] header h1
-#  content: div[class^=Page__PageContent] header + div > div > div > p, div[class^=Page__PageContent] article
-  title: ''
-  content: ''
-#  javascript: 'true'
+'bitbucket\.org/+[^/]+/+[^/]+/+raw':
+  content: '*'
 
 'sanger\.ac\.uk':
   title: '#main .panel-outer h2'
@@ -180,8 +182,8 @@
 # can only get the short description and not the whole readme
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.home-panel-title
-  content: '.project-home-panel .home-panel-description > :not(button), #readme .file-content > *'
-  license: '#tree-holder .nav > .nav-item:last-child .project-stat-value'
+  content: .home-panel-description-markdown[itemprop=description], article .blob-viewer[itemprop=about]
+  license: .project-buttons [itemprop=license]
 
 'pypi\.(python\.)?org':
   title: h1.package-header__name

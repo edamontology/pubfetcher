@@ -32,6 +32,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.Loader;
@@ -73,6 +75,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.select.Selector.SelectorParseException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,7 +101,7 @@ import org.edamontology.pubfetcher.core.scrape.Scrape;
 import org.edamontology.pubfetcher.core.scrape.ScrapeSiteKey;
 import org.edamontology.pubfetcher.core.scrape.ScrapeWebpageKey;
 
-public class Fetcher {
+public class Fetcher implements AutoCloseable {
 
 	private static final Logger logger = LogManager.getLogger();
 
@@ -137,7 +143,15 @@ public class Fetcher {
 
 	private static final Pattern F1000_DOI = Pattern.compile("^10.12688/.+\\..+\\..+$");
 
+	private static final Pattern HTTP_OR_HTTPS = Pattern.compile("(?i)^(http|https)://");
+	private static final Pattern HTML = Pattern.compile("(?i)<[\\p{Z}\\p{Cc}\\p{Cf}]*html[>\\p{Z}\\p{Cc}\\p{Cf}]");
+
 	private static Set<ActiveHost> activeHosts = new HashSet<>();
+	private static final int ACTIVE_HOSTS_MAX = 4;
+
+	private final List<WebDriver> drivers = new ArrayList<>();
+	private final List<Boolean> driversFree = new ArrayList<>();
+	private static final int DRIVERS_MAX = 4;
 
 	private final Scrape scrape;
 
@@ -147,6 +161,15 @@ public class Fetcher {
 
 	public Scrape getScrape() {
 		return scrape;
+	}
+
+	@Override
+	public void close() {
+		for (WebDriver driver : drivers) {
+			if (driver != null) {
+				driver.quit();
+			}
+		}
 	}
 
 	private static ActiveHost findActiveHost(String host) {
@@ -179,7 +202,7 @@ public class Fetcher {
 		ActiveHost activeHost = null;
 		synchronized(activeHosts) {
 			boolean waited = false;
-			while ((activeHost = findActiveHost(host)) != null && activeHost.getThreadId() != Thread.currentThread().getId()) {
+			while ((activeHost = findActiveHost(host)) != null && activeHost.getCount() >= ACTIVE_HOSTS_MAX) {
 				waited = true;
 				logger.info("Waiting behind host {}", host);
 				try {
@@ -195,12 +218,31 @@ public class Fetcher {
 			}
 			if (activeHost == null) {
 				activeHost = new ActiveHost(host);
-				activeHosts.add(activeHost);
 			} else {
 				activeHost.increment();
 			}
+			activeHosts.add(activeHost);
 		}
 		return activeHost;
+	}
+
+	private WebDriver makeWebDriver(FetcherArgs fetcherArgs, int driversIndex) {
+		logger.info("Making WebDriver {}", driversIndex);
+		FirefoxOptions options = new FirefoxOptions();
+		if (!fetcherArgs.getPrivateArgs().getSeleniumGeckodriver().isEmpty()) {
+			System.setProperty("webdriver.gecko.driver", fetcherArgs.getPrivateArgs().getSeleniumGeckodriver());
+		}
+		if (!fetcherArgs.getPrivateArgs().getSeleniumFirefox().isEmpty()) {
+			options.setBinary(fetcherArgs.getPrivateArgs().getSeleniumFirefox());
+		}
+		options.addArguments("-headless");
+		FirefoxProfile profile = new FirefoxProfile();
+		options.setProfile(profile);
+		options.setAcceptInsecureCerts(true);
+		options.setPageLoadTimeout(Duration.ofMillis(fetcherArgs.getTimeout() * 2)); // connect timeout plus read timeout
+		//options.setScriptTimeout(Duration.ofMillis(10000));
+		options.addPreference("general.useragent.override", fetcherArgs.getPrivateArgs().getUserAgent());
+		return new FirefoxDriver(options);
 	}
 
 	private void setFetchException(Webpage webpage, Publication publication, String exceptionUrl) {
@@ -219,33 +261,71 @@ public class Fetcher {
 	}
 
 	public Document postDoc(String url, Map<String, String> data, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, null, null, null, null, null, false, false, Method.POST, data, fetcherArgs);
+		return getDoc(url, null, null, null, null, null, null, false, false, Method.POST, data, fetcherArgs, false);
 	}
 
 	public Document getDoc(String url, boolean javascript, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, null, null, null, null, null, javascript, false, Method.GET, null, fetcherArgs);
+		return getDoc(url, null, null, null, null, null, null, javascript, false, Method.GET, null, fetcherArgs, false);
 	}
 
 	private Document getDoc(String url, Publication publication, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, publication, null, null, null, null, false, false, Method.GET, null, fetcherArgs);
+		return getDoc(url, null, publication, null, null, null, null, false, false, Method.GET, null, fetcherArgs, false);
 	}
 
 	private Document getDoc(Webpage webpage, boolean javascript, FetcherArgs fetcherArgs) {
-		return getDoc(webpage.getStartUrl(), webpage, null, null, null, null, null, javascript, false, Method.GET, null, fetcherArgs);
+		return getDoc(webpage.getStartUrl(), webpage, null, null, null, null, null, javascript, false, Method.GET, null, fetcherArgs, false);
 	}
 
 	private Document getDoc(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, FetcherArgs fetcherArgs) {
-		return getDoc(url, null, publication, type, from, links, parts, javascript, false, Method.GET, null, fetcherArgs);
+		return getDoc(url, null, publication, type, from, links, parts, javascript, false, Method.GET, null, fetcherArgs, false);
 	}
 
 	@SuppressWarnings("deprecation")
-	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout, Method method, Map<String, String> data, FetcherArgs fetcherArgs) {
+	private Document getDoc(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, boolean javascript, boolean timeout, Method method, Map<String, String> data, FetcherArgs fetcherArgs, boolean reentry) {
 		Document doc = null;
 
 		logger.info("    {} {}{}{}", method, url, javascript ? " (with JavaScript)" : "", data != null ? (" (with data " + data + ")") : "");
 
-		ActiveHost activeHost = activateHost(getHost(url));
-		if (Thread.currentThread().isInterrupted()) return null;
+		ActiveHost activeHost = null;
+		if (!reentry) {
+			activeHost = activateHost(getHost(url));
+			if (Thread.currentThread().isInterrupted()) return null;
+		}
+		int driversIndex = -1;
+		if (javascript && (fetcherArgs.getPrivateArgs().isSelenium() || !fetcherArgs.getPrivateArgs().getSeleniumGeckodriver().isEmpty() || !fetcherArgs.getPrivateArgs().getSeleniumFirefox().isEmpty())) {
+			synchronized(driversFree) {
+				boolean waited = false;
+				while (true) {
+					for (int i = 0; i < driversFree.size(); ++i) {
+						if (driversFree.get(i)) {
+							driversIndex = i;
+							driversFree.set(i, false);
+							break;
+						}
+					}
+					if (driversIndex < 0 && driversFree.size() < DRIVERS_MAX) {
+						driversIndex = driversFree.size();
+						drivers.add(null);
+						driversFree.add(false);
+					}
+					if (driversIndex >= 0) {
+						break;
+					}
+					logger.info("Waiting for free WebDriver");
+					waited = true;
+					try {
+						driversFree.wait();
+					} catch (InterruptedException e) {
+						logger.error("Interrupt!", e);
+						Thread.currentThread().interrupt();
+						return null;
+					}
+				}
+				if (waited) {
+					logger.info("Found free WebDriver {}", driversIndex);
+				}
+			}
+		}
 
 		try {
 			if (webpage != null) {
@@ -253,36 +333,67 @@ public class Fetcher {
 			}
 
 			if (javascript) {
-				JavascriptThread javascriptThread = new JavascriptThread(url, webpage, fetcherArgs);
+				if (driversIndex >= 0) {
+					WebDriver driver = drivers.get(driversIndex);
+					if (driver == null || driver.manage().timeouts().getPageLoadTimeout().toMillis() != fetcherArgs.getTimeout() * 2) {
+						if (driver != null) {
+							driver.quit();
+						}
+						driver = makeWebDriver(fetcherArgs, driversIndex);
+						drivers.set(driversIndex, driver);
+					}
+					new URL(url);
+					if (!HTTP_OR_HTTPS.matcher(url).find()) {
+						throw new MalformedURLException("Must be http or https");
+					}
+					driver.get(url);
+					String pageSource = driver.getPageSource();
+					if (pageSource.contains("<script src=\"resource://pdf.js/build/pdf.mjs\" type=\"module\"></script>")) {
+						throw new UnsupportedMimeTypeException("Page is a PDF file", "application/pdf", driver.getCurrentUrl());
+					}
+					if (webpage != null) {
+						if (pageSource.contains("<link rel=\"stylesheet\" href=\"resource://content-accessible/plaintext.css\">")) {
+							webpage.setContentType("text/plain");
+						} else if (HTML.matcher(pageSource).find()) {
+							webpage.setContentType("text/html");
+						} else {
+							webpage.setContentType("text/plain");
+						}
+					}
+					doc = Jsoup.parse(pageSource, driver.getCurrentUrl());
+					logger.info("    GOT {} (with JavaScript)", doc.location());
+				} else {
+					JavascriptThread javascriptThread = new JavascriptThread(url, webpage, fetcherArgs);
 
-				Thread t = new Thread(javascriptThread);
-				t.setDaemon(true);
-				t.start();
+					Thread t = new Thread(javascriptThread);
+					t.setDaemon(true);
+					t.start();
 
-				long start = System.currentTimeMillis();
+					long start = System.currentTimeMillis();
 
-				while (!javascriptThread.isFinished()) {
-					try {
-						Thread.sleep(100);
-						long elapsed = System.currentTimeMillis() - start;
-						// 2 * timeout is expected timeout if htmlunit behaves, give twice that amount plus a fixed 1 second independent of timeout arg value
-						// but cap max timeout for javascript at 2 minutes, because letting stuck htmlunit code run beyond that will start to cause errors for other fetching threads 
-						if (elapsed > 2 * 2 * fetcherArgs.getTimeout() + 1000 || elapsed > JAVASCRIPT_HARD_TIMEOUT) { 
-							t.stop(); // alternative is to call stop0(new ThreadDeath()) directly with Thread.class.getDeclaredMethod("stop0") and setAccessible(true)
+					while (!javascriptThread.isFinished()) {
+						try {
+							Thread.sleep(100);
+							long elapsed = System.currentTimeMillis() - start;
+							// 2 * timeout is expected timeout if htmlunit behaves, give twice that amount plus a fixed 1 second independent of timeout arg value
+							// but cap max timeout for javascript at 2 minutes, because letting stuck htmlunit code run beyond that will start to cause errors for other fetching threads
+							if (elapsed > 2 * 2 * fetcherArgs.getTimeout() + 1000 || elapsed > JAVASCRIPT_HARD_TIMEOUT) {
+								t.stop(); // alternative is to call stop0(new ThreadDeath()) directly with Thread.class.getDeclaredMethod("stop0") and setAccessible(true)
+								break;
+							}
+						} catch (InterruptedException e) {
+							logger.error("Exception!", e);
 							break;
 						}
-					} catch (InterruptedException e) {
-						logger.error("Exception!", e);
-						break;
 					}
-				}
 
-				if (javascriptThread.getException() != null) {
-					throw javascriptThread.getException();
-				} else if (javascriptThread.getDoc() == null) {
-					throw new NullPointerException("JavascriptThread has not created a Document!");
-				} else {
-					doc = javascriptThread.getDoc();
+					if (javascriptThread.getException() != null) {
+						throw javascriptThread.getException();
+					} else if (javascriptThread.getDoc() == null) {
+						throw new NullPointerException("JavascriptThread has not created a Document!");
+					} else {
+						doc = javascriptThread.getDoc();
+					}
 				}
 			} else {
 				URL u = new URL(url);
@@ -325,11 +436,11 @@ public class Fetcher {
 			if (links != null) {
 				links.addTriedLink(doc.location(), type, from);
 			}
-		} catch (MalformedURLException e) {
+		} catch (MalformedURLException | ClientProtocolException e) {
 			// if the request URL is not a HTTP or HTTPS URL, or is otherwise malformed
 			logger.warn(e);
 			if (webpage != null || publication != null) {
-				fetchPdf(url, webpage, publication, type, from, links, parts, fetcherArgs);
+				fetchPdf(url, webpage, publication, type, from, links, parts, fetcherArgs, true);
 			}
 		} catch (HttpStatusException e) {
 			// if the response is not OK and HTTP response errors are not ignored
@@ -376,27 +487,27 @@ public class Fetcher {
 			if (e.getMimeType() != null && (APPLICATION_PDF.matcher(e.getMimeType()).matches() || e.getMimeType().startsWith("PB"))) {
 				// webpage/doc urls and doi links can point directly to PDF files
 				if (webpage != null || publication != null) {
-					fetchPdf(e.getUrl(), webpage, publication, type, from, links, parts, fetcherArgs);
+					fetchPdf(e.getUrl(), webpage, publication, type, from, links, parts, fetcherArgs, true);
 				} else {
 					logger.warn(e);
 				}
 			} else {
 				logger.warn(e);
 			}
-		} catch (SocketTimeoutException e) {
+		} catch (SocketTimeoutException | org.openqa.selenium.TimeoutException e) {
 			// if the connection times out
 			logger.warn(e);
-			if (!timeout) {
-				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true, method, data, fetcherArgs);
+			if (!timeout && !fetcherArgs.isQuick()) {
+				doc = getDoc(url, webpage, publication, type, from, links, parts, javascript, true, method, data, fetcherArgs, true);
 			} else {
 				setFetchException(webpage, publication, null);
 			}
 		} catch (javax.net.ssl.SSLHandshakeException | javax.net.ssl.SSLProtocolException e) {
 			logger.warn(e);
-			// jsoup has deprecated validateTLSCertificates(false), so try with htmlunit and setUseInsecureSSL(true)
+			// jsoup has deprecated validateTLSCertificates(false), so try with htmlunit and setUseInsecureSSL(true) or selenium and setAcceptInsecureCerts(true)
 			// in jsoup, Connection.sslSocketFactory(SSLSocketFactory sslSocketFactory) provides a path to implement a workaround
 			if (!javascript && method == Method.GET) {
-				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout, method, data, fetcherArgs);
+				doc = getDoc(url, webpage, publication, type, from, links, parts, true, timeout, method, data, fetcherArgs, true);
 			}
 		} catch (IOException e) {
 			// if a connection or read error occurs
@@ -405,10 +516,19 @@ public class Fetcher {
 			logger.warn("Exception!", e);
 			setFetchException(webpage, publication, null);
 		} finally {
-			if (activeHost != null && !activeHost.decrement()) {
+			if (activeHost != null) {
 				synchronized(activeHosts) {
-					activeHosts.remove(activeHost);
+					activeHost.decrement();
+					if (activeHost.getCount() <= 0) {
+						activeHosts.remove(activeHost);
+					}
 					activeHosts.notifyAll();
+				}
+			}
+			if (driversIndex >= 0) {
+				synchronized(driversFree) {
+					driversFree.set(driversIndex, true);
+					driversFree.notifyAll();
 				}
 			}
 		}
@@ -417,10 +537,10 @@ public class Fetcher {
 	}
 
 	private void fetchPdf(String url, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
-		fetchPdf(url, null, publication, type, from, links, parts, fetcherArgs);
+		fetchPdf(url, null, publication, type, from, links, parts, fetcherArgs, false);
 	}
 
-	private void fetchPdf(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
+	private void fetchPdf(String url, Webpage webpage, Publication publication, PublicationPartType type, String from, Links links, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs, boolean reentry) {
 		// Don't fetch PDF if only keywords are missing
 		// Also, getting a meaningful title or abstract from PDF (if previous methods have failed) is rather doubtful
 		if (webpage == null && (publication == null
@@ -430,8 +550,11 @@ public class Fetcher {
 
 		logger.info("    GET PDF {}", url);
 
-		ActiveHost activeHost = activateHost(getHost(url));
-		if (Thread.currentThread().isInterrupted()) return;
+		ActiveHost activeHost = null;
+		if (!reentry) {
+			activeHost = activateHost(getHost(url));
+			if (Thread.currentThread().isInterrupted()) return;
+		}
 
 		try {
 			URLConnection con;
@@ -601,9 +724,12 @@ public class Fetcher {
 				setFetchException(webpage, publication, null);
 			}
 		} finally {
-			if (activeHost != null && !activeHost.decrement()) {
+			if (activeHost != null) {
 				synchronized(activeHosts) {
-					activeHosts.remove(activeHost);
+					activeHost.decrement();
+					if (activeHost.getCount() <= 0) {
+						activeHosts.remove(activeHost);
+					}
 					activeHosts.notifyAll();
 				}
 			}
@@ -2506,9 +2632,12 @@ public class Fetcher {
 				setFetchException(null, publication, null);
 			}
 		} finally {
-			if (activeHost != null && !activeHost.decrement()) {
+			if (activeHost != null) {
 				synchronized(activeHosts) {
-					activeHosts.remove(activeHost);
+					activeHost.decrement();
+					if (activeHost.getCount() <= 0) {
+						activeHosts.remove(activeHost);
+					}
 					activeHosts.notifyAll();
 				}
 			}
@@ -2592,7 +2721,13 @@ public class Fetcher {
 		if (goon) {
 			logger.info("Fetch links {}", publication.toStringId());
 		}
+		long start = System.currentTimeMillis();
 		for (int linksFetched = 0; linksFetched < LINKS_LIMIT && goon; ++linksFetched) {
+			if (fetcherArgs.isQuick() && System.currentTimeMillis() - start > fetcherArgs.getTimeout() * 3) {
+				logger.info("Fetch links timeout");
+				break;
+			}
+
 			if (isFinal(publication, new PublicationPartName[] {
 					PublicationPartName.title, PublicationPartName.keywords, PublicationPartName.theAbstract, PublicationPartName.fulltext
 				}, parts, false, fetcherArgs)

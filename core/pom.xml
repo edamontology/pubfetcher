@@ -84,6 +84,11 @@
       <artifactId>htmlunit</artifactId>
       <version>${htmlunit.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-firefox-driver</artifactId>
+      <version>${selenium.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

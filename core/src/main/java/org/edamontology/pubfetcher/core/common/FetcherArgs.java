@@ -96,12 +96,21 @@ public class FetcherArgs extends Args {
 	@Parameter(names = { "--" + timeoutId }, validateWith = PositiveInteger.class, description = timeoutDescription)
 	private Integer timeout = timeoutDefault;
 
+	private static final String quickId = "quick";
+	private static final String quickDescription = "Do some optimizations to potentially limit time spent fetching a resource (do not retry in case of timeout; limit time given for found extra links when fetching publication)";
+	private static final Boolean quickDefault = false;
+	@Parameter(names = { "--" + quickId }, arity = 1, description = quickDescription)
+	private Boolean quick = quickDefault;
+
 	@Override
 	protected void addArgs() {
+	}
+
+	protected void addArgs(int retryLimit, int timeout, boolean quick) {
 		args.add(new Arg<>(this::getEmptyCooldown, this::setEmptyCooldown, emptyCooldownDefault, emptyCooldownId, "Empty cooldown", emptyCooldownDescription, null));
 		args.add(new Arg<>(this::getNonFinalCooldown, this::setNonFinalCooldown, nonFinalCooldownDefault, nonFinalCooldownId, "Non-final cooldown", nonFinalCooldownDescription, null));
 		args.add(new Arg<>(this::getFetchExceptionCooldown, this::setFetchExceptionCooldown, fetchExceptionCooldownDefault, fetchExceptionCooldownId, "Fetching exception cooldown", fetchExceptionCooldownDescription, null));
-		args.add(new Arg<>(this::getRetryLimit, this::setRetryLimit, retryLimitDefault, retryLimitId, "Retry limit", retryLimitDescription, null));
+		args.add(new Arg<>(this::getRetryLimit, this::setRetryLimit, retryLimit, retryLimitId, "Retry limit", retryLimitDescription, null));
 		args.add(new Arg<>(this::getTitleMinLength, this::setTitleMinLength, titleMinLengthDefault, 0, null, titleMinLengthId, "Title min. length", titleMinLengthDescription, null));
 		args.add(new Arg<>(this::getKeywordsMinSize, this::setKeywordsMinSize, keywordsMinSizeDefault, 0, null, keywordsMinSizeId, "Keywords min. size", keywordsMinSizeDescription, null));
 		args.add(new Arg<>(this::getMinedTermsMinSize, this::setMinedTermsMinSize, minedTermsMinSizeDefault, 0, null, minedTermsMinSizeId, "Mined terms min. size", minedTermsMinSizeDescription, null));
@@ -109,7 +118,19 @@ public class FetcherArgs extends Args {
 		args.add(new Arg<>(this::getFulltextMinLength, this::setFulltextMinLength, fulltextMinLengthDefault, 0, null, fulltextMinLengthId, "Fulltext min. length", fulltextMinLengthDescription, null));
 		args.add(new Arg<>(this::getWebpageMinLength, this::setWebpageMinLength, webpageMinLengthDefault, 0, null, webpageMinLengthId, "Webpage min. length", webpageMinLengthDescription, null));
 		args.add(new Arg<>(this::getWebpageMinLengthJavascript, this::setWebpageMinLengthJavascript, webpageMinLengthJavascriptDefault, 0, null, webpageMinLengthJavascriptId, "Webpage min. length JS", webpageMinLengthJavascriptDescription, null));
-		args.add(new Arg<>(this::getTimeout, this::setTimeout, timeoutDefault, 0, null, timeoutId, "Timeout", timeoutDescription, null));
+		args.add(new Arg<>(this::getTimeout, this::setTimeout, timeout, 0, null, timeoutId, "Timeout", timeoutDescription, null));
+		args.add(new Arg<>(this::isQuick, this::setQuick, quick, quickId, "Quick", quickDescription, null));
+	}
+
+	public FetcherArgs() {
+		addArgs(retryLimitDefault, timeoutDefault, quickDefault);
+	}
+
+	public FetcherArgs(int retryLimit, int timeout, boolean quick) {
+		this.retryLimit = retryLimit;
+		this.timeout = timeout;
+		this.quick = quick;
+		addArgs(retryLimit, timeout, quick);
 	}
 
 	@ParametersDelegate
@@ -214,5 +235,12 @@ public class FetcherArgs extends Args {
 	}
 	public void setPrivateArgs(FetcherPrivateArgs privateArgs) {
 		this.privateArgs = privateArgs;
+	}
+
+	public Boolean isQuick() {
+		return quick;
+	}
+	public void setQuick(Boolean quick) {
+		this.quick = quick;
 	}
 }

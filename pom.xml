@@ -74,6 +74,7 @@
     <mapdb.version>3.0.10</mapdb.version>
     <jackson.version>2.15.2</jackson.version>
     <htmlunit.version>2.70.0</htmlunit.version>
+    <selenium.version>4.16.1</selenium.version>
     <log4j.version>2.20.0</log4j.version>
     <slf4j.version>2.0.9</slf4j.version>
   </properties>

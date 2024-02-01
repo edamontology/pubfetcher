@@ -55,7 +55,7 @@ public class Scrape {
 
 	private final List<Pattern> javascript = new ArrayList<>();
 
-	private final List<Pattern> off = new ArrayList<>();
+	private final List<Pattern> restart = new ArrayList<>();
 
 	private final Map<Pattern, Map<String, String>> webpages = new LinkedHashMap<>();
 
@@ -101,12 +101,12 @@ public class Scrape {
 
 		List<String> javascriptSection = (List<String>) nextSection(it, journals, 3, 4, List.class);
 		if (javascriptSection != null) {
-			javascript.addAll(makeJavascriptOff(javascriptSection, journals, true));
+			javascript.addAll(makeJavascriptRestart(javascriptSection, journals, true));
 		}
 
-		List<String> offSection = (List<String>) nextSection(it, journals, 4, 4, List.class);
-		if (offSection != null) {
-			off.addAll(makeJavascriptOff(offSection, journals, false));
+		List<String> restartSection = (List<String>) nextSection(it, journals, 4, 4, List.class);
+		if (restartSection != null) {
+			restart.addAll(makeJavascriptRestart(restartSection, journals, false));
 		}
 
 		validateTooManySections(it, journals, 4);
@@ -167,24 +167,24 @@ public class Scrape {
 		}
 		return regex;
 	}
-	private List<Pattern> makeJavascriptOff(List<String> javascriptOffString, String name, Boolean javascript) throws ParseException {
-		List<Pattern> javascriptOff = new ArrayList<>();
-		for (int i = 0; i < javascriptOffString.size(); ++i) {
+	private List<Pattern> makeJavascriptRestart(List<String> javascriptRestartString, String name, Boolean javascript) throws ParseException {
+		List<Pattern> javascriptRestart = new ArrayList<>();
+		for (int i = 0; i < javascriptRestartString.size(); ++i) {
 			String j;
 			try {
-				j = javascriptOffString.get(i);
+				j = javascriptRestartString.get(i);
 			} catch (ClassCastException e) {
-				throw new ParseException("Syntax error in " + (javascript ? "javascript" : "off")  + " regex in scraping rules '" + name + "'! (" + (javascript ? "javascript" : "off") + " pos " + (i + 1) + ")\n" + e, i + 1);
+				throw new ParseException("Syntax error in " + (javascript ? "javascript" : "restart")  + " regex in scraping rules '" + name + "'! (" + (javascript ? "javascript" : "restart") + " pos " + (i + 1) + ")\n" + e, i + 1);
 			}
 			if (j == null || j.isEmpty()) {
-				throw new ParseException((javascript ? "Javascript" : "Off") + " regex cannot be empty in scraping rules '" + name + "'! (" + (javascript ? "javascript" : "off") + " pos " + (i + 1) + ")", i + 1);
+				throw new ParseException((javascript ? "Javascript" : "Restart") + " regex cannot be empty in scraping rules '" + name + "'! (" + (javascript ? "javascript" : "restart") + " pos " + (i + 1) + ")", i + 1);
 			}
 			if (j.charAt(0) != '^') {
 				j = "(?i)^https?://(www\\.)?" + j;
 			}
-			javascriptOff.add(Pattern.compile(j));
+			javascriptRestart.add(Pattern.compile(j));
 		}
-		return javascriptOff;
+		return javascriptRestart;
 	}
 
 	private Map<Pattern, Map<String, String>> makeWebpages(Map<String, Map<String, String>> yaml, String name) throws ParseException {
@@ -349,14 +349,14 @@ public class Scrape {
 		}
 		return false;
 	}
-	public boolean getOff(String url) {
+	public boolean getRestart(String url) {
 		try {
 			url = new URL(url).toString();
 		} catch (MalformedURLException e) {
 			logger.error(e);
 			return false;
 		}
-		for (Pattern pattern : off) {
+		for (Pattern pattern : restart) {
 			if (pattern.matcher(url).find()) {
 				return true;
 			}

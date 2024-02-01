@@ -79,8 +79,8 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-scrape-javascript" }, description = "Output \"true\" or \"false\" depending on whether JavaScript will be used or not for fetching the given publication URL")
 	String scrapeJavascript = null;
 
-	@Parameter(names = { "-scrape-off" }, description = "Output \"true\" or \"false\" depending on whether fetching for the given publication URL is turned off or not")
-	String scrapeOff = null;
+	@Parameter(names = { "-scrape-restart" }, description = "Output \"true\" or \"false\" depending on whether Selenium WebDriver will be restarted for fetching the given publication URL")
+	String scrapeRestart = null;
 
 	@Parameter(names = { "-scrape-webpage" }, description = "Output all CSS selectors used for extracting webpage content and metadata from the given URL (or \"null\" if not found or URL invalid)")
 	String scrapeWebpage = null;

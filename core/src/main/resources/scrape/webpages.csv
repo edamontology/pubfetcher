@@ -7,8 +7,8 @@ title,content,license,language,webpage
 10,247,5,8,http://www.bioconductor.org/packages//2.13/bioc/html/DAVIDQuery.html
 
 # bioconductor.org vignettes
-23,54740,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,30071,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+23,34869,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
+69,22909,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
@@ -21,9 +21,9 @@ title,content,license,language,webpage
 9,422,11,24,https://github.com/arq5x/poretools
 
 # github.com user
-7,1301,0,0,https://github.com/SeqWare
-28,1361,0,0,https://github.com/BeatsonLab-MicrobialGenomics
-37,855,0,0,https://github.com/brisskit-uol/
+7,1340,0,0,https://github.com/SeqWare
+28,1512,0,0,https://github.com/BeatsonLab-MicrobialGenomics
+37,954,0,0,https://github.com/brisskit-uol/
 
 # github.com wiki
 4,3304,0,0,https://github.com/synergy-zju/gips/wiki
@@ -35,7 +35,7 @@ title,content,license,language,webpage
 # github.com tree
 9,4371,0,0,https://github.com/rmtheis/mummergpu/tree/master/mummergpu-2.0
 6,69,0,0,https://github.com/buotex/BICEPS/tree/master/libs/pepsplice
-5,20852,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
+5,20736,0,0,https://github.com/seqan/seqan/tree/master/apps/razers
 5,718,0,0,https://github.com/gkno/seqan/tree/master/core/apps/seqcons
 14,0,0,0,https://github.com/NCIP/cagrid-general/tree/master/demos/06annual/workflow/JRProteomicsGridSkeletonValue-1.0/src/org/globus/cagrid/RProteomics
 
@@ -94,10 +94,10 @@ title,content,license,language,webpage
 25,3979,0,0,https://sourceforge.net/p/metabolic-network-sgl/git/ci/master/tree/
 
 # code.google.com
-6,2025,10,0,https://code.google.com/archive/p/acpype
-5,431,14,0,https://code.google.com/archive/p/aquad/
-6,2615,18,0,https://code.google.com/archive/p/tag-db
-24,2976,0,0,https://code.google.com/archive/p/ehu-bio/wikis/PAnalyzer.wiki
+6,1997,10,0,https://code.google.com/archive/p/acpype
+5,429,14,0,https://code.google.com/archive/p/aquad/
+6,2591,18,0,https://code.google.com/archive/p/tag-db
+24,2941,0,0,https://code.google.com/archive/p/ehu-bio/wikis/PAnalyzer.wiki
 
 # cran.r-project.org
 87,477,5,0,https://cran.r-project.org/web/packages/linkcomm/index.html
@@ -134,10 +134,10 @@ title,content,license,language,webpage
 8,1772,699,0,http://www.sanger.ac.uk/science/tools/ssahasnp
 
 # tools.proteomecenter.org
-14,1004,0,0,http://tools.proteomecenter.org/Libra.php
-0,549,0,0,http://tools.proteomecenter.org/mzStar.php
-0,2588,0,0,http://tools.proteomecenter.org/XLink.php
-18,10143,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
+14,1004,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:Libra
+0,547,0,0,http://tools.proteomecenter.org/mzStar.php
+0,2569,0,0,http://tools.proteomecenter.org/XLink.php
+18,10132,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
 
 # genome.sph.umich.edu
 3,4116,0,0,https://genome.sph.umich.edu/wiki/Arf
@@ -158,14 +158,15 @@ title,content,license,language,webpage
 8,397,0,0,http://compomics.github.io/projects/reporter.html
 
 # rostlab.org wiki
-7,8270,0,0,https://rostlab.org/owiki/index.php/CHOPPER
-10,1456,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
+#7,8270,0,0,https://rostlab.org/owiki/index.php/CHOPPER
+#10,1456,0,0,https://rostlab.org/owiki/index.php/Uniqueprot
 
 # rna.informatik.uni-freiburg.de
-25,3387,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
-27,2258,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
+25,3349,0,0,http://rna.informatik.uni-freiburg.de/CopraRNA/Input.jsp
+27,2240,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
 
 # gitlab.com
+# can only get the short description and not the whole readme
 11,201,0,0,https://gitlab.com/CarlBrunius/sampleDrift
 6,134,9,0,https://gitlab.com/Gustafsson-lab/lassim
 7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K

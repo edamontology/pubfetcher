@@ -200,8 +200,8 @@ public final class PubFetcherMethods {
 	private static void scrapeJavascript(String url, Fetcher fetcher) {
 		System.out.println(fetcher.getScrape().getJavascript(url));
 	}
-	private static void scrapeOff(String url, Fetcher fetcher) {
-		System.out.println(fetcher.getScrape().getOff(url));
+	private static void scrapeRestart(String url, Fetcher fetcher) {
+		System.out.println(fetcher.getScrape().getRestart(url));
 	}
 	private static void scrapeWebpage(String url, Fetcher fetcher) {
 		System.out.println(fetcher.getScrape().getWebpage(url));
@@ -1782,7 +1782,7 @@ public final class PubFetcherMethods {
 		if (args.scrapeSelector != null) scrapeSelector(args.scrapeSelector.get(0), ScrapeSiteKey.valueOf(args.scrapeSelector.get(1)), fetcher);
 		if (args.scrapeWebpage != null) scrapeWebpage(args.scrapeWebpage, fetcher);
 		if (args.scrapeJavascript != null) scrapeJavascript(args.scrapeJavascript, fetcher);
-		if (args.scrapeOff != null) scrapeOff(args.scrapeOff, fetcher);
+		if (args.scrapeRestart != null) scrapeRestart(args.scrapeRestart, fetcher);
 
 		if (args.isPmid != null) isPmid(args.isPmid);
 		if (args.isPmcid != null) isPmcid(args.isPmcid);

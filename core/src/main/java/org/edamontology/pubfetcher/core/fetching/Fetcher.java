@@ -335,7 +335,7 @@ public class Fetcher implements AutoCloseable {
 			if (javascript) {
 				if (driversIndex >= 0) {
 					WebDriver driver = drivers.get(driversIndex);
-					if (driver == null || driver.manage().timeouts().getPageLoadTimeout().toMillis() != fetcherArgs.getTimeout() * 2) {
+					if (driver == null || scrape.getRestart(url) || driver.manage().timeouts().getPageLoadTimeout().toMillis() != fetcherArgs.getTimeout() * 2) {
 						if (driver != null) {
 							driver.quit();
 						}
@@ -2417,11 +2417,6 @@ public class Fetcher implements AutoCloseable {
 				}
 			} catch (MalformedURLException e) {
 			}
-		}
-
-		if (scrape.getOff(url)) {
-			logger.info("    Fetching of {} turned off", url);
-			return;
 		}
 
 		boolean javascript = scrape.getJavascript(url);

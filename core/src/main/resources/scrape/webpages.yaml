@@ -34,10 +34,10 @@
   content: ''
 
 'bioconductor\.org.*/bioc/+html/':
-  title: '#PageContent > h1'
-  content: '#PageContent > div > h2, #PageContent > div > h2 + p + p, #PageContent table td + td:matches(^R Script$) + td, #PageContent table.details td:matchesOwn(^biocViews$) + td'
-  license: .details td:matchesOwn(^License$) + td
-  language: '#PageContent table td + td:matches(^R Script$)'
+  title: '#PageContent > h1, section.content > h1'
+  content: '#PageContent > div > h2, #PageContent > div > h2 + p + p, #PageContent table td + td:matches(^R Script$) + td, #PageContent table.details td:matchesOwn(^biocViews$) + td, section.content > div > h2, section.content .package-info > p:first-child + p, section.content table tr:has(td:matches(^R Script$)) td:first-child , section.content table td:matchesOwn(^biocViews$) + td'
+  license: .details td:matchesOwn(^License$) + td, section.content table td:matchesOwn(^License$) + td
+  language: '#PageContent table td + td:matches(^R Script$), section.content table td + td:matches(^R Script$)'
 
 'bioconductor\.org.*/bioc/+vignettes/':
   title: head > title
@@ -170,9 +170,9 @@
   title: .page-content > h1
   content: .page-content > :not(h1):not(p:matches(^Go to top of page$))
 
-'rostlab\.org/+owiki/':
-  title: h1.firstHeading
-  content: '#mw-content-text > :not(#toc)'
+#'rostlab\.org/+owiki/':
+#  title: h1.firstHeading
+#  content: '#mw-content-text > :not(#toc)'
 
 'rna\.informatik\.uni-freiburg\.de':
   title: .content > h1
@@ -182,7 +182,7 @@
 # can only get the short description and not the whole readme
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.home-panel-title
-  content: .home-panel-description-markdown[itemprop=description], article .blob-viewer[itemprop=about]
+  content: .home-panel-description-markdown[itemprop=description] .read-more-content, article .blob-viewer[itemprop=about]
   license: .project-buttons [itemprop=license]
 
 'pypi\.(python\.)?org':

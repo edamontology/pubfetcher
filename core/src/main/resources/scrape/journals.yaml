@@ -43,11 +43,10 @@
 'journals\.plos\.org': plos
 'biorxiv\.org': biorxiv
 'biorxiv\.org/.+\.full/*[^/]*$': biorxiv_full
-'pubs\.acs\.org/+doi/+abs/+10': acs
-'pubs\.acs\.org/+doi/+(full/+)?10': acs_full
+'pubs\.acs\.org': acs
 'arxiv\.org': arxiv
 'mcponline\.org': highwire2 # redirected to sciencedirect
-'pnas\.org': highwire2 # not working, Cloudflare, turned off
+'pnas\.org': highwire2
 'ieeexplore\.ieee\.org': ieee
 '(online\.)?liebertpub\.com/+doi/+abs/+10': liebertpub
 '(online\.)?liebertpub\.com/+doi/+(full/+)?10': liebertpub_full
@@ -83,7 +82,7 @@
 '(internal-www\.)?frontiersin\.org': frontiersin
 'digital-library\.theiet\.org': theiet
 '[a-zA-Z0-9.-]*bmj\.com': bmj
-'nrcresearchpress\.com': nrcresearchpress
+'cdnsciencepub\.com': cdnsciencepub
 'genetics\.org': highwire2 # redirected to oup
 'plantphysiol\.org': highwire2 # redirected to oup
 'plantcell\.org': highwire2 # redirected to oup
@@ -95,8 +94,7 @@
 'zenodo\.org': zenodo
 'future-science\.com': liebertpub_full
 'jstatsoft\.org': jstatsoft
-'journals\.sagepub\.com/+doi/+abs/+10': sagepub
-'journals\.sagepub\.com/+doi/+(full/+)?10': sagepub_full
+'journals\.sagepub\.com': sagepub
 '[a-zA-Z0-9.-]*springeropen\.com': biomedcentral
 'ashpublications\.org': silverchair
 'portlandpress\.com': silverchair
@@ -108,7 +106,6 @@
 'g3journal\.org': highwire2 # redirected to oup
 'wellcomeopenresearch\.org/+articles': f1000research_articles # not working, MathJax
 'gatesopenresearch\.org/+articles': f1000research_articles
-'aasopenresearch\.org/+articles': f1000research_articles # not working, MathJax
 'researchsquare\.com/+article': researchsquare
 'medrxiv\.org': biorxiv
 'medrxiv\.org/.+\.full/*[^/]*$': biorxiv_full
@@ -174,7 +171,6 @@ citeseerx:
   pdf_src: /summary\?
   pdf_dst: /download?repid=rep1&type=pdf&
 
-# not working, Cloudflare, turned off
 wiley:
   doi: .article-citation .epub-doi
   title: .article-citation .citation__title
@@ -182,10 +178,9 @@ wiley:
   abstract: .article-section__abstract > .article-section__content > *
   fulltext_a: .coolBar .go-to-full
   pdf_a: .coolBar .PdfLink > .pdf-download
-  corresp_author_names: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .author-name'
-  corresp_author_emails: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) span:matchesOwn(^E-mail address:$) + a, .loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .corr-email'
+  corresp_author_names: '.loa-authors .author-info:has(.author-type:matchesOwn(^Corresponding Author$)) .author-name'
+  corresp_author_emails: '.loa-authors .author-info:has(.author-type:matchesOwn(^Corresponding Author$)) a.sm-account__link, .loa-authors .author-info:has(.author-type:matchesOwn(^Corresponding Author$)) a.corr-email'
 
-# not working, Cloudflare, turned off
 wiley_full:
   doi: .article-citation .epub-doi
   title: .article-citation .citation__title
@@ -193,8 +188,8 @@ wiley_full:
   abstract: .article-section__abstract > .article-section__content > *
   fulltext: .article-section__full > [id].article-section__content > :not(.article-section__sub-content), .article-section__full > .article-section__supporting, .article-section__full .article-section__sub-content > :not(.article-section__sub-content)
   pdf_a: .coolBar .PdfLink > .pdf-download
-  corresp_author_names: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .author-name'
-  corresp_author_emails: '.loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) span:matchesOwn(^E-mail address:$) + a, .loa-authors .accordion-tabbed__tab-mobile:has(.author-type:matchesOwn(^Corresponding Author$)) .corr-email'
+  corresp_author_names: '.loa-authors .author-info:has(.author-type:matchesOwn(^Corresponding Author$)) .author-name'
+  corresp_author_emails: '.loa-authors .author-info:has(.author-type:matchesOwn(^Corresponding Author$)) a.sm-account__link, .loa-authors .author-info:has(.author-type:matchesOwn(^Corresponding Author$)) a.corr-email'
 
 sciencedirect:
   doi: 'article #article-identifier-links > .doi'
@@ -220,7 +215,7 @@ springer:
   subtitle: '.page-title > .page-title__subtitle, #book-header [data-test=book-subtitle]'
   keywords: .Keyword, .c-article-subject-list__subject
   abstract: 'section.Abstract > p, #book-description > *, #Abs1-content > p:not(:matches(^These keywords were added by machine and not by the authors)), #about-this-book + div, article div[data-article-body=true] section[data-title=Definition] .c-article-section__content'
-  fulltext: '#body > section > *:not(#preview-section), article div[data-article-body=true] section:not([data-title=Definition]) > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section):not(#copyright-information-section):not(#chapter-info-section):not(#editor-information-section):not(#preview-section):not([id~=Bib[0-9]*-section]) > *'
+  fulltext: '#body > section > *:not(#preview-section), article div[data-article-body=true] section:not([data-title=Definition]):not([data-title=Inline Recommendations]) > :not(#abstract-section):not(#Abs1-section):not(#references-section):not(#Bib1-section):not(#acknowledgements-section):not(#Ack1-section):not(#author-information-section):not(#author-contribution-section):not(#article-comments-section):not(#rightslink-section):not(#article-info-section):not(#further-reading-section):not(#ethics-section):not(#copyright-information-section):not(#chapter-info-section):not(#editor-information-section):not(#preview-section):not([id~=Bib[0-9]*-section]):not(#publish-with-us-section) > *'
   pdf_a: '.test-pdf-link > :not([id$=no_access_banner]) > a, .c-pdf-download__link:not(:has([data-test=access-via-institution])):not([data-track-label=inline link]):not([data-test=front-matter-pdf]):not([data-test=back-matter-pdf])'
   corresp_author_names: .c-article-author-list a[data-test=author-name]:has(.u-icon)
   corresp_author_emails: '#corresponding-author-list > a'
@@ -270,10 +265,8 @@ highwire2:
   doi: header .self-citation > a, header .doi
   title: header h1
   abstract: '#abstracts section > div'
-  fulltext: '#bodymatter > div > div:not(:has(.denial-block)), #bodymatter section:not([id=acknowledgments]) > :not(section)'
-  pdf_src: /+doi/+full/+10
-  pdf_dst: /doi/epdf/10
-  pdf_a: '#header .info-panel .btn-pdf, #core-collateral-info .core-download > a'
+  fulltext: '#bodymatter > div > div:not(:has(.denial-block)), #bodymatter section:not([id=acknowledgments]):not(.denial-block) > :not(section)'
+  pdf_a: '#header .info-panel .btn-pdf, #core-collateral-info .core-download > a, .after-credits a:matches(^Download PDF$)'
   corresp_author_names: header .authors [property=author]:has(a[property=email]) > a:first-child
   corresp_author_emails: header .authors [property=author]:has(a[property=email]) > a[property=email]
 
@@ -302,29 +295,14 @@ biorxiv_full:
   corresp_author_names: '[class~=^author-tooltip-[0-9]+$]:has(.author-corresp-email-link) .author-tooltip-name'
   corresp_author_emails: '[class~=^author-tooltip-[0-9]+$] .author-corresp-email-link a'
 
-# not working, Cloudflare, turned off
 acs:
   doi: main .article_header-doiurl
   title: main .article_header-title
   subtitle: main .article_header-subtitle
-  keywords: main .article_keywords-container li # not working with javascript
-  abstract: '#abstractBox > :not(:has(.figure-bottom-links))'
-  fulltext_src: /+doi/+abs/+10
-  fulltext_dst: /doi/full/10
-  pdf_src: /+doi/+abs/+10
-  pdf_dst: /doi/pdf/10
-  corresp_author_names: .loa span:has(.author-xref-symbol:matches(^\*$)) > .hlFld-ContribAuthor > a
-  corresp_author_emails: .affiliations .corresp-info a
-
-# not working, Cloudflare, turned off
-acs_full:
-  doi: main .article_header-doiurl
-  title: main .article_header-title
-  subtitle: main .article_header-subtitle
-  keywords: main .article_keywords-container li # not working with javascript
+  #keywords: main .article_header-taxonomy li # truncated
   abstract: '#abstractBox > :not(:has(.figure-bottom-links))'
   fulltext: 'main .article_content-left > .NLM_sec > :not(.article_content-header), main .article_content-left > .NLM_sec > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .article_supporting-info > :not(.article_content-header), main .article_content-left > .NLM_back > .article_supporting-info > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .NLM_sec'
-  pdf_src: /+doi/+(full/+)?10
+  pdf_src: /+doi/+((abs|full)/+)?10
   pdf_dst: /doi/pdf/10
   corresp_author_names: .loa span:has(.author-xref-symbol:matches(^\*$)) > .hlFld-ContribAuthor > a
   corresp_author_emails: .affiliations .corresp-info a
@@ -433,21 +411,19 @@ dtu:
   keywords_split: .keywords > li
   abstract: .publication-content > .rendering_abstractportal
 
-# not working, Cloudflare, turned off
 tandfonline:
   doi: .dx-doi
   title: h1 > .NLM_article-title
   keywords: .abstractKeywords a
-  abstract: .abstractSection > *
+  abstract: article .hlFld-Abstract > :not(h2)
   fulltext_a: .tab-nav .show-full
   pdf_a: .tab-nav .show-pdf
 
-# not working, Cloudflare, turned off
 tandfonline_full:
   doi: .dx-doi
   title: h1 > .NLM_article-title
   keywords: .abstractKeywords a
-  abstract: .abstractSection > *
+  abstract: article .hlFld-Abstract > :not(h2)
   fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.hidden):matchText, .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.hidden) > :not(.ref-lnk):not(.hidden)
   pdf_a: .tab-nav .show-pdf
 
@@ -478,7 +454,6 @@ biecoll:
   abstract: b:matchesOwn(^Abstract) + div
   pdf_a: .rahmendownload > a
 
-# not working, Cloudflare, turned off
 jbc_full:
   doi: '#articleHeader .article-header__doi__value'
   title: '#articleHeader h1'
@@ -505,16 +480,13 @@ embnet_full:
   abstract: '#content .abstract-box > p ~ p'
   fulltext: '#content .abstract-box ~ :not(ol):not(.references)'
 
-# not working, Cloudflare, turned off
 sciencemag:
-  title: article.primary header h1
-  abstract: article.primary .article > [id^=abstract] > p
-  fulltext_src: /*$
-  fulltext_dst: .full
-  pdf_src: /doi/(.+)$
-  pdf_dst: /doi/pdf/$1?download=true
-  corresp_author_names: .contributor-list > .contributor:has(.xref-corresp) .name
-  corresp_author_emails: .corresp-list > .corresp .em-addr a, .fn-corresp .em-addr a
+  title: article h1
+  abstract: '#abstract > :not(h2), #structured-abstract > :not(h2)'
+  fulltext: '#bodymatter > div > div:not(.alert-signup__dropzone), #bodymatter section:not(.denial-block) > :not(section), #supplementary-materials'
+  pdf_a: .after-credits a:matches(^Download PDF$)
+  corresp_author_names: .core-authors .heading:has(.xref:matches(\*))
+  corresp_author_emails: .core-authors-notes [role=doc-footnote] a
 
 bioinformation:
   title: tr > td:matches(^Title$) ~ td:last-of-type
@@ -547,7 +519,6 @@ iospress:
   title: '#contentcolumn .metadata > .title'
   abstract: '#contentcolumn .metadata > .abstract > p'
 
-# not working, Cloudflare, turned off
 researchgate:
   doi: .research-detail-header-section__metadata > div:matchesOwn(^DOI:) > a
   title: main h1
@@ -572,12 +543,12 @@ bmj:
   abstract: '#article-top .article > .abstract > :not(h2)'
   corresp_author_emails: .corresp .em-addr a
 
-# not working, Cloudflare, turned off
-nrcresearchpress:
-  doi: '#content .citationLine > a'
-  title: '#content h1.article-title'
-  keywords: '#content .keywordsLabel ~ a'
-  abstract: '#content .abstractInFull'
+cdnsciencepub:
+  doi: article .doi
+  title: article h1
+  abstract: '#abstract > :not(h2)'
+  corresp_author_names: .core-authors [property=author]:has(a[property=email]) h5 # will also contain email text
+  corresp_author_emails: .core-authors a[property=email]
 
 zenodo:
   title: 'h1#record-title'
@@ -591,22 +562,14 @@ jstatsoft:
   abstract: article .article-abstract
   pdf_a: .article-more-details a:has(.fa-file-pdf)
 
-# not working, Cloudflare, turned off
 sagepub:
-  doi: .articleMeta .doiWidgetLink
-  title: .hlFld-Title > .publicationContentTitle > h1
-  keywords: .abstractKeywords > .hlFld-KeywordText a
-  abstract: .hlFld-Abstract > .abstractSection > *
-  fulltext_a: .showFullText > a
-  pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
-
-sagepub_full:
-  doi: .articleMeta .doiWidgetLink
-  title: .hlFld-Title > .publicationContentTitle > h1
-  keywords: .abstractKeywords > .hlFld-KeywordText a
-  abstract: .hlFld-Abstract > .abstractSection > *
-  fulltext: .hlFld-Fulltext > :not(.acknowledgement):not(.fn-group):not(.sectionInfo):not(.references)
-  pdf_a: .pdf-wrapper a[data-item-name=download-PDF]
+  doi: article .doi
+  title: article h1
+  keywords: '#tab-information [property=keywords] li'
+  abstract: '#abstract > :not(h2)'
+  fulltext: '#bodymatter > div > div, #bodymatter section > :not(section), #supplementary-materials'
+  pdf_src: /doi/+(full/)?
+  pdf_dst: /doi/pdf/
 
 silverchair:
   doi: '#main .citation-doi > a'
@@ -637,7 +600,7 @@ preprints:
 chemrxiv:
   doi: main .DOIInformation a > div
   title: main h1
-  keywords: main h2:matchesOwn(^Keywords$) + div a
+  keywords: main .article-keyword-tags .article-keyword-tag a
   abstract: main .Abstract
 
 iop:
@@ -674,6 +637,7 @@ osf:
 aimspress:
   doi: .article-list-time a[href^=https://doi.org/]
   title: .article-title h1
+  keywords: .article-keyword a
   abstract: '#Abstract abstract > *'
   fulltext: '#FullTextWrap > :not(#Abstract-list):not(.article-abstract):not(#References-list):not(#References)'
   corresp_author_names: .article-author > li:has(.com-mail) .mainColor
@@ -704,34 +668,34 @@ cambridge:
 - 'osf\.io'
 - 'aimspress\.com/+article/+doi' # for fulltext
 
- # email-protection
-- 'aasopenresearch\.org'
-- 'pubs\.acs\.org'
-- 'aip\.scitation\.org'
-
 # Cloudflare DDoS
-- 'onlinelibrary\.wiley\.com'
+- '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com'
 - 'pnas\.org'
 - '[a-zA-Z0-9.-]*asm\.org'
 - '[a-zA-Z0-9.-]*science\.org'
-- 'nrcresearchpress\.com'
+- 'nrcresearchpress\.com' # redirects to cdnsciencepub
+- 'cdnsciencepub\.com'
 - 'journals\.sagepub\.com'
+- 'worldscientific\.com'
+- 'tandfonline\.com/+doi/'
+- 'jbc\.org/.+full(text)?$'
+- 'pubs\.acs\.org/+doi/'
 
 ---
 
-# off
+# restart
 
 # '(?i)^https?://(www\.)?' is automatically put in front of regex
 # except when regex already begins with '^'
 
-# Cloudflare "Checking if the site connection is secure" and PDF also not accessible
-- '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com/+doi/'
-- 'pubs\.acs\.org/+doi/'
+- '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com'
 - 'pnas\.org'
+- '[a-zA-Z0-9.-]*asm\.org'
+- '[a-zA-Z0-9.-]*science\.org'
+- 'nrcresearchpress\.com' # redirects to cdnsciencepub
+- 'cdnsciencepub\.com'
+- 'journals\.sagepub\.com'
 - 'worldscientific\.com'
 - 'tandfonline\.com/+doi/'
-- 'jbc\.org/.+fulltext$'
-- '[a-zA-Z0-9.-]*science\.org'
-- 'researchgate\.net'
-- 'nrcresearchpress\.com'
-- 'journals\.sagepub\.com'
+- 'jbc\.org/.+full(text)?$'
+- 'pubs\.acs\.org/+doi/'

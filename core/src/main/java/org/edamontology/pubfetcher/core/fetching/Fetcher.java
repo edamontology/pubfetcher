@@ -75,10 +75,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.select.Selector.SelectorParseException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -137,7 +140,7 @@ public class Fetcher implements AutoCloseable {
 	private static final Pattern NAME_INITIAL_PERIOD = Pattern.compile("[.]");
 
 	private static final Pattern ELSEVIER_REDIRECT = Pattern.compile("^https?://linkinghub\\.elsevier\\.com/retrieve/pii/(.+)$");
-	private static final Pattern SCIENCEDIRECT = Pattern.compile("^https?://(www\\.)?sciencedirect\\.com/.+$");
+	private static final Pattern SCIENCEDIRECT = Pattern.compile("(?i)^https?://(www\\.)?sciencedirect\\.com/.+$");
 	private static final String SCIENCEDIRECT_LINK = "https://www.sciencedirect.com/science/article/pii/";
 	private static final String LIEBERTPUB_COOKIE_ABSENT = "https://www.liebertpub.com/action/cookieAbsent";
 
@@ -347,6 +350,21 @@ public class Fetcher implements AutoCloseable {
 						throw new MalformedURLException("Must be http or https");
 					}
 					driver.get(url);
+					String waitUntil = scrape.getSelector(scrape.getSite(driver.getCurrentUrl()), ScrapeSiteKey.wait_until);
+					if (waitUntil == null) {
+						Map<String, String> scrapeWebpage = scrape.getWebpage(driver.getCurrentUrl());
+						if (scrapeWebpage != null) {
+							waitUntil = scrapeWebpage.get(ScrapeWebpageKey.wait_until.toString());
+						}
+					}
+					if (waitUntil != null) {
+						WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(fetcherArgs.getTimeout()));
+						try {
+							wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(waitUntil)));
+						} catch (org.openqa.selenium.TimeoutException e) {
+							logger.error(e);
+						}
+					}
 					String pageSource = driver.getPageSource();
 					if (pageSource.contains("<script src=\"resource://pdf.js/build/pdf.mjs\" type=\"module\"></script>")) {
 						throw new UnsupportedMimeTypeException("Page is a PDF file", "application/pdf", driver.getCurrentUrl());
@@ -2428,8 +2446,7 @@ public class Fetcher implements AutoCloseable {
 		if (doc != null) {
 			Matcher elsevier_id = ELSEVIER_REDIRECT.matcher(doc.location());
 			if (elsevier_id.matches()) {
-				// using JavaScript does not help get the fulltext
-				doc = getDoc(SCIENCEDIRECT_LINK + elsevier_id.group(1), publication, type, from, links, parts, false, fetcherArgs);
+				doc = getDoc(SCIENCEDIRECT_LINK + elsevier_id.group(1), publication, type, from, links, parts, true, fetcherArgs);
 			}
 		}
 

@@ -166,10 +166,9 @@ title,content,license,language,webpage
 27,2240,0,0,http://rna.informatik.uni-freiburg.de/MARNA/Input.jsp
 
 # gitlab.com
-# can only get the short description and not the whole readme
-11,201,0,0,https://gitlab.com/CarlBrunius/sampleDrift
-6,134,9,0,https://gitlab.com/Gustafsson-lab/lassim
-7,118,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
+11,2658,0,0,https://gitlab.com/CarlBrunius/sampleDrift
+6,6445,9,0,https://gitlab.com/Gustafsson-lab/lassim
+7,8231,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe

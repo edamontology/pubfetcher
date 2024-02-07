@@ -65,21 +65,19 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,29,41,0,0,0,2,0,https://onlinelibrary.wiley.com/doi/full/10.1002/9780471650126.dob0949
 
 # sciencedirect
-# fulltext not working
-# pdf_a not working
 0,0,28,63,0,782,0,1,11,https://doi.org/10.1016/0006-2944(75)90147-7
 0,0,28,126,0,1695,0,1,0,https://doi.org/10.1016/0888-7543(91)90071-L
 0,0,34,94,0,1340,0,1,0,https://doi.org/10.1016/B978-0-12-385120-8.00008-5
-0,0,14,84,0,1471,0,1,13,https://doi.org/10.1086/519795
-0,0,26,80,0,1419,0,1,29,https://doi.org/10.1016/j.cels.2016.07.001
+0,0,14,84,0,1471,64955,2,13,https://doi.org/10.1086/519795
+0,0,26,80,0,1419,49230,2,29,https://doi.org/10.1016/j.cels.2016.07.001
 0,0,28,53,0,785,0,1,9,https://doi.org/10.1016/0263-7855(90)80070-V
 0,0,28,104,0,1615,0,1,20,https://doi.org/10.1016/0378-1119(95)00714-8
 # can't remove extra footnote link from title
-0,0,22,102,9,1135,0,1,12,https://doi.org/10.1006/jmbi.2000.4315
-0,0,25,80,0,1035,0,1,15,https://doi.org/10.1016/j.str.2010.12.023
-0,0,26,76,5,1006,0,1,15,https://doi.org/10.1016/j.mito.2010.10.005
-0,0,28,117,0,1464,0,1,13,https://doi.org/10.1016/j.celrep.2015.06.031
-0,0,27,110,4,740,0,1,18,https://doi.org/10.1016/j.softx.2015.06.001
+0,0,22,102,9,1135,44311,2,12,https://doi.org/10.1006/jmbi.2000.4315
+0,0,25,80,0,1035,41768,2,15,https://doi.org/10.1016/j.str.2010.12.023
+0,0,26,76,5,1006,24858,2,15,https://doi.org/10.1016/j.mito.2010.10.005
+0,0,28,117,0,1464,27206,2,13,https://doi.org/10.1016/j.celrep.2015.06.031
+0,0,27,110,4,740,28911,2,18,https://doi.org/10.1016/j.softx.2015.06.001
 
 # springer
 0,0,18,83,4,665,0,1,0,https://doi.org/10.1007/BF00182187
@@ -239,10 +237,10 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 
 # mcponline
 # redirected to sciencedirect
-0,0,23,118,0,1172,0,1,13,https://doi.org/10.1074/mcp.M111.010264
-0,0,23,119,0,1093,0,1,15,https://doi.org/10.1074/mcp.M110.004994
-0,0,23,81,0,1707,0,1,14,https://doi.org/10.1074/mcp.M115.055558
-0,0,26,89,0,1740,0,1,21,https://doi.org/10.1074/mcp.M200002-MCP200
+0,0,23,118,0,1172,41360,2,13,https://doi.org/10.1074/mcp.M111.010264
+0,0,23,119,0,1093,37651,2,15,https://doi.org/10.1074/mcp.M110.004994
+0,0,23,81,0,1707,60927,2,14,https://doi.org/10.1074/mcp.M115.055558
+0,0,26,89,0,1740,28789,2,21,https://doi.org/10.1074/mcp.M200002-MCP200
 
 # pnas
 0,0,23,53,0,1128,0,2,0,https://doi.org/10.1073/pnas.81.11.3443
@@ -304,10 +302,9 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,30,71,7,837,9041,2,46,https://doi.org/10.12688/f1000research.11223.1
 
 # f1000research_posters
-# abstract not working (because in <input>)
 # pdf_a not working (because href="#")
-0,0,0,59,5,0,0,1,41,https://doi.org/10.7490/f1000research.1110127.1
-0,0,0,86,8,0,0,1,89,https://doi.org/10.7490/f1000research.1112656.1
+0,0,0,59,5,3933,0,1,41,https://doi.org/10.7490/f1000research.1110127.1
+0,0,0,86,8,768,0,1,89,https://doi.org/10.7490/f1000research.1112656.1
 0,0,0,97,6,0,0,1,33,https://doi.org/10.7490/f1000research.1113436.1
 
 # peerj
@@ -368,8 +365,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 
 # jbc
 # redirected to sciencedirect
-0,0,22,159,0,1263,0,1,20,https://doi.org/10.1074/jbc.M506654200
-0,0,22,58,0,1303,0,1,13,https://doi.org/10.1074/jbc.M309909200
+0,0,22,159,0,1263,53368,2,20,https://doi.org/10.1074/jbc.M506654200
+0,0,22,58,0,1303,37895,2,13,https://doi.org/10.1074/jbc.M309909200
 
 # jbc_full
 0,0,22,159,0,1263,74622,2,0,http://www.jbc.org/content/280/42/35588.full
@@ -409,9 +406,9 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,0,78,3,922,0,2,56,http://www.bioinformation.net/009/97320630009840.htm
 
 # aps
-0,0,26,82,0,1320,0,1,0,https://doi.org/10.1103/PhysRevE.67.031902
-0,0,26,40,0,1044,0,1,0,https://doi.org/10.1103/PhysRevE.72.041917
-0,0,30,115,0,939,0,1,0,https://doi.org/10.1103/PhysRevLett.104.228103
+0,0,26,82,0,1320,0,2,0,https://doi.org/10.1103/PhysRevE.67.031902
+0,0,26,40,0,1044,0,2,0,https://doi.org/10.1103/PhysRevE.72.041917
+0,0,30,115,0,939,0,2,0,https://doi.org/10.1103/PhysRevLett.104.228103
 
 # projecteuclid
 0,0,0,99,6,1293,0,2,0,https://doi.org/10.1214/07-AOAS155
@@ -542,10 +539,9 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,21,60,5,882,17598,2,37,https://doi.org/10.1534/g3.119.400373
 
 # wellcomeopenresearch
-# not working, MathJax
-0,0,32,110,5,1732,10756,2,79,https://doi.org/10.12688/wellcomeopenres.10004.1
-0,0,32,99,6,1149,31470,2,46,https://doi.org/10.12688/wellcomeopenres.15334.1
-0,0,32,99,6,1176,35513,2,46,https://doi.org/10.12688/wellcomeopenres.15334.2
+0,0,32,110,0,1732,10756,1,0,https://doi.org/10.12688/wellcomeopenres.10004.1
+0,0,32,99,0,1149,31476,1,0,https://doi.org/10.12688/wellcomeopenres.15334.1
+0,0,32,99,0,1176,35566,1,0,https://doi.org/10.12688/wellcomeopenres.15334.2
 
 # gatesopenresearch
 0,0,29,115,7,1092,35182,2,39,https://doi.org/10.12688/gatesopenres.13087.1
@@ -573,9 +569,8 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,27,103,0,2761,29930,2,91,https://www.medrxiv.org/content/10.1101/2023.05.04.23289518v1.full
 
 # authorea
-# can't get fulltext, keywords, doi
-0,0,0,82,0,1470,0,2,15,https://doi.org/10.22541/au.166117417.77605988/v2
-0,0,0,107,0,1714,0,2,15,https://doi.org/10.22541/au.168501604.43569192/v1
+0,0,32,82,4,1470,0,2,15,https://doi.org/10.22541/au.166117417.77605988/v2
+0,0,33,107,6,1714,19509,2,15,https://doi.org/10.22541/au.168501604.43569192/v1
 
 # osf
 0,0,21,99,7,0,0,2,0,https://doi.org/10.31234/osf.io/f2sqd

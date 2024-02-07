@@ -104,7 +104,7 @@
 'chemrxiv\.org': chemrxiv
 'iopscience\.iop\.org': iop
 'g3journal\.org': highwire2 # redirected to oup
-'wellcomeopenresearch\.org/+articles': f1000research_articles # not working, MathJax
+'wellcomeopenresearch\.org/+articles': wellcomeopenresearch
 'gatesopenresearch\.org/+articles': f1000research_articles
 'researchsquare\.com/+article': researchsquare
 'medrxiv\.org': biorxiv
@@ -134,6 +134,7 @@
 #  pdf_a:
 #  corresp_author_names:
 #  corresp_author_emails:
+#  wait_until:
 
 # Each site must have at least one mention in the previous section
 
@@ -196,9 +197,10 @@ sciencedirect:
   title: article h1 > .title-text
   keywords: article .Keywords > div > .keyword
   abstract: article .Abstracts > div:not(.graphical) > div
-  #fulltext: article .Body > div:not(.Appendices) > * # not working anymore
-  #pdf_a: .PdfDropDownMenu a:matchesOwn(^Article$) # not working anymore
+  fulltext: article .Body > div > *
+  pdf_a: .accessbar .ViewPDF a
   corresp_author_names: 'article #author-group button:has([title=Correspondence author icon]) span:has(> .surname)'
+  wait_until: body[class=""]
 
 biomedcentral:
   doi: '#article-info-content [data-track-action=view doi], .c-bibliographic-information__list-item:has(abbr[title=Digital Object Identifier]) .c-bibliographic-information__value'
@@ -375,14 +377,21 @@ f1000research_articles:
   pdf_dst: /pdf
   corresp_author_names: .f1r-article-desk .authors > span > a.cauthor
   corresp_author_emails: .f1r-article-desk .authors > span > a.cauthor
+  wait_until: .generated-article-body
 
 f1000research_posters:
   title: .asset-title > h1
   keywords_split: .asset-subcontainer__title:containsOwn(Keywords) + *
-  # abstract not working (because in <input>)
+  abstract: .abstract__content
   # pdf_a not working (because href="#")
   corresp_author_names: .asset-details-container-large .asset-authors > a
   corresp_author_emails: .asset-details-container-large .asset-authors > a
+
+wellcomeopenresearch:
+  title: header > h1
+  abstract: '#content-tab-0 section:has(h2:matchesOwn(^Abstract$)) > :not(h2)'
+  fulltext: '#content-tab-0 .generated-article-body'
+  wait_until: .generated-article-body
 
 peerj:
   pmid: '#article-identifier-pmid'
@@ -500,6 +509,7 @@ aps:
   doi: '#article-content > .abstract > div > p > .doi-field'
   title: '#title h3'
   abstract: '#article-content > .abstract > div > p'
+  pdf_a: '#article-actions .article-nav-actions a:matchesOwn(^PDF$)'
 
 projecteuclid:
   title: .panel-body .ProceedingsArticleOpenAccessHeaderText
@@ -618,15 +628,15 @@ researchsquare:
   fulltext: .tw-min-h-screen .tw-max-w-reading > div:has(h2:matches(^Abstract$)) ~ :not(div:has(h2:matches(^Declarations$))):not(div:has(h2:matches(^References$))):not(div:has(h2:matches(^Additional Declarations$)))
   pdf_a: a:has(span:matches(^Download PDF$))
 
-# can't get fulltext, keywords, doi
 authorea:
   doi: .publication-status .publication-status__citation-doi
   title: .article-preview-content .au-article-title
   keywords: .article-preview-content .preview-tags a
   abstract: .article-preview-content .preview-abstract > div
-  #fulltext: '#article-content .au-block-list > div:not(:has(div:matches(^References$))):not(:has(div:matches(^Acknowledgments$))):not(:has(div:matches(^Conflict of Interest$))):not(:has(div:matches(^Ethics Statement$))):not(:has(div:matches(^Author Contributions$)))'
+  fulltext: '#article-content .au-block-list > div:not(:has(div:matches(^References$))):not(:has(div:matches(^Acknowledgements$))):not(:has(div:matches(^Conflict of Interest$))):not(:has(div:matches(^Ethics Statement$))):not(:has(div:matches(^Author Contributions$))):not(:has(> .file-block))'
   pdf_a: a.social-box__download-preprint-button:matches(^Download PDF$)
   corresp_author_names: .article-preview-content .preview-authors-row .preview-author-name:has(.fa-envelope)
+  wait_until: .au-block-list > div
 
 osf:
   doi: .doi-section a[href^=https://doi.org/]
@@ -667,6 +677,9 @@ cambridge:
 - 'iopscience\.iop\.org' # bot protection
 - 'osf\.io'
 - 'aimspress\.com/+article/+doi' # for fulltext
+- 'authorea\.com' # wait_until
+- 'wellcomeopenresearch\.org/+articles' # wait_until
+- 'f1000research\.com(:443)?/+posters' # for abstract
 
 # Cloudflare DDoS
 - '[a-zA-Z0-9.-]*onlinelibrary\.wiley\.com'

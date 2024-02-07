@@ -24,7 +24,8 @@ public enum ScrapeWebpageKey {
 	content,
 	javascript,
 	license,
-	language;
+	language,
+	wait_until;
 
 	private String key;
 

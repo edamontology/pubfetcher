@@ -36,7 +36,8 @@ public enum ScrapeSiteKey {
 	pdf_dst,
 	pdf_a,
 	corresp_author_names,
-	corresp_author_emails;
+	corresp_author_emails,
+	wait_until;
 
 	private String key;
 

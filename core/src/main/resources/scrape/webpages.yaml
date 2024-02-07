@@ -179,11 +179,13 @@
   content: .content > :not(h1):not(.footer)
   javascript: 'true'
 
-# can only get the short description and not the whole readme
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.home-panel-title
-  content: .home-panel-description-markdown[itemprop=description] .read-more-content, article .blob-viewer[itemprop=about]
-  license: .project-buttons [itemprop=license]
+  content: .home-panel-description-markdown[itemprop=description] .read-more-content, article div[itemprop=about]
+  license: a[href~=/search\?l=]:has(span:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > span.text-bold
+  # language is in title= attribute
+  javascript: 'true'
+  wait_until: article div[itemprop=about] > * > * > *
 
 'pypi\.(python\.)?org':
   title: h1.package-header__name

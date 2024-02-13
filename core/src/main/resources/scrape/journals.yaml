@@ -210,6 +210,7 @@ biomedcentral:
   fulltext: 'article > section > :not(#Abs1-section):not(#Bib1-section):not(#Ack1-section):not(#author-information-section):not(#additional-information-section):not(#rightslink-section):not(#article-info-section) > *, article > div.c-article-section__content'
   pdf_a: .c-pdf-download > [data-track-action=download pdf]
   corresp_author_names: .c-article-author-list a[data-test=author-name]:has(.u-icon)
+  corresp_author_emails: '#corresponding-author-list a'
 
 springer:
   doi: '#doi-url, #AboutThisContent a[data-track-action=view doi], #article-info-section a[data-track-action=view doi], .c-bibliographic-information__list-item:has(abbr[title=Digital Object Identifier]) .c-bibliographic-information__value, .c-bibliographic-information__list-item:matchesWholeText(DOI)'
@@ -252,6 +253,7 @@ nature:
   fulltext: 'article .c-article-body section > [id~=Sec[0-9]*-section], article #accession-codes-section, article #glossary-section, article .c-article-body > .main-content > .c-article-section__content, article #appendices-section'
   pdf_a: a[data-article-pdf]
   corresp_author_names: .c-article-author-list a[data-test=author-name]:has(.u-icon)
+  corresp_author_emails: '#corresponding-author-list a'
 
 plos:
   doi: '#artDoi'
@@ -456,6 +458,7 @@ hindawi:
   abstract: '#abstract + p'
   fulltext: '#abstract + p ~ *:not(#acknowledgments):not(#acknowledgments + p):not(#acknowledgment):not(#acknowledgment + p):not(#conflict-of-interests):not(#conflict-of-interests + p)'
   pdf_a: a[data-testid=download-pdf]
+  # corresp_author_emails needs javascript
 
 biecoll:
   doi: b:matchesOwn(^DOI) > a[href^=http://dx.doi.org]
@@ -469,6 +472,8 @@ jbc_full:
   abstract: .article__body .section-paragraph > .section-paragraph
   fulltext: .article__body :has(.section-paragraph) > h2, .article__body :has(.section-paragraph) > h3, .article__body :not(.section-paragraph) > .section-paragraph:not(:has(.section-paragraph))
   pdf_a: '#articleHeader .article-tools__item__pdf'
+  corresp_author_names: .author:has(a[href^=mailto]) .article-header__info__label
+  corresp_author_emails: .author a[href^=mailto]
 
 eurekaselect:
   doi: '#side-b p > strong:matchesOwn(^DOI:) + a'
@@ -541,6 +546,7 @@ frontiersin:
   abstract: .JournalAbstract > p
   fulltext: .JournalFullText > :not(.References)
   pdf_a: .side-article-download a.download-files-pdf
+  # corresp_author_emails is plain text in html not mailto href
 
 theiet:
   doi: '#content .doicontainer > .doi > a'
@@ -580,6 +586,8 @@ sagepub:
   fulltext: '#bodymatter > div > div, #bodymatter section > :not(section), #supplementary-materials'
   pdf_src: /doi/+(full/)?
   pdf_dst: /doi/pdf/
+  corresp_author_names: .core-authors .heading:has(.xref:matches(\*))
+  corresp_author_emails: .core-authors-notes [role=doc-footnote] a
 
 silverchair:
   doi: '#main .citation-doi > a'
@@ -599,6 +607,7 @@ mdpi:
   fulltext: 'article .html-body section > :not(section), article #SupplementaryFiles, article #html-glossary'
   pdf_a: '#abstract .download a:matchesOwn(^Download PDF$)'
   corresp_author_names: .art-authors > span:has(.emailCaptcha) > .sciprofiles-link
+  # corresp_author_emails needs javascript
 
 preprints:
   title: '#submission-content > h1'
@@ -619,6 +628,7 @@ iop:
   abstract: main .article-content > [itemprop=description] > *
   fulltext: main .article-content > [itemprop=articleBody] > .header-anchor:not([name=acknowledgments]), main .article-content > [itemprop=articleBody] > .header-anchor:not([name=acknowledgments]) + .article-text > *
   pdf_a: main a.btn:matches(^Download Article PDF$)
+  corresp_author_emails: .article-meta .wd-jnl-art-email-addresses a[href^=mailto]
 
 researchsquare:
   doi: .tw-min-h-screen .tw-max-w-reading > div.tw-py-3 p:matches(^https://doi.org/)
@@ -636,6 +646,7 @@ authorea:
   fulltext: '#article-content .au-block-list > div:not(:has(div:matches(^References$))):not(:has(div:matches(^Acknowledgements$))):not(:has(div:matches(^Conflict of Interest$))):not(:has(div:matches(^Ethics Statement$))):not(:has(div:matches(^Author Contributions$))):not(:has(> .file-block))'
   pdf_a: a.social-box__download-preprint-button:matches(^Download PDF$)
   corresp_author_names: .article-preview-content .preview-authors-row .preview-author-name:has(.fa-envelope)
+  # corresp_author_emails is plain text in html not mailto href
   wait_until: .au-block-list > div
 
 osf:

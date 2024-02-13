@@ -154,15 +154,16 @@ public final class FetcherTest {
 		int mismatch = testPubmedHtml(test, publication, parts);
 		mismatch += equal(test[8], publication.getJournalTitle().length(), "journal title length");
 		mismatch += equal(test[9], publication.getPubDateHuman(), "publication date");
+		mismatch += equal(test[10], CorrespAuthor.toString(publication.getCorrespAuthor()).length(), "corresponding author length");
 		return mismatch;
 	}
 
 	private static int testEuropepmc(String[] test, Publication publication, FetcherPublicationState state, EnumMap<PublicationPartName, Boolean> parts) {
 		int mismatch = testPubmedXml(test, publication, parts);
-		mismatch += equal(test[10], publication.isOA() ? 1 : 0, "Open Access");
-		mismatch += equal(test[11], state.europepmcHasFulltextHTML ? 1 : 0, "has HTML");
-		mismatch += equal(test[12], state.europepmcHasPDF ? 1 : 0, "has PDF");
-		mismatch += equal(test[13], state.europepmcHasMinedTerms ? 1 : 0, "has mined");
+		mismatch += equal(test[11], publication.isOA() ? 1 : 0, "Open Access");
+		mismatch += equal(test[12], state.europepmcHasFulltextHTML ? 1 : 0, "has HTML");
+		mismatch += equal(test[13], state.europepmcHasPDF ? 1 : 0, "has PDF");
+		mismatch += equal(test[14], state.europepmcHasMinedTerms ? 1 : 0, "has mined");
 		return mismatch;
 	}
 
@@ -319,7 +320,7 @@ public final class FetcherTest {
 	}
 
 	private static void testPubmedXml(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
-		test(getTest("pubmed-xml.csv", "test", 10), "fetchPubmedXml", "testPubmedXml", fetcher, parts, fetcherArgs);
+		test(getTest("pubmed-xml.csv", "test", 11), "fetchPubmedXml", "testPubmedXml", fetcher, parts, fetcherArgs);
 	}
 
 	private static Publication fetchPubmedHtml(String pmid, Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) {
@@ -348,7 +349,7 @@ public final class FetcherTest {
 
 	private static void testEuropepmc(Fetcher fetcher, EnumMap<PublicationPartName, Boolean> parts, FetcherArgs fetcherArgs) throws IOException, ReflectiveOperationException {
 		int mismatch = 0;
-		List<String[]> tests = getTest("europepmc.csv", "test", 14);
+		List<String[]> tests = getTest("europepmc.csv", "test", 15);
 		int i = 0;
 		long start = System.currentTimeMillis();
 		for (String[] test : tests) {

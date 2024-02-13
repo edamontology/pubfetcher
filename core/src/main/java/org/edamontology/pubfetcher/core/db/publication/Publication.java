@@ -382,6 +382,9 @@ public class Publication extends DatabaseEntry<Publication> {
 			this.correspAuthor = correspAuthor;
 		}
 	}
+	public void resetCorrespAuthor() {
+		this.correspAuthor = new ArrayList<>();
+	}
 
 	public Set<Link> getVisitedSites() {
 		return visitedSites;

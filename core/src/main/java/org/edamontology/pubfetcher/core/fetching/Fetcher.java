@@ -134,6 +134,7 @@ public class Fetcher implements AutoCloseable {
 	private static final String PHONE_ALLOWED_END = "[\\p{N})]";
 	private static final Pattern PHONE = Pattern.compile("(?i)(tel[:.e]*[\\p{Z}\\p{Cc}]*(phone[:.]*)?|phone[:.]*)[\\p{Z}\\p{Cc}]*(" + PHONE_ALLOWED + "+" + PHONE_ALLOWED_END + ")");
 	private static final Pattern EMAIL = Pattern.compile("(?i)e-?mail[:.]*[\\p{Z}\\p{Cc}]*([a-zA-Z0-9+._-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,})");
+	private static final Pattern EMAIL_ONLY = Pattern.compile("(?i)[A-Z0-9+._-]+@[A-Z0-9.-]+\\.[a-z]{2,}");
 	private static final Pattern WHITESPACE = Pattern.compile("[\\p{Z}\\p{Cc}\\p{Cf}]+");
 	private static final Pattern PUNCTUATION_NUMBERS = Pattern.compile("[\\p{P}\\p{S}\\p{N}]+");
 	private static final Pattern NAME_SEPARATOR = Pattern.compile("[ \\u002D\\u2010]+");
@@ -1169,6 +1170,48 @@ public class Fetcher implements AutoCloseable {
 		}
 	}
 
+	private void setCorrespAuthor(Publication publication, Element result, boolean europepmc) {
+		List<CorrespAuthor> correspAuthor = new ArrayList<>();
+
+		for (Element author : result.select(europepmc ? "authorList > author" : "AuthorList > Author")) {
+			String email = null;
+			for (Element affiliation : author.select(europepmc ? "affiliation" : "Affiliation")) {
+				String affiliationText = affiliation.text();
+				Matcher emailMatcher = EMAIL_ONLY.matcher(affiliation.text());
+				if (emailMatcher.find()) {
+					email = affiliationText.substring(emailMatcher.start(), emailMatcher.end());
+					break;
+				}
+			}
+			if (email != null) {
+				CorrespAuthor ca = new CorrespAuthor();
+				Element lastName = author.selectFirst(europepmc ? "lastName" : "LastName");
+				if (lastName != null) {
+					String name = lastName.text();
+					Element firstName = author.selectFirst(europepmc ? "firstName" : "ForeName");
+					if (firstName != null) {
+						name = firstName.text() + " " + name;
+					}
+					ca.setName(name);
+				}
+				Element orcid = author.selectFirst(europepmc ? "authorId[type=ORCID]" : "Identifier[Source=ORCID]");
+				if (orcid != null) {
+					String orcidText = orcid.text();
+					if (!orcidText.startsWith("http")) {
+						orcidText = "https://orcid.org/" + orcidText;
+					}
+					ca.setOrcid(orcidText);
+				}
+				ca.setEmail(email);
+				correspAuthor.add(ca);
+			}
+		}
+
+		if (!correspAuthor.isEmpty()) {
+			publication.setCorrespAuthor(correspAuthor);
+		}
+	}
+
 	private void setCorrespAuthor(Publication publication, Element element, String location, boolean xml) {
 		List<CorrespAuthor> correspAuthor = new ArrayList<>();
 
@@ -1455,6 +1498,9 @@ public class Fetcher implements AutoCloseable {
 		}
 
 		if (!correspAuthor.isEmpty()) {
+			if (xml && (!correspAuthor.get(0).getEmail().isEmpty() || correspAuthor.size() > publication.getCorrespAuthor().size())) {
+				publication.resetCorrespAuthor();
+			}
 			publication.setCorrespAuthor(correspAuthor);
 		} else {
 			logger.warn("Corresponding author not found in {}", location);
@@ -1771,6 +1817,8 @@ public class Fetcher implements AutoCloseable {
 
 		// "A count that indicates the number of times an article has been cited by other articles in our databases."
 		setCitationsCount(publication, europepmcResult, "citedByCount", doc.location());
+
+		setCorrespAuthor(publication, europepmcResult, true);
 
 		Element inEPMC = europepmcResult.getElementsByTag("inEPMC").first();
 		if (inEPMC != null && inEPMC.text().equalsIgnoreCase("Y")) {
@@ -2198,6 +2246,8 @@ public class Fetcher implements AutoCloseable {
 			setJournalTitle(publication, doc, "Journal > Title", doc.location());
 
 			setPubDate(publication, doc, "ArticleDate", doc.location(), true);
+
+			setCorrespAuthor(publication, doc, false);
 		}
 	}
 

@@ -68,6 +68,7 @@ public class Publication extends DatabaseEntry<Publication> {
 	private PublicationPartString fulltext;
 
 	private boolean oa = false;
+	private boolean preprint = false;
 
 	private String journalTitle = "";
 
@@ -320,6 +321,13 @@ public class Publication extends DatabaseEntry<Publication> {
 		this.oa = oa;
 	}
 
+	public boolean isPreprint() {
+		return preprint;
+	}
+	public void setPreprint(boolean preprint) {
+		this.preprint = preprint;
+	}
+
 	public String getJournalTitle() {
 		return journalTitle;
 	}
@@ -508,6 +516,7 @@ public class Publication extends DatabaseEntry<Publication> {
 		sb.append(super.toStringHtml(prepend)).append("\n");
 		sb.append(prepend).append("<br>\n");
 		sb.append(prepend).append("<div><span>Open Access:</span> <span>").append(oa).append("</span></div>\n");
+		sb.append(prepend).append("<div><span>Preprint:</span> <span>").append(preprint).append("</span></div>\n");
 		sb.append(prepend).append("<div><span>Journal title:</span> <span>").append(PubFetcher.escapeHtml(journalTitle)).append("</span></div>\n");
 		sb.append(prepend).append("<div><span>Pub. date:</span> <span>").append(getPubDateHuman()).append(" (").append(pubDate).append(")</span></div>\n");
 		sb.append(prepend).append("<div><span>Citations count:</span> <span>").append(citationsCount).append(" (").append(getCitationsTimestampHuman()).append(" (").append(citationsTimestamp).append("))</span></div>\n");
@@ -528,6 +537,7 @@ public class Publication extends DatabaseEntry<Publication> {
 	public void toStringMetaJson(JsonGenerator generator, FetcherArgs fetcherArgs) throws IOException {
 		super.toStringJson(generator);
 		generator.writeBooleanField("oa", oa);
+		generator.writeBooleanField("preprint", preprint);
 		generator.writeStringField("journalTitle", journalTitle);
 		generator.writeNumberField("pubDate", pubDate);
 		generator.writeStringField("pubDateHuman", getPubDateHuman());
@@ -562,6 +572,7 @@ public class Publication extends DatabaseEntry<Publication> {
 		sb.append(fulltext).append("\n\n");
 		sb.append(super.toString()).append("\n\n");
 		sb.append("OPEN ACCESS: ").append(oa).append("\n");
+		sb.append("PREPRINT: ").append(preprint).append("\n");
 		sb.append("JOURNAL TITLE: ").append(journalTitle).append("\n");
 		sb.append("PUB. DATE: ").append(getPubDateHuman()).append(" (").append(pubDate).append(")\n");
 		sb.append("CITATIONS: ").append(citationsCount).append(" (").append(getCitationsTimestampHuman()).append(" (").append(citationsTimestamp).append("))\n");

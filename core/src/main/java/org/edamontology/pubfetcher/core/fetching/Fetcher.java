@@ -1810,6 +1810,11 @@ public class Fetcher implements AutoCloseable {
 			publication.setOA(true);
 		}
 
+		Element sourceTag = europepmcResult.selectFirst("source");
+		if (sourceTag != null && sourceTag.text().equals("PPR")) {
+			publication.setPreprint(true);
+		}
+
 		setJournalTitle(publication, europepmcResult, "journalInfo > journal > title", doc.location());
 
 		// "The date of first publication, whichever is first, electronic or print publication. Where a date is not fully available e.g. year only, an algorithm is applied to determine the value"

@@ -481,6 +481,12 @@ public class PubFetcherArgs {
 	@Parameter(names = { "-not-oa" }, description = "Only keep publications that are not Open Access")
 	boolean notOa = false;
 
+	@Parameter(names = { "-preprint" }, description = "Only keep publications that are a preprint")
+	boolean preprint = false;
+
+	@Parameter(names = { "-not-preprint" }, description = "Only keep publications that are not a preprint")
+	boolean notPreprint = false;
+
 	@Parameter(names = { "-journal-title" }, description = "Only keep publications whose journal title has a match with the given regular expression")
 	String journalTitle = null;
 

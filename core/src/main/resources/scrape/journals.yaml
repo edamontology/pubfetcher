@@ -305,7 +305,7 @@ acs:
   subtitle: main .article_header-subtitle
   #keywords: main .article_header-taxonomy li # truncated
   abstract: '#abstractBox > :not(:has(.figure-bottom-links))'
-  fulltext: 'main .article_content-left > .NLM_sec > :not(.article_content-header), main .article_content-left > .NLM_sec > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .article_supporting-info > :not(.article_content-header), main .article_content-left > .NLM_back > .article_supporting-info > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .NLM_sec'
+  fulltext: 'main .article_content-left > .NLM_sec > :not(.article_content-header), main .article_content-left > .NLM_sec > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .article_supporting-info > :not(.article_content-header), main .article_content-left > .NLM_back > .article_supporting-info > .article_content-header .article_content-title, main .article_content-left > .NLM_back > .NLM_sec, main .article_content-left > .NLM_back > .dataAvailabilityNotesSection > :not(.article_content-header), main .article_content-left > .NLM_back > .dataAvailabilityNotesSection > .article_content-header .article_content-title'
   pdf_src: /+doi/+((abs|full)/+)?10
   pdf_dst: /doi/pdf/10
   corresp_author_names: .loa span:has(.author-xref-symbol:matches(^\*$)) > .hlFld-ContribAuthor > a

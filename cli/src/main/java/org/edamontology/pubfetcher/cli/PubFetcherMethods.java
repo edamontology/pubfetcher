@@ -1433,6 +1433,8 @@ public final class PubFetcherMethods {
 
 		if (args.oa) filter(publications, p -> p.isOA(), "publications", "Open Access", true, !preFilter);
 		if (args.notOa) filter(publications, p -> p.isOA(), "publications", "Open Access", false, !preFilter);
+		if (args.preprint) filter(publications, p -> p.isPreprint(), "publications", "Preprint", true, !preFilter);
+		if (args.notPreprint) filter(publications, p -> p.isPreprint(), "publications", "Preprint", false, !preFilter);
 		if (args.journalTitle != null) filterRegex(publications, p -> p.getJournalTitle(), args.journalTitle, "publications", "journal title", true, !preFilter);
 		if (args.notJournalTitle != null) filterRegex(publications, p -> p.getJournalTitle(), args.notJournalTitle, "publications", "journal title", false, !preFilter);
 		if (args.journalTitleEmpty) filter(publications, p -> p.getJournalTitle().isEmpty(), "publications", "empty journal title", true, !preFilter);

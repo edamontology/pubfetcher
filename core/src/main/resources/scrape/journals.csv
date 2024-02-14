@@ -228,6 +228,7 @@ pmid,pmcid,doi,title,keywords,abstract,fulltext,links,corresp,site
 0,0,17,57,0,1363,21918,2,53,http://pubs.acs.org/doi/full/10.1021/sb300084h
 # strange keywords
 0,0,17,108,0,677,32991,2,0,http://pubs.acs.org/doi/full/10.1021/pr034046d
+0,0,29,95,0,1066,29393,2,0,https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00714
 
 # arxiv
 0,0,24,54,0,1439,0,2,0,https://arxiv.org/abs/0704.3759

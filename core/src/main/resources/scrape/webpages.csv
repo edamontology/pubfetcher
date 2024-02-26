@@ -8,7 +8,7 @@ title,content,license,language,webpage
 
 # bioconductor.org vignettes
 23,34869,0,0,http://bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.html
-69,22909,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
+69,22899,0,0,http://bioconductor.org/packages/release/bioc/vignettes/IHW/inst/doc/introduction_to_ihw.html
 
 # git.bioconductor.org
 0,0,0,0,https://git.bioconductor.org/packages/RIVER
@@ -106,7 +106,7 @@ title,content,license,language,webpage
 0,4772,0,0,https://cran.r-project.org/web/packages/linkcomm/NEWS
 
 # cran.r-project.org vignettes
-25,29820,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
+25,11636,0,0,https://cran.r-project.org/web/packages/pergola/vignettes/my-vignette.html
 
 # bibiserv.cebitec.uni-bielefeld.de
 4,2685,0,0,https://bibiserv.cebitec.uni-bielefeld.de/acdc/
@@ -134,7 +134,7 @@ title,content,license,language,webpage
 8,1772,699,0,http://www.sanger.ac.uk/science/tools/ssahasnp
 
 # tools.proteomecenter.org
-14,1004,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:Libra
+14,1000,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:Libra
 0,547,0,0,http://tools.proteomecenter.org/mzStar.php
 0,2569,0,0,http://tools.proteomecenter.org/XLink.php
 18,10132,0,0,http://tools.proteomecenter.org/wiki/index.php?title=Software:SuperHirn
@@ -167,8 +167,8 @@ title,content,license,language,webpage
 
 # gitlab.com
 11,2658,0,0,https://gitlab.com/CarlBrunius/sampleDrift
-6,6445,9,0,https://gitlab.com/Gustafsson-lab/lassim
-7,8231,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
+6,6477,9,0,https://gitlab.com/Gustafsson-lab/lassim
+7,8205,7,0,https://gitlab.com/SimonHTausch/RAMBO-K
 
 # pypi.org
 16,779,26,6,https://pypi.python.org/pypi/omics_pipe
@@ -188,8 +188,8 @@ title,content,license,language,webpage
 9,899,0,0,https://en.wikipedia.org/wiki/ProRepeat
 
 # webchem.ncbr.muni.cz wiki
-27,1991,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
-26,1466,0,0,http://webchem.ncbr.muni.cz/Wiki/MotiveValidator:UserManual
+#27,1991,0,0,http://webchem.ncbr.muni.cz/Wiki/ChargeCalculator:UserManual
+#26,1466,0,0,http://webchem.ncbr.muni.cz/Wiki/MotiveValidator:UserManual
 
 # biocatalogue.org
 #16,407,0,0,https://www.biocatalogue.org/services/2

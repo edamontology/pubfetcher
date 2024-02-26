@@ -181,8 +181,8 @@
 
 'gitlab\.com/+[^/]+/+[^/]+/*$':
   title: .project-home-panel h1.home-panel-title
-  content: .home-panel-description-markdown[itemprop=description] .read-more-content, article div[itemprop=about]
-  license: a[href~=/search\?l=]:has(span:matchesOwn(^(100|[1-9][0-9]|[5-9])\.[0-9]%$)) > span.text-bold
+  content: .home-panel-description-markdown[itemprop=description] .read-more-content, article div[itemprop=about], aside a[itemprop=keywords]
+  license: aside [itemprop=license]
   # language is in title= attribute
   javascript: 'true'
   wait_until: article div[itemprop=about] > * > * > *
@@ -206,9 +206,9 @@
   title: '#firstHeading'
   content: '#bodyContent'
 
-'webchem\.ncbr\.muni\.cz/+Wiki/':
-  title: '#firstHeading'
-  content: '#bodyContent'
+#'webchem\.ncbr\.muni\.cz/+Wiki/':
+#  title: '#firstHeading'
+#  content: '#bodyContent'
 
 #'biocatalogue\.org':
 #  title: article > header > h1

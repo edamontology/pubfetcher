@@ -52,7 +52,7 @@
 '(online\.)?liebertpub\.com/+doi/+(full/+)?10': liebertpub_full
 'pubs\.rsc\.org.*/(ArticleLanding|articlelanding)/': rsc
 'pubs\.rsc\.org.*/(ArticleHTML|articlehtml)/': rsc_full
-'scripts\.iucr\.org': iucr
+'(scripts|journals)\.iucr\.org': iucr
 'worldscientific\.com': liebertpub
 'f1000research\.com(:443)?/+articles': f1000research_articles
 'f1000research\.com(:443)?/+posters': f1000research_posters
@@ -364,10 +364,12 @@ rsc_full:
   pdf_a: '.left_head a:contains(PDF)'
 
 iucr:
-  doi: .ica_doi
-  title: .ica_title
-  keywords: .kwdg > a
-  abstract: .ica_abstract
+  doi: .ica_doi, .doi_catchline
+  title: '.ica_title, #atl > h2'
+  keywords: '.kwdg > a, #kwdg a'
+  abstract: '.ica_abstract, #abs > *'
+  fulltext: '#body > * > *'
+  corresp_author_emails: '#aff a[href^=mailto]'
 
 f1000research_articles:
   doi: .article-information > [data-test-id=box-how-to-cite] > a[href^=https://doi.org]
@@ -390,7 +392,7 @@ f1000research_posters:
   corresp_author_emails: .asset-details-container-large .asset-authors > a
 
 wellcomeopenresearch:
-  title: header > h1
+  title: header > h1 > :matchText
   abstract: '#content-tab-0 section:has(h2:matchesOwn(^Abstract$)) > :not(h2)'
   fulltext: '#content-tab-0 .generated-article-body'
   wait_until: .generated-article-body
@@ -428,15 +430,15 @@ tandfonline:
   keywords: .abstractKeywords a
   abstract: article .hlFld-Abstract > :not(h2)
   fulltext_a: .tab-nav .show-full
-  pdf_a: .tab-nav .show-pdf
+  pdf_a: .downloadPDFLink .show-pdf
 
 tandfonline_full:
   doi: .dx-doi
   title: h1 > .NLM_article-title
   keywords: .abstractKeywords a
   abstract: article .hlFld-Abstract > :not(h2)
-  fulltext: .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.hidden):matchText, .hlFld-Fulltext .NLM_sec > :not(.NLM_sec):not(.hidden) > :not(.ref-lnk):not(.hidden)
-  pdf_a: .tab-nav .show-pdf
+  fulltext: '.hlFld-Fulltext .NLM_sec:not(#ack):not(#coi-statement) > :not(.NLM_sec):not(.hidden):matchText, .hlFld-Fulltext .NLM_sec:not(#ack):not(#coi-statement) > :not(.NLM_sec):not(.hidden) > :not(.ref-lnk):not(.hidden), .hlFld-Fulltext #supplemental-material-section'
+  pdf_a: .downloadPDFLink .show-pdf
 
 acm:
   doi: article .issue-item__doi
@@ -541,11 +543,12 @@ researchgate:
   pdf_a: a:matches(^Download full-text PDF$)
 
 frontiersin:
-  doi: .abstract-container > .article-header-container .header-bar-three > a
-  title: .JournalAbstract > h1
+  doi: .abstract-container > .article-header-container .header-bar-three > a, .ArticleLayoutHeader__info__doiVolume > .ArticleLayoutHeader__info__doi
+  title: .JournalAbstract h1
+  keywords_split: .AbstractSummary p:matches(^Keywords:)
   abstract: .JournalAbstract > p
-  fulltext: .JournalFullText > :not(.References)
-  pdf_a: .side-article-download a.download-files-pdf
+  fulltext: .JournalFullText > .JournalFullText > :not(.References)
+  pdf_a: .side-article-download a.download-files-pdf, .ActionsDropDown__option[data-event=actionsDropDown-a-pdf]
   # corresp_author_emails is plain text in html not mailto href
 
 theiet:

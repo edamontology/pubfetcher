@@ -129,57 +129,31 @@ A publication represents one publication (most often a research paper) and conta
 publications
   Array of publications
 
-    .. _fetchTime:
-
-  fetchTime
+  _`fetchTime`
     Time of initial fetch or last retryCounter_ reset as `UNIX time <https://en.wikipedia.org/wiki/Unix_time>`_ (in milliseconds)
-
-    .. _fetchTimeHuman:
-  fetchTimeHuman
+  _`fetchTimeHuman`
     Time of initial fetch or last retryCounter_ reset as `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_ combined date and time
-
-    .. _retryCounter:
-  retryCounter
+  _`retryCounter`
     A refetch can occur if the value of retryCounter_ is less than :ref:`retryLimit <retrylimit>`; or if any of the cooldown times (in :ref:`fetching <fetching>` parameters) of a currently ``true`` condition have passed since fetchTime_, in which case retryCounter_ is also reset
-
-    .. _fetchException:
-  fetchException
+  _`fetchException`
     ``true`` if there was a fetching exception during the last fetch; ``false`` otherwise
-
-    .. _oa:
-  oa
+  _`oa`
     ``true`` if the article is Open Access; ``false`` otherwise
-
-    .. _preprint:
-  preprint
+  _`preprint`
     ``true`` if the article is a preprint; ``false`` otherwise
-
-    .. _journalTitle:
-  journalTitle
+  _`journalTitle`
     Title of the journal the article was published in
-
-    .. _pubDate:
-  pubDate
+  _`pubDate`
     Publication date of the article as `UNIX time <https://en.wikipedia.org/wiki/Unix_time>`_ (in milliseconds); negative, if unknown
-
-    .. _pubDateHuman:
-  pubDateHuman
+  _`pubDateHuman`
     Publication date of the article as `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_ date; before ``1970-01-01``, if unknown
-
-    .. _citationsCount:
-  citationsCount
+  _`citationsCount`
     Number of times the article has been cited (according to :ref:`Europe PMC <europe_pmc>`); negative, if unknown
-
-    .. _citationsTimestamp:
-  citationsTimestamp
+  _`citationsTimestamp`
     Time when citationsCount_ was last updated as `UNIX time <https://en.wikipedia.org/wiki/Unix_time>`_ (in milliseconds); negative, if citationsCount_ has not yet been updated
-
-    .. _citationsTimestampHuman:
-  citationsTimestampHuman
+  _`citationsTimestampHuman`
     Time when citationsCount_ was last updated as `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_ combined date and time; before ``1970-01-01T00:00:00.000Z``, if citationsCount_ has not yet been updated
-
-    .. _correspAuthor:
-  correspAuthor
+  _`correspAuthor`
     Array of objects representing corresponding authors of the article
 
     name
@@ -192,9 +166,7 @@ publications
       Telephone number of the corresponding author
     uri
       Web page of the corresponding author
-
-    .. _visitedSites:
-  visitedSites
+  _`visitedSites`
     Array of objects representing sites visited for getting content (outside of standard Europe PMC, PubMed and oaDOI :ref:`resources <resources>` and also excluding PDFs)
 
     url
@@ -209,81 +181,54 @@ publications
       Time when the link of the site was picked up as `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_ combined date and time
 
     .. _publication_empty:
+
   empty
     ``true``, if all :ref:`publication part <publication_parts>`\ s (except IDs) are empty_; ``false`` otherwise
 
     .. _publication_usable:
+
   usable
     ``true``, if at least one :ref:`publication part <publication_parts>` (apart from IDs) is usable_; ``false`` otherwise
 
     .. _publication_final:
+
   final
     ``true``, if title_, abstract_ and fulltext_ are final_; ``false`` otherwise
-
-    .. _totallyFinal:
-  totallyFinal
+  _`totallyFinal`
     ``true``, if all :ref:`publication part <publication_parts>`\ s are final_; ``false`` otherwise
-
-    .. _pmid:
-  pmid
+  _`pmid`
     A :ref:`publication part <publication_parts>` (like the following pmcid_, doi_, title_, etc), in this case representing the publication PMID
 
-      .. _content:
-
-    content
+    _`content`
       Content of the publication part (in this case, the publication PMID as a string)
-
-      .. _type:
-    type
+    _`type`
       :ref:`The type <publication_types>` of the publication part content source
-
-      .. _url:
-    url
+    _`url`
       URL of the publication part content source
-
-      .. _timestamp:
-    timestamp
+    _`timestamp`
       Time when the publication part content was set as `UNIX time <https://en.wikipedia.org/wiki/Unix_time>`_ (in milliseconds)
-    timestampHuman
+    _`timestampHuman`
       Time when the publication part content was set as `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_ combined date and time
-
-      .. _size:
-    size
+    _`size`
       Number of characters in the content
-
-      .. _empty:
-    empty
+    _`empty`
       ``true``, if the content is empty (size is ``0``); ``false`` otherwise
-
-      .. _usable:
-    usable
+    _`usable`
       ``true``, if the content is long enough (the threshold can be influenced by :ref:`fetching <fetching>` parameters), in other words, if the publication part content can be used as input for other applications; ``false`` otherwise
-
-      .. _final:
-    final
+    _`final`
       ``true``, if the content is from a reliable source and is long enough, in other words, if there is no need to try fetching the publication part content from another source; ``false`` otherwise
-
-    .. _pmcid:
-  pmcid
+  _`pmcid`
     Publication part representing the publication PMCID. Structure same as in pmid_.
-
-    .. _doi:
-  doi
+  _`doi`
     Publication part representing the publication DOI. Structure same as in pmid_.
-
-    .. _title:
-  title
+  _`title`
     Publication part representing the publication title. Structure same as in pmid_.
-
-    .. _keywords:
-  keywords
+  _`keywords`
     Publication part representing publication keywords. Structure same as in pmid_, except content_ is replaced with "list" and size_ is number of elements in "list".
 
     list
       Array of string representing publication keywords
-
-    .. _mesh:
-  mesh
+  _`mesh`
     Publication part representing publication MeSH terms. Structure same as in pmid_, except content_ is replaced with "list" and size_ is number of elements in "list".
 
     list
@@ -295,9 +240,7 @@ publications
         ``true``, if the term is a major topic of the article
       uniqueId
         MeSH Unique Identifier
-
-    .. _efo:
-  efo
+  _`efo`
     Publication part representing publication EFO and other experimental methods terms. Structure same as in pmid_, except content_ is replaced with "list" and size_ is number of elements in "list".
 
     list
@@ -309,17 +252,11 @@ publications
         Number of times the term was mined from full text by :ref:`Europe PMC <europe_pmc>`
       uri
         Unique URI to the ontology term
-
-    .. _go:
-  go
+  _`go`
     Publication part representing publication GO terms. Structure same as in efo_.
-
-    .. _abstract:
-  abstract
+  _`abstract`
     Publication part representing the publication abstract. Structure same as in pmid_.
-
-    .. _fulltext:
-  fulltext
+  _`fulltext`
     Publication part representing the publication fulltext. Structure same as in pmid_.
 
 If ``--plain`` is specified, then metadata is omitted from the output (everything from fetchTime_ to totallyFinal_) and the value corresponding to :ref:`publication part <publication_parts>` keys (pmid_ to fulltext_) will be the value of content_ (for pmid_, pmcid_, doi_, title_, abstract_, fulltext_) or the value of "list" (for keywords_, mesh_, efo_, go_) as specified above for each corresponding part.
@@ -346,66 +283,52 @@ webpages
     Same as retryCounter_ of publications
   fetchException
     Same as fetchException_ of publications
-
-    .. _startUrl:
-  startUrl
+  _`startUrl`
     URL given as webpage identifier, same as listed by webpageUrls_
-
-    .. _finalUrl:
-  finalUrl
+  _`finalUrl`
     Final URL after potential redirections
-
-    .. _contentType:
-  contentType
+  _`contentType`
     `HTTP Content-Type <https://en.wikipedia.org/wiki/Media_type>`_ header
-
-    .. _statusCode:
-  statusCode
+  _`statusCode`
     `HTTP status code <https://en.wikipedia.org/wiki/List_of_HTTP_status_codes>`_
-
-    .. _contentTime:
-  contentTime
+  _`contentTime`
     Time when current webpage content was last set as `UNIX time <https://en.wikipedia.org/wiki/Unix_time>`_ (in milliseconds)
   contentTimeHuman
     Time when current webpage content was last set as `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_ combined date and time
-
-    .. _license:
-  license
+  _`license`
     Software license of the tool the webpage is about (empty if not found or missing corresponding :ref:`scraping rule <scraping>`)
-
-    .. _language:
-  language
+  _`language`
     Programming language of the tool the webpage is about (empty if not found or missing corresponding :ref:`scraping rule <scraping>`)
-
-    .. _titleLength:
-  titleLength
+  _`titleLength`
     Number of characters in the `webpage title`_
-
-    .. _contentLength:
-  contentLength
+  _`contentLength`
     Number of characters in the `webpage content`_
 
     .. _webpage_title:
+
   title
     The webpage title (as extracted by the corresponding :ref:`scraping rule <scraping>`; or text from the HTML ``<title>`` element if scraping rules were not found)
 
     .. _webpage_empty:
+
   empty
     ``true``, if `webpage title`_ and `webpage content`_ are empty; ``false`` otherwise
 
     .. _webpage_usable:
+
   usable
     ``true``, if the length of `webpage title`_ plus the length of `webpage content`_ is large enough (at least :ref:`webpageMinLength <webpageminlength>` characters), that is, the webpage can be used as input for other applications; ``false`` otherwise
 
     .. _webpage_final:
+
   final
     ``true``, if the webpage is not broken_ and the webpage is usable_ and the length on the `webpage content`_ is larger than 0; ``false`` otherwise
 
-    .. _broken:
-  broken
+  _`broken`
     ``true``, if the webpage with the given URL could not be fetched (based on the values of statusCode_ and finalUrl_); ``false`` otherwise
 
     .. _webpage_content:
+
   content
     The webpage content (as extracted by the corresponding :ref:`scraping rule <scraping>`; or the :ref:`automatically cleaned <cleaning>` content from the entire HTML of the page if scraping rules were not found)
 

@@ -150,6 +150,10 @@ publications
   oa
     ``true`` if the article is Open Access; ``false`` otherwise
 
+    .. _preprint:
+  preprint
+    ``true`` if the article is a preprint; ``false`` otherwise
+
     .. _journalTitle:
   journalTitle
     Title of the journal the article was published in

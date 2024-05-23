@@ -33,7 +33,7 @@ There are built-in rules for both journal sites (in `journals.yaml <https://gith
 
 In case of problems in the configuration file -- either errors in the YAML syntax itself or mistakes in adhering to the configuration format specified below -- the starting of PubFetcher is aborted and a hopefully helpful error message output to the log.
 
-The syntax of regular expressions used in the configuration file is as defined in Java, see documentation of the Pattern class: https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html. If the regex is meant to match a URL, then the string "(?i)^https?://(www\.)?" is automatically put in front of the specified regular expression, except when the regular expression already begins with "^".
+The syntax of regular expressions used in the configuration file is as defined in Java, see documentation of the Pattern class: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html. If the regex is meant to match a URL, then the string "(?i)^https?://(www\.)?" is automatically put in front of the specified regular expression, except when the regular expression already begins with "^".
 
 .. _journals_yaml:
 
@@ -44,7 +44,7 @@ Scraping rules for journal web pages (resolved from :ref:`DOI resource <doi_reso
 
 One way to find journal web pages that are worth writing rules for is to use the :ref:`top hosts <top_hosts>` functionality of the CLI on an existing collection of publications.
 
-A journals YAML configuration file must have three sections (separated by ``---``): regex_, site_ and javascript_.
+A journals YAML configuration file must have three sections (separated by ``---``): regex_, site_, javascript_ and restart_.
 
 regex
 -----
@@ -106,17 +106,26 @@ corresp_author_names
   Selector string for the names of :ref:`correspAuthor <correspauthor>`. All elements found using the selector are extracted, each name added as a separate corresponding author.
 corresp_author_emails
   Selector string for the e-mails of :ref:`correspAuthor <correspauthor>`. All elements found using the selector are extracted, with e-mail addresses found in ``href`` attributes (after the prefix ``mailto:`` which is removed). E-mail addresses are added to the names extracted with "corresp_author_names" (in the same order), which means the number of names must match the number of e-mail addresses -- if they don't match, then names are discarded and corresponding authors are only created using the extracted e-mails.
+wait_until
+  For use with `Selenium WebDriver <https://www.selenium.dev/documentation/webdriver/>`_. Continue executing until the element selected by the given CSS becomes visible.
 
 The ``-scrape-selector`` command of the :ref:`CLI <scrape_rules>` can be used to test which selector string from loaded configuration files will be in effect for the supplied URL and "ScrapeSiteKey".
 
 javascript
 ----------
 
-As mentioned in :ref:`Getting a HTML document <getting_a_html_document>`, either the `jsoup <https://jsoup.org/>`_ or `HtmlUnit <http://htmlunit.sourceforge.net/>`_ library can be used for fetching a HTML document, with one difference being that HtmlUnit supports executing JavaScript, which jsoup does not. But as running JavaScript is very slow with HtmlUnit, then jsoup is the default and JavaScript is turned on only for sites from which content can't be extracted otherwise. This section enables the specification of such sites.
+As mentioned in :ref:`Getting a HTML document <getting_a_html_document>`, either the `jsoup <https://jsoup.org/>`_, `HtmlUnit <http://htmlunit.sourceforge.net/>`_ or `Selenium WebDriver <https://www.selenium.dev/documentation/webdriver/>`_ library can be used for fetching a HTML document, with one difference being that HtmlUnit/Selenium supports executing JavaScript, which jsoup does not. But as running JavaScript is slow, then jsoup is the default and JavaScript is turned on only for sites from which content can't be extracted otherwise. This section enables the specification of such sites.
 
-The section is made up of a list of regular expression. If the current URL has a match with any of the regexes, then HtmlUnit and JavaScript support is used for fetching the corresponding site, otherwise jsoup (without JavaScript support) is used. The current URL in this case is either the first URL resolved from :ref:`DOI resource <doi_resource>` (there might be additional redirection while fetching the site) or the URL of a link from :ref:`Links <links>` (again, this URL might change during fetching, so a different regex might be needed to apply scraping rules to the site at the final URL).
+The section is made up of a list of regular expressions. If the current URL has a match with any of the regexes, then HtmlUnit/Selenium and JavaScript support is used for fetching the corresponding site, otherwise jsoup (without JavaScript support) is used. The current URL in this case is either the first URL resolved from :ref:`DOI resource <doi_resource>` (there might be additional redirection while fetching the site) or the URL of a link from :ref:`Links <links>` (again, this URL might change during fetching, so a different regex might be needed to apply scraping rules to the site at the final URL).
 
 The ``-scrape-javascript`` command of the :ref:`CLI <scrape_rules>` can be used to test if JavaScript will be enabled for the supplied URL.
+
+restart
+-------
+
+For some sites, when fetching is done using Selenium, a fresh WebDriver instance is required to properly get the content. This section specifies the URLs for which Selenium must be restarted (these URLs still need to be matched in the javascript_ section). The section is made up of a list of regular expressions, analogously to the javascript_ section.
+
+The ``-scrape-restart`` command of the :ref:`CLI <scrape_rules>` can be used to test if Selenium WebDriver will be restarted for the supplied URL.
 
 .. _webpages_yaml:
 
@@ -138,7 +147,7 @@ title
 content
   Selector string for the :ref:`webpage content <webpage_content>` or doc content.  All elements found using the selector are extracted and concatenated to a final string, with ``\n\n`` (two line breaks) separating the elements. If the selector is empty, then all content of the fetched document will be discarded and the content will be empty. If the selector is missing, then the fetched document will be :ref:`automatically cleaned <cleaning>` and the resulting formatted text set as the content.
 javascript
-  This key enables turning on JavaScript support, similarly to the javascript_ section in the journals YAML. If its value is ``true`` (case-insensitively), then fetching will be done using HtmlUnit and JavaScript support is enabled, in case of any other value fetching will be done using jsoup and executing JavaScript is not supported. In contrast to other "ScrapeWebpageKey" keys, the value of this key is taken from the rule found using matching to the :ref:`startUrl <starturl>` (and not the :ref:`finalUrl <finalurl>`) of the webpage or doc. If the javascript key is missing (and not set explicitly to ``false``), then JavaScript support is not enabled, but if after fetching the document without JavaScript support there are no scraping rules corresponding to the found :ref:`finalUrl <finalurl>` and the entire text content of the fetched document is smaller than :ref:`webpageMinLengthJavascript <webpageminlengthjavascript>` or a ``<noscript>`` tag is found in it, or alternatively, scraping rules are present for the found :ref:`finalUrl <finalurl>` and the javascript key has a ``true`` value in those rules, then fetching of the document will be repeated, but this time with JavaScript support. If the javascript key is explicitly set to ``false``, then fetching with JavaScript support will not be done in any case.
+  This key enables turning on JavaScript support, similarly to the javascript_ section in the journals YAML. If its value is ``true`` (case-insensitively), then fetching will be done using HtmlUnit or Selenium and JavaScript support is enabled, in case of any other value fetching will be done using jsoup and executing JavaScript is not supported. In contrast to other "ScrapeWebpageKey" keys, the value of this key is taken from the rule found using matching to the :ref:`startUrl <starturl>` (and not the :ref:`finalUrl <finalurl>`) of the webpage or doc. If the javascript key is missing (and not set explicitly to ``false``), then JavaScript support is not enabled, but if after fetching the document without JavaScript support there are no scraping rules corresponding to the found :ref:`finalUrl <finalurl>` and the entire text content of the fetched document is smaller than :ref:`webpageMinLengthJavascript <webpageminlengthjavascript>` or a ``<noscript>`` tag is found in it, or alternatively, scraping rules are present for the found :ref:`finalUrl <finalurl>` and the javascript key has a ``true`` value in those rules, then fetching of the document will be repeated, but this time with JavaScript support. If the javascript key is explicitly set to ``false``, then fetching with JavaScript support will not be done in any case.
 license
   Selector string for :ref:`license <license>`. Only the first element found using the selector is extracted.
 language

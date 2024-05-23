@@ -16,13 +16,13 @@ Low-level methods
 Getting a HTML document
 =======================
 
-Fetching HTML (or XML) resources for both :ref:`publications <publications>` and :ref:`webpages <webpages>`/:ref:`docs <docs>` is done in the same method, where either the `jsoup <https://jsoup.org/>`_ or `HtmlUnit <https://htmlunit.sourceforge.io/>`_ libraries are used for getting the document. The HtmlUnit library has the advantage of supporting JavaScript, which needs to be executed to get the proper output for many sites, and it also works for some sites with problematic SSL certificates. As a disadvantage, it is a lot slower than jsoup, which is why using jsoup is the default and HtmlUnit is used only if JavaScript support is requested (or switched to automatically in case of some SSL exceptions). Also, fetching with JavaScript can get stuck for a few rare sites, in which case the misbehaving HtmlUnit code is terminated.
+Fetching HTML (or XML) resources for both :ref:`publications <publications>` and :ref:`webpages <webpages>`/:ref:`docs <docs>` is done in the same method, where either the `jsoup <https://jsoup.org/>`_, `HtmlUnit <https://htmlunit.sourceforge.io/>`_ or `Selenium WebDriver <https://www.selenium.dev/documentation/webdriver/>`_ libraries are used for getting the document. The HtmlUnit and Selenium libraries have the advantage of supporting JavaScript, which needs to be executed to get the proper output for many sites, and they also work for some sites with problematic SSL certificates. As a disadvantage, it is a lot slower than jsoup, which is why using jsoup is the default and HtmlUnit/Selenium is used only if JavaScript support is requested (or switched to automatically in case of some SSL exceptions or if a :ref:`webpage <content_of_webpages>` without :ref:`scraping rules <scraping>` seems to require JavaScript based on -\-:ref:`webpageMinLengthJavascript <webpageMinLengthJavascript>` or the presence of ``<noscript>`` in the HTML source). Among HtmlUnit and Selenium, using Selenium is the default and switching to HtmlUnit can be done by supplying ``--selenium false``. Selenium is faster and works correctly with more sites, furthermore HtmlUnit can sometimes get stuck for some sites (in which case the misbehaving HtmlUnit code is terminated). However, Selenium requires the Firefox browser to be installed (or available and pointed to with -\-:ref:`seleniumFirefox <seleniumFirefox>`) and is somewhat more heavyweight. Also, with Selenium the :ref:`HTTP status code <statusCode>` can't be obtained and getting :ref:`HTTP Content-Type <contentType>` is tricky (some more popular ones are guessed). Up to 4 Selenium WebDrivers are started, if all 4 are occupied fetching a resource, then further parallel requests will have to wait for one of them to finish.
 
 Supplied :ref:`fetching <fetching>` parameters :ref:`timeout <timeout>` and :ref:`userAgent <useragent>` are used for setting the connect timeout and the read timeout and the User-Agent HTTP header of connections. If getting the HTML document for a publication is successful and a list of already fetched links is supplied, then the current URL will be added to that list so that it is not tried again for the current publication. The successfully fetched document is returned to the caller for further processing.
 
 A number of exceptions can occur, in which case getting the HTML document has failed and the following is done:
 
-MalformedURLException
+MalformedURLException or ClientProtocolException
   The protocol is not HTTP or HTTPS or the URL is malformed. Getting the URL is tried again as a PDF document, as a few of these exception are caused by URLs that point to PDFs accessible through the FTP protocol.
 HttpStatusException or FailingHttpStatusCodeException
   The :ref:`fetchException <fetchexception>` of the publication, webpage or doc is set to ``true`` in case the HTTP status code in the response is ``503 Service Unavailable``. Setting :ref:`fetchException <fetchexception>` to ``true`` means the URL can be tried again in the future (depending on :ref:`retryCounter <retrycounter>` or :ref:`fetchExceptionCooldown <fetchexceptioncooldown>`) as the ``503`` code is usually a temporary condition. Additionally, in case of publications, :ref:`fetchException <fetchexception>` is set to ``true`` for all failing HTTP status codes if the URL is not from "doi.org" and it is not a URL pointing to a PDF, PS or GZIP file.
@@ -30,10 +30,10 @@ ConnectException or NoRouteToHostException
   An error occurred while attempting to connect a socket to a remote address and port. Set :ref:`fetchException <fetchexception>` to ``true``.
 UnsupportedMimeTypeException
   The response MIME type is not supported. If the MIME type is determined to be a PDF type, then getting the URL is tried again, but as a PDF document.
-SocketTimeoutException
+SocketTimeoutException or TimeoutException
   A timeout has occurred on a socket read or accept. A new attempt is made right away and if that also fails with a timeout, then :ref:`fetchException <fetchexception>` is set to ``true``.
 SSLHandshakeException or SSLProtocolException
-  Problem with SSL. If fetching was attempted with jsoup, then it is attempted once more, but with HtmlUnit.
+  Problem with SSL. If fetching was attempted with jsoup, then it is attempted once more, but with HtmlUnit or Selenium.
 IOException
   A connection or read error occurred, just issue a warning to the log.
 Exception
@@ -77,7 +77,7 @@ After this cleaning has been done, the remaining text will be extracted from the
 Multithreaded fetching
 ======================
 
-Only one thread should be filling one publication or one webpage or one doc. But many threads can be filling different :ref:`publications <publications>`, :ref:`webpages <webpages>` and :ref:`docs <docs>` in parallel. If many of these threads depend on the same resources, then what can happen is many parallel connections to the same host. To avoid such hammering, locking is implemented around each connection such that only one connection to one host is allowed at once (comparison of hosts is done case-insensitively and "www." is removed). Other threads wanting to connect to the same host will have to wait until the resource is free again.
+Only one thread should be filling one publication or one webpage or one doc. But many threads can be filling different :ref:`publications <publications>`, :ref:`webpages <webpages>` and :ref:`docs <docs>` in parallel. If many of these threads depend on the same resources, then what can happen is many parallel connections to the same host. To avoid such hammering, locking is implemented around each connection such that only up to 4 connections to the same host are allowed at once (comparison of hosts is done case-insensitively and "www." is removed). Other threads wanting to connect to the same host will have to wait until one of these 4 threads has finished fetching from the host.
 
 *********************
 Fetching publications
@@ -105,7 +105,7 @@ Europe PMC
 
 The endpoint of the API is https://www.ebi.ac.uk/europepmc/webservices/rest/search, documentation is at https://europepmc.org/RestfulWebService. The API accepts any of the publication IDs: either a PMID_, a PMCID_ or a DOI_. With parameter :ref:`europepmcEmail <europepmcemail>` an e-mail address can be supplied to the API.
 
-We can possibly get all `publication parts`_ from the Europe PMC API, except for fulltext_, efo_ and go_ for which we get a ``Y`` or ``N`` indicating if the corresponding part is available at the `Europe PMC fulltext`_ or `Europe PMC mined`_ resource. In addition, we can possibly get values for the publication fields :ref:`oa <oa>`, :ref:`journalTitle <journaltitle>`, :ref:`pubDate <pubdate>` and :ref:`citationsCount <citationscount>`. Europe PMC is currently the only resource we can get the :ref:`citationsCount <citationscount>` value from.
+We can possibly get all `publication parts`_ from the Europe PMC API, except for fulltext_, efo_ and go_ for which we get a ``Y`` or ``N`` indicating if the corresponding part is available at the `Europe PMC fulltext`_ or `Europe PMC mined`_ resource. In addition, we can possibly get values for the publication fields :ref:`oa <oa>`, :ref:`preprint <preprint>`, :ref:`journalTitle <journaltitle>`, :ref:`pubDate <pubdate>`, :ref:`citationsCount <citationscount>` and :ref:`correspAuthor <correspAuthor>`. Europe PMC is currently the only resource we can get the :ref:`preprint <preprint>` and :ref:`citationsCount <citationscount>` values from.
 
 Europe PMC itself has content from multiple sources (see https://europepmc.org/Help#contentsources) and in some cases multiple results are returned for a query (each from a different source). In that case the MED (MEDLINE) source is preferred, then PMC (PubMed Central), then PPR (preprints) and then whichever source is first in the list of results.
 
@@ -134,7 +134,7 @@ The `PubMed <https://www.ncbi.nlm.nih.gov/pubmed/>`_ resource is used to access 
 
 The following URL is used for retrieving data in XML format for an article: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?retmode=xml&db=pubmed&id={PMID}. As seen, a PMID_ is required to query the resource. Documentation is at https://www.ncbi.nlm.nih.gov/books/NBK25500/.
 
-In addition to theAbstract_, the `publication parts`_ pmid_, pmcid_, doi_, title_ and mesh_ can possibly be obtained from PubMed. Also, the publication part keywords_ can seldom be obtained, but if keywords_ is the only still missing publication part, then the resource is not fetched (instead, `PubMed Central`_ is relied upon for keywords_). In addition, we can possibly get values for the publication fields :ref:`journalTitle <journaltitle>` and :ref:`pubDate <pubdate>`.
+In addition to theAbstract_, the `publication parts`_ pmid_, pmcid_, doi_, title_ and mesh_ can possibly be obtained from PubMed. Also, the publication part keywords_ can seldom be obtained, but if keywords_ is the only still missing publication part, then the resource is not fetched (instead, `PubMed Central`_ is relied upon for keywords_). In addition, we can possibly get values for the publication fields :ref:`journalTitle <journaltitle>`, :ref:`pubDate <pubdate>` and :ref:`correspAuthor <correspAuthor>`.
 
 .. _pubmed_html:
 
@@ -151,6 +151,8 @@ PubMed Central
 `PubMed Central <https://www.ncbi.nlm.nih.gov/pmc/>`_ contains full text articles, which can be obtained in XML format from the URL: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?retmode=xml&db=pmc&id={PMCID}, where {PMCID} is the PMCID_ of the publication with the "PMC" prefix removed.
 
 It is analogous to `Europe PMC fulltext`_ and used as a backup to that resource for getting content for articles available in the PMC system.
+
+PMC Author Manuscripts can also be fetched from the corresponding HTML page.
 
 .. _doi_resource:
 
@@ -224,7 +226,7 @@ pubmed_html
 pmc_xml
   From `PubMed Central`_ resource
 pmc_html
-  Currently disabled
+  From `PubMed Central`_ HTML resource
 doi
   From `DOI resource`_ (excluding PDF links)
 link

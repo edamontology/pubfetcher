@@ -40,6 +40,7 @@ public class FetcherPrivateArgs extends Args {
 	private static final String userAgentId = "userAgent";
 	private static final String userAgentDescription = "HTTP User-Agent";
 	// better to use a Desktop UA, like Firefox ESR
+	// https://techblog.willshouse.com/2012/01/03/most-common-user-agents/
 	private static final String userAgentDefault = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0";
 	@Parameter(names = { "--" + userAgentId }, description = userAgentDescription)
 	private String userAgent = userAgentDefault;
@@ -63,13 +64,13 @@ public class FetcherPrivateArgs extends Args {
 	private Boolean selenium = seleniumDefault;
 
 	private static final String seleniumGeckodriverId = "seleniumGeckodriver";
-	private static final String seleniumGeckodriverDescription = "Location of the geckodriver executable used by Selenium WebDriver. If not specified Selenium Manager will download it automatically. Specifying the location automatically enables Selenium WebDriver usage.";
+	private static final String seleniumGeckodriverDescription = "Location of the geckodriver executable used by Selenium WebDriver. If not specified Selenium Manager will download it automatically. Specifying the location enables Selenium WebDriver usage.";
 	private static final String seleniumGeckodriverDefault = "";
 	@Parameter(names = { "--" + seleniumGeckodriverId }, description = seleniumGeckodriverDescription)
 	private String seleniumGeckodriver = seleniumGeckodriverDefault;
 
 	private static final String seleniumFirefoxId = "seleniumFirefox";
-	private static final String seleniumFirefoxDescription = "Location of the firefox executable used by Selenium WebDriver. Not necessary to specify if the wanted firefox is in PATH. Specifying the location automatically enables Selenium WebDriver usage.";
+	private static final String seleniumFirefoxDescription = "Location of the firefox executable used by Selenium WebDriver. Not necessary to specify if the wanted firefox is in PATH. Specifying the location enables Selenium WebDriver usage.";
 	private static final String seleniumFirefoxDefault = "";
 	@Parameter(names = { "--" + seleniumFirefoxId }, description = seleniumFirefoxDescription)
 	private String seleniumFirefox = seleniumFirefoxDefault;

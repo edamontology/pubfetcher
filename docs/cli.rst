@@ -5,7 +5,7 @@
 Command-line interface manual
 #############################
 
-The CLI of PubFetcher is provided by a Java executable packaged in a .jar file. If a Java Runtime Environment (JRE) capable of running version 8 of Java is installed on the system, then this .jar file can be executed using the ``java`` command. For example, executing PubFetcher-CLI with the parameter ``-h`` or ``--help`` outputs a list of all possible parameters:
+The CLI of PubFetcher is provided by a Java executable packaged in a .jar file. If a Java Runtime Environment (JRE) capable of running version 11 of Java is installed on the system, then this .jar file can be executed using the ``java`` command. For example, executing PubFetcher-CLI with the parameter ``-h`` or ``--help`` outputs a list of all possible parameters:
 
 .. code-block:: bash
 
@@ -59,6 +59,7 @@ _`fulltextMinLength`           ``2000``   ``0``  Minimum length of a :ref:`usabl
 _`webpageMinLength`            ``50``     ``0``  Minimum length of a :ref:`usable webpage <webpage_usable>` combined :ref:`title <webpage_title>` and :ref:`content <webpage_content>`
 _`webpageMinLengthJavascript`  ``200``    ``0``  If the length of a the whole web page text fetched without JavaScript is below the specified limit and no :ref:`scraping rules <scraping>` are found for the corresponding URL, then refetching using JavaScript support will be attempted
 _`timeout`                     ``15000``  ``0``  Connect and read timeout of connections, in milliseconds
+_`quick`                       ``false``         Do some optimizations to potentially limit time spent fetching a resource (do not retry in case of :ref:`timeout <timeout>`; limit time given for found :ref:`extra links <links>` when fetching publication)
 =============================  =========  =====  ===========
 
 .. _fetching_private:
@@ -68,15 +69,18 @@ Fetching private
 
 These are like Fetching_ parameters in that they have a general effect, e.g. setting ``--userAgent`` changes the HTTP User-Agent of all HTTP connections. However, Fetching_ parameters are such parameters that we might want to expose via a web API to be changeable by a client (when extending or using the PubFetcher library), but the parameters below should probably only be configured locally and as such are separated in code.
 
-=================  ===========
-Parameter          Description
-=================  ===========
-_`europepmcEmail`  E-mail to send to the :ref:`Europe PMC <europe_pmc>` API
-_`oadoiEmail`      E-mail to send to the oaDOI (:ref:`Unpaywall <unpaywall>`) API
-_`userAgent`       HTTP User-Agent
-_`journalsYaml`    YAML file containing custom :ref:`journals scrape rules <journals_yaml>` to add to default ones
-_`webpagesYaml`    YAML file containing custom :ref:`webpages scrape rules <webpages_yaml>` to add to default ones
-=================  ===========
+======================  ===========
+Parameter               Description
+======================  ===========
+_`europepmcEmail`       E-mail to send to the :ref:`Europe PMC <europe_pmc>` API
+_`oadoiEmail`           E-mail to send to the oaDOI (:ref:`Unpaywall <unpaywall>`) API
+_`userAgent`            HTTP User-Agent
+_`journalsYaml`         YAML file containing custom :ref:`journals scrape rules <journals_yaml>` to add to default ones
+_`webpagesYaml`         YAML file containing custom :ref:`webpages scrape rules <webpages_yaml>` to add to default ones
+_`selenium`             Enable `Selenium WebDriver <https://www.selenium.dev/documentation/webdriver/>`_ (using Firefox) for JavaScript execution instead of `HtmlUnit <https://htmlunit.sourceforge.io/>`_ (default: ``true``)
+_`seleniumGeckodriver`  Location of the geckodriver executable used by Selenium WebDriver. If not specified Selenium Manager will download it automatically. Specifying the location enables Selenium WebDriver usage.
+_`seleniumFirefox`      Location of the firefox executable used by Selenium WebDriver. Not necessary to specify if the wanted firefox is in PATH. Specifying the location enables Selenium WebDriver usage.
+======================  ===========
 
 .. _simple_one_off_operations:
 
@@ -111,15 +115,15 @@ Parameter                         Parameter args     Description
 Print a web page
 ================
 
-Methods for fetching and outputting a web page. Affected by timeout_ and userAgent_ parameters, ``-fetch-webpage-selector`` also by webpageMinLength_ and webpageMinLengthJavascript_.
+Methods for fetching and outputting a web page. Affected by timeout_, quick_, userAgent_ and selenium_  parameters, ``-fetch-webpage-selector`` also by webpageMinLength_ and webpageMinLengthJavascript_.
 
 ==============================  =================================================================  ===========
 Parameter                       Parameter args                                                     Description
 ==============================  =================================================================  ===========
 ``-fetch-document``             *<url>*                                                            Fetch a web page (without JavaScript support, i.e. using jsoup) and output its raw HTML to stdout
-``-fetch-document-javascript``  *<url>*                                                            Fetch a web page (with JavaScript support, i.e. using HtmlUnit) and output its raw HTML to stdout
+``-fetch-document-javascript``  *<url>*                                                            Fetch a web page (with JavaScript support, i.e. using Selenium or HtmlUnit) and output its raw HTML to stdout
 ``-post-document``              *<url> <param name> <param value> <param name> <param value> ...*  Fetch a web resource using HTTP POST. The first parameter specifies the resource URL and is followed by the request data in the form of name/value pairs, with names and values separated by spaces.
-``-fetch-webpage-selector``     *<url> <title selector> <content selector> <javascript support>*   Fetch a :ref:`webpage <content_of_webpages>` and output it to stdout in the format specified by the `Output modifiers`_ ``--plain`` and ``--format``. Works also for PDF files. *Title* and *content* args are CSS selectors as supported by jsoup. If the *title selector* is an empty string, then the :ref:`page title <webpage_title>` will be the text content of the document's ``<title>`` element. If the *content selector* is an empty string, then :ref:`content <webpage_content>` will be the :ref:`automatically cleaned <cleaning>` whole text content parsed from the HTML/XML. If javascript arg is ``true``, then fetching will be done using JavaScript support (HtmlUnit), if ``false``, then without JavaScript (jsoup). If javascript arg is empty, then fetching will be done without JavaScript and if the text length of the returned document is less than webpageMinLengthJavascript_ or if a ``<noscript>`` tag is found in it, a second fetch will happen with JavaScript support.
+``-fetch-webpage-selector``     *<url> <title selector> <content selector> <javascript support>*   Fetch a :ref:`webpage <content_of_webpages>` and output it to stdout in the format specified by the `Output modifiers`_ ``--plain`` and ``--format``. Works also for PDF files. *Title* and *content* args are CSS selectors as supported by jsoup. If the *title selector* is an empty string, then the :ref:`page title <webpage_title>` will be the text content of the document's ``<title>`` element. If the *content selector* is an empty string, then :ref:`content <webpage_content>` will be the :ref:`automatically cleaned <cleaning>` whole text content parsed from the HTML/XML. If javascript arg is ``true``, then fetching will be done using JavaScript support (Selenium or HtmlUnit), if ``false``, then without JavaScript (jsoup). If javascript arg is empty, then fetching will be done without JavaScript and if the text length of the returned document is less than webpageMinLengthJavascript_ or if a ``<noscript>`` tag is found in it, a second fetch will happen with JavaScript support.
 ==============================  =================================================================  ===========
 
 .. _scrape_rules:
@@ -135,6 +139,7 @@ Parameter               Parameter args           Description
 ``-scrape-site``        *<url>*                  Output found journal site name for the given URL to stdout (or ``null`` if not found or URL invalid)
 ``-scrape-selector``    *<url> <ScrapeSiteKey>*  Output the CSS selector used for extracting the :ref:`publication part <publication_parts>` represented by :ref:`ScrapeSiteKey <scrapesitekey>` from the given URL
 ``-scrape-javascript``  *<url>*                  Output ``true`` or ``false`` depending on whether JavaScript will be used or not for fetching the given publication URL
+``-scrape-restart``     *<url>*                  Output ``true`` or ``false`` depending on whether Selenium WebDriver will be restarted for fetching the given publication URL
 ``-scrape-webpage``     *<url>*                  Output all CSS selectors used for extracting webpage content and metadata from the given URL (or ``null`` if not found or URL invalid)
 ======================  =======================  ===========
 
@@ -356,6 +361,8 @@ Parameter                            Parameter args                             
 ``-not-totally-final``                                                                     Only keep :ref:`publications <publications>` whose content is not :ref:`totally final <totallyfinal>`
 ``-oa``                                                                                    Only keep :ref:`publications <publications>` that are :ref:`Open Access <oa>`
 ``-not-oa``                                                                                Only keep :ref:`publications <publications>` that are not :ref:`Open Access <oa>`
+``-preprint``                                                                              Only keep :ref:`publications <publications>` that are a :ref:`preprint <preprint>`
+``-not-preprint``                                                                          Only keep :ref:`publications <publications>` that are not a :ref:`preprint <preprint>`
 ``-journal-title``                   <regex_>                                              Only keep :ref:`publications <publications>` whose :ref:`journal title <journaltitle>` has a match with the given regular expression
 ``-not-journal-title``               <regex_>                                              Only keep :ref:`publications <publications>` whose :ref:`journal title <journaltitle>` does not have a match with the given regular expression
 ``-journal-title-empty``                                                                   Only keep :ref:`publications <publications>` whose :ref:`journal title <journaltitle>` is empty
@@ -1063,7 +1070,7 @@ Notes
 
 .. _regex:
 
-The syntax of regular expressions is as defined in Java, see documentation of the Pattern class: https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html.
+The syntax of regular expressions is as defined in Java, see documentation of the Pattern class: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html.
 
 .. _`ISO-8601 time`:
 

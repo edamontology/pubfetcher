@@ -326,7 +326,7 @@ _`efo`
 _`go`
   .. _fetcher_go:
 
-  `Gene ontology <http://geneontology.org/>`_ terms of the publication. Text-mined by the `Europe PMC <https://europepmc.org/>`_ project from the full text of the article. The :ref:`go structure <go>`.
+  `Gene ontology <https://geneontology.org/>`_ terms of the publication. Text-mined by the `Europe PMC <https://europepmc.org/>`_ project from the full text of the article. The :ref:`go structure <go>`.
 _`theAbstract`
   .. _fetcher_theAbstract:
 

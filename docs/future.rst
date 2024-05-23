@@ -54,7 +54,7 @@ Scraping
 * The current quick and dirty and uniform approach for article web page scraping could be replaced with APIs for some publishers that provide one (there's a sample list at https://libraries.mit.edu/scholarly/publishing/apis-for-scholarly-resources/).
 * Reuse of scraping rules from the `Zotero <https://www.zotero.org/>`_ reference management software could be attempted, either by using the JavaScript `translators <https://github.com/zotero/translators/>`_ directly or through the `translation server <https://github.com/zotero/translation-server>`_.
 * Currently the CSS-like jsoup selector is used for extraction. But it has its limitations and sometimes the use of XPath could be better, for example when selecting parents is required.
-* There is an extension to XPath called `OXPath <http://www.oxpath.org/>`_ which highlights another problem: more web pages might start to require some JavaScript interactions before any content can be obtained.
+* There is an extension to XPath called `OXPath <https://github.com/oxpath/oxpath>`_ which highlights another problem: more web pages might start to require some JavaScript interactions before any content can be obtained.
 * The entire original web page should also be saved when scraping. Then, the web page would not need re-fetching if some scraping rules are changed or the actual source web page examined at some later date when debugging.
 * The robots.txt should be respected.
 

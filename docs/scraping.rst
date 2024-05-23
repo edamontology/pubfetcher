@@ -27,7 +27,7 @@ For :ref:`webpages <webpages>` and :ref:`docs <docs>`, there are no hardcoded se
 Rules in YAML
 *************
 
-Scraping rules for journal web pages (resolved from :ref:`DOI resource <doi_resource>` or in :ref:`Links <links>`) and :ref:`webpages/docs <webpages>` are specified in YAML configuration files. YAML parsing support is implemented using `SnakeYAML <https://bitbucket.org/asomov/snakeyaml>`_.
+Scraping rules for journal web pages (resolved from :ref:`DOI resource <doi_resource>` or in :ref:`Links <links>`) and :ref:`webpages/docs <webpages>` are specified in YAML configuration files. YAML parsing support is implemented using `SnakeYAML <https://bitbucket.org/snakeyaml/snakeyaml>`_.
 
 There are built-in rules for both journal sites (in `journals.yaml <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/resources/scrape/journals.yaml>`_) and webpages/docs (in `webpages.yaml <https://github.com/edamontology/pubfetcher/blob/master/core/src/main/resources/scrape/webpages.yaml>`_). For adding scraping rules to non-supported sites, the location of a custom configuration file can be specified by the user: for journals using the parameter :ref:`journalsYaml <journalsyaml>` and for webpages/docs using the parameter :ref:`webpagesYaml <webpagesyaml>`. In addition to adding rules, the default rules can be overridden. To do that, the top-level keys of the rules to be overridden must be repeated in the custom configuration file and the new desired values specified under those keys.
 
@@ -114,7 +114,7 @@ The ``-scrape-selector`` command of the :ref:`CLI <scrape_rules>` can be used to
 javascript
 ----------
 
-As mentioned in :ref:`Getting a HTML document <getting_a_html_document>`, either the `jsoup <https://jsoup.org/>`_, `HtmlUnit <http://htmlunit.sourceforge.net/>`_ or `Selenium WebDriver <https://www.selenium.dev/documentation/webdriver/>`_ library can be used for fetching a HTML document, with one difference being that HtmlUnit/Selenium supports executing JavaScript, which jsoup does not. But as running JavaScript is slow, then jsoup is the default and JavaScript is turned on only for sites from which content can't be extracted otherwise. This section enables the specification of such sites.
+As mentioned in :ref:`Getting a HTML document <getting_a_html_document>`, either the `jsoup <https://jsoup.org/>`_, `HtmlUnit <https://htmlunit.sourceforge.net/>`_ or `Selenium WebDriver <https://www.selenium.dev/documentation/webdriver/>`_ library can be used for fetching a HTML document, with one difference being that HtmlUnit/Selenium supports executing JavaScript, which jsoup does not. But as running JavaScript is slow, then jsoup is the default and JavaScript is turned on only for sites from which content can't be extracted otherwise. This section enables the specification of such sites.
 
 The section is made up of a list of regular expressions. If the current URL has a match with any of the regexes, then HtmlUnit/Selenium and JavaScript support is used for fetching the corresponding site, otherwise jsoup (without JavaScript support) is used. The current URL in this case is either the first URL resolved from :ref:`DOI resource <doi_resource>` (there might be additional redirection while fetching the site) or the URL of a link from :ref:`Links <links>` (again, this URL might change during fetching, so a different regex might be needed to apply scraping rules to the site at the final URL).
 

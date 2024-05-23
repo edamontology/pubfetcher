@@ -22,4 +22,4 @@ Installation instructions can be found in [INSTALL.md](INSTALL.md).
 
 ## Documentation
 
-Documentation for PubFetcher can be found at https://pubfetcher.readthedocs.io/.
+Documentation for PubFetcher can be found at https://pubfetcher.readthedocs.io/en/latest/.

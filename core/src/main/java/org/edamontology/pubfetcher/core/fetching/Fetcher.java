@@ -547,6 +547,10 @@ public class Fetcher implements AutoCloseable {
 			if (driversIndex >= 0) {
 				synchronized(driversFree) {
 					driversFree.set(driversIndex, true);
+					if (fetcherArgs.isQuick()) {
+						drivers.get(driversIndex).quit();
+						drivers.set(driversIndex, null);
+					}
 					driversFree.notifyAll();
 				}
 			}

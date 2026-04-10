@@ -75,7 +75,7 @@
     <jackson.version>2.15.2</jackson.version>
     <htmlunit.version>2.70.0</htmlunit.version>
     <selenium.version>4.16.1</selenium.version>
-    <log4j.version>2.25.3</log4j.version>
+    <log4j.version>2.25.4</log4j.version>
     <slf4j.version>2.0.9</slf4j.version>
   </properties>
 
